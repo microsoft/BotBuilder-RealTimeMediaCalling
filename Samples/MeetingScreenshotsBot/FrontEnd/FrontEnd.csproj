@@ -87,8 +87,8 @@
       <HintPath>..\packages\Microsoft.Bot.Builder.3.5.8.0\lib\net46\Microsoft.Bot.Builder.Autofac.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Bot.Builder.Calling, Version=3.0.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.Bot.Builder.Calling.3.0.3\lib\net46\Microsoft.Bot.Builder.Calling.dll</HintPath>
+    <Reference Include="Microsoft.Bot.Builder.Calling, Version=3.0.4.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Bot.Builder.Calling.3.0.4\lib\net46\Microsoft.Bot.Builder.Calling.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Bot.Builder.RealTimeMediaCalling, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
