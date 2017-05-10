@@ -1,0 +1,24 @@
+﻿<?xml version="1.0"?>
+<package xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <metadata xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <id>Microsoft.Bot.Builder.RealTimeMediaCalling</id>
+    <version>1.0.2-alpha</version>
+    <authors>Microsoft</authors>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>
+      Microsoft Bot Builder extension for Skype Real Time Media Calling API. It provides the required constructs to extend your bot to access media for incoming calls from Skype. 
+    </description>
+    <projectUrl>https://github.com/Microsoft/BotBuilder-RealTimeMediaCalling</projectUrl>
+    <iconUrl>http://docs.botframework.com/images/bot_icon.png</iconUrl>
+    <summary>A Microsoft Bot Builder extension for Skype Real Time Media Calling API.</summary>
+    <language>en-US</language>
+    <dependencies>
+      <dependency id="Microsoft.Bot.Builder.Calling" version="3.0.3" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\release\Microsoft.Bot.Builder.RealTimeMediaCalling.dll" target="lib\net46" />
+    <file src="bin\release\Microsoft.Bot.Builder.RealTimeMediaCalling.xml" target="lib\net46" />
+    <file src="bin\release\Microsoft.Bot.Builder.RealTimeMediaCalling.pdb" target="lib\net46" />
+  </files>
+</package>
