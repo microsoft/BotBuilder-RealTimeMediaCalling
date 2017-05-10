@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ServiceConfiguration serviceName="AudioVideoPlayerBot" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="4" osVersion="*" schemaVersion="2015-04.2.6">
+  <Role name="WorkerRole">
+    <Instances count="1" />
+    <ConfigurationSettings>
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=$storage$;AccountKey=$storageKey$" />
+      <Setting name="ServiceDnsName" value="$ServiceDnsName$" />
+      <!-- xyz.cloudapp.net-->
+      <Setting name="DefaultCertificate" value="$CertificateThumbprint$" />
+    </ConfigurationSettings>
+    <Certificates>
+      <Certificate name="Default" thumbprint="$CertificateThumbprint$" thumbprintAlgorithm="sha1" />
+      <Certificate name="Microsoft.WindowsAzure.Plugins.RemoteAccess.PasswordEncryption" thumbprint="CC1F08BA748C221066DDFA32EA74516481896FF4" thumbprintAlgorithm="sha1" />
+    </Certificates>
+  </Role>
+  <NetworkConfiguration>
+    <AddressAssignments>
+      <InstanceAddress roleName="WorkerRole">
+        <PublicIPs>
+          <PublicIP name="instancePublicIP" domainNameLabel="pip" />
+        </PublicIPs>
+      </InstanceAddress>
+    </AddressAssignments>
+  </NetworkConfiguration>
+</ServiceConfiguration>
