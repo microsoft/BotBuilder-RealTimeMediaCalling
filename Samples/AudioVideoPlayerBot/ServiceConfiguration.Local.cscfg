@@ -10,7 +10,6 @@
     </ConfigurationSettings>
     <Certificates>
       <Certificate name="Default" thumbprint="$CertificateThumbprint$" thumbprintAlgorithm="sha1" />
-      <Certificate name="Microsoft.WindowsAzure.Plugins.RemoteAccess.PasswordEncryption" thumbprint="CC1F08BA748C221066DDFA32EA74516481896FF4" thumbprintAlgorithm="sha1" />
     </Certificates>
   </Role>
   <NetworkConfiguration>
