@@ -67,7 +67,7 @@ namespace FrontEnd.Http
             // Enforce the connection close to ensure that requests are evenly load balanced so
             // calls do no stick to one instance of the worker role.
             response.Headers.ConnectionClose = true;
-            return response;              
+            return response;
         }
 
         /// <summary>

@@ -17,6 +17,11 @@ namespace FrontEnd.Http
         public const string CallSignalingRoutePrefix = "api/calling";
 
         /// <summary>
+        /// Route prefix for incoming requests
+        /// </summary>
+        public const string OnIncomingMessageRoute = "api/messages";
+
+        /// <summary>
         /// Route for incoming calls.
         /// </summary>
         public const string OnIncomingCallRoute = "call";
