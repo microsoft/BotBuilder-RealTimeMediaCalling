@@ -32,6 +32,9 @@ namespace WorkerRole
         private const string ServiceDnsNameKey = "ServiceDnsName";
         private const string DefaultCertificateKey = "DefaultCertificate";
         private const string MicrosoftAppIdKey = "MicrosoftAppId";
+        private const string MicrosoftAppPasswordKey = "MicrosoftAppPassword";
+        private const string DefaultMicrosoftAppIdValue = "$MicrosoftAppId$";
+        private const string DefaultMicrosoftAppPasswordValue = "$BotSecret$";
 
         //Prefix of the InstanceId from the RoleEnvironment 
         private const string InstanceIdToken = "in_";
@@ -102,9 +105,15 @@ namespace WorkerRole
             string instanceCallControlIpEndpoint = string.Format("{0}:{1}", instanceCallControlInternalIpAddress, instanceCallControlInternalPort);
 
             MicrosoftAppId = ConfigurationManager.AppSettings[MicrosoftAppIdKey];
-            if(string.IsNullOrEmpty(MicrosoftAppId))
+            if (string.IsNullOrEmpty(MicrosoftAppId) || string.Equals(MicrosoftAppId, DefaultMicrosoftAppIdValue))
             {
-                throw new ConfigurationException("MicrosoftAppId", "Key not found or empty value");
+                throw new ConfigurationException("MicrosoftAppId", "Update app.config in WorkerRole with AppId from the bot registration portal");
+            }
+
+            string microsoftAppPassword = ConfigurationManager.AppSettings[MicrosoftAppPasswordKey];
+            if (string.IsNullOrEmpty(microsoftAppPassword) || string.Equals(microsoftAppPassword, DefaultMicrosoftAppPasswordValue))
+            {
+                throw new ConfigurationException("MicrosoftAppPassword", "Update app.config in WorkerRole with BotSecret from the bot registration portal");
             }
 
             // Create structured config objects for service.
