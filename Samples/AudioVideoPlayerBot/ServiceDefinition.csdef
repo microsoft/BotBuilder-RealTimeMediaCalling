@@ -33,6 +33,8 @@
       <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" />
       <Setting name="ServiceDnsName" />
       <Setting name="DefaultCertificate" />
+      <Setting name="VideoFileLocation"  />
+      <Setting name="AudioFileLocation"  />
     </ConfigurationSettings>
     <Endpoints>
       <InputEndpoint name="DefaultCallControlEndpoint" protocol="tcp" port="443" localPort="9440" />

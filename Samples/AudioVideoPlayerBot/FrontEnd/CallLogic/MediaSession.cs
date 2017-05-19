@@ -160,7 +160,7 @@ namespace FrontEnd.Call
 
                 if (_audioVideoFramePlayer != null)
                 {
-                    _audioVideoFramePlayer.LowOnFrames -= OnLowInFrames;
+                    _audioVideoFramePlayer.LowOnFrames -= OnLowOnFrames;
                     Log.Verbose(new CallerInfo(), LogContext.FrontEnd, "shutting down the player LocalId={0}.", Id);
                     _audioVideoFramePlayer.ShutdownAsync().GetAwaiter().GetResult();
                     Log.Info(new CallerInfo(), LogContext.FrontEnd, "player shutdown LocalId={0}.", Id);
@@ -262,7 +262,7 @@ namespace FrontEnd.Call
 
         #region AudioVideoFramePlayer
 
-        private void OnLowInFrames(object sender, LowOnFramesEventArgs e)
+        private void OnLowOnFrames(object sender, LowOnFramesEventArgs e)
         {
             if (Interlocked.CompareExchange(ref _disposed, 1, 1) == 1)
             {
@@ -301,7 +301,7 @@ namespace FrontEnd.Call
                     LogContext.Media,
                     "created the audio video player");
 
-                _audioVideoFramePlayer.LowOnFrames += OnLowInFrames;
+                _audioVideoFramePlayer.LowOnFrames += OnLowOnFrames;
                 var currentTick = DateTime.Now.Ticks;
                 _videoMediaBuffers = Utilities.CreateVideoMediaBuffers(currentTick);
                 _audioMediaBuffers = Utilities.CreateAudioMediaBuffers(currentTick);
