@@ -18,13 +18,9 @@ To develop a real-time media bot, you must install these NuGet packages within y
 ### Get started
 
 
-**[Review the documentation](http://docs.botframework.com)** to get started with the Bot Builder-RealTimeMediaCalling SDK!
-
-
-Get started quickly with our samples:
-
-* Bot Builder-RealTimeMediaCalling samples [GitHub repo](https://github.com/Microsoft/BotBuilder-RealTimeMediaCalling/Samples)
-*
+- **[Review the documentation](https://docs.microsoft.com/en-us/bot-framework/dotnet/bot-builder-dotnet-real-time-media-concepts)** to understand the concepts behind building real-time media bots.
+- Check out the **[requirements](https://docs.microsoft.com/en-us/bot-framework/dotnet/bot-builder-dotnet-real-time-media-requirements)** for real-time media bots.
+- Get started quickly with our **[samples](https://github.com/Microsoft/BotBuilder-RealTimeMediaCalling/tree/master/Samples)**.
 
 ## Contributing
 
