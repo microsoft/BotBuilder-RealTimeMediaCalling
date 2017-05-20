@@ -7,6 +7,8 @@
       <Setting name="ServiceDnsName" value="$ServiceDnsName$" />
       <!-- xyz.cloudapp.net-->
       <Setting name="DefaultCertificate" value="$CertificateThumbprint$" />
+      <Setting name="AudioFileLocation" value="$audioFileLocation$" />
+      <Setting name="VideoFileLocation" value="$videoFileLocation$" />
     </ConfigurationSettings>
     <Certificates>
       <Certificate name="Default" thumbprint="$CertificateThumbprint$" thumbprintAlgorithm="sha1" />

@@ -96,8 +96,8 @@ namespace WorkerRole
             // Collect config values from Azure config.
             TraceEndpointInfo();
             ServiceDnsName = GetString(ServiceDnsNameKey);
-            AudioFileLocation = ConfigurationManager.AppSettings[AudioFilePathKey];
-            VideoFileLocation = ConfigurationManager.AppSettings[VideoFilePathKey];
+            AudioFileLocation = GetString(AudioFilePathKey);
+            VideoFileLocation = GetString(VideoFilePathKey);
             X509Certificate2 defaultCertificate = GetCertificateFromStore(DefaultCertificateKey);
 
             RoleInstanceEndpoint instanceCallControlEndpoint = RoleEnvironment.IsEmulated ? null : GetEndpoint(InstanceCallControlEndpointKey);
