@@ -31,7 +31,8 @@
     </Startup>
     <ConfigurationSettings>
       <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" />
-      <Setting name="ServiceDnsName" />
+      <Setting name="ServiceDnsName" /> <!--This is the .cloudapp.net name of the service-->
+      <Setting name="ServiceCNAME" /> <!-- CNAME pointing to the .cloudapp.net if available-->
       <Setting name="DefaultCertificate" />
       <Setting name="Skype.Bots.Speech.Subscription" />
     </ConfigurationSettings>

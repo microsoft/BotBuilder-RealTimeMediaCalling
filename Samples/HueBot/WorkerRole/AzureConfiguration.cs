@@ -38,6 +38,7 @@ namespace WorkerRole
         private const string InstanceCallControlEndpointKey = "InstanceCallControlEndpoint";
         private const string InstanceMediaControlEndpointKey = "InstanceMediaControlEndpoint";
         private const string ServiceDnsNameKey = "ServiceDnsName";
+		private const string ServiceCNAMEKey = "ServiceCNAME";
         private const string DefaultCertificateKey = "DefaultCertificate";
         private const string SpeechSubscriptionKey = "Skype.Bots.Speech.Subscription";
         private const string MicrosoftAppIdKey = "MicrosoftAppId";
@@ -66,7 +67,9 @@ namespace WorkerRole
         #region Properties
         public string ServiceDnsName { get; private set; }
 
-        public IEnumerable<Uri> CallControlListeningUrls { get; private set; }
+		public string ServiceCNAME { get; private set; }
+
+		public IEnumerable<Uri> CallControlListeningUrls { get; private set; }
 
         public Uri CallControlCallbackUrl { get; private set; }
 
@@ -94,6 +97,12 @@ namespace WorkerRole
             // Collect config values from Azure config.
             TraceEndpointInfo();
             ServiceDnsName = GetString(ServiceDnsNameKey);
+			ServiceCNAME = GetString(ServiceCNAMEKey, true);
+			if (string.IsNullOrEmpty(ServiceCNAME))
+			{
+				ServiceCNAME = ServiceDnsName;
+			}
+
             X509Certificate2 defaultCertificate = GetCertificateFromStore(DefaultCertificateKey);
 
             RoleInstanceEndpoint instanceCallControlEndpoint = RoleEnvironment.IsEmulated ? null : GetEndpoint(InstanceCallControlEndpointKey);
@@ -126,14 +135,14 @@ namespace WorkerRole
             // Create structured config objects for service.
             CallControlCallbackUrl = new Uri(string.Format(
                 "https://{0}:{1}/{2}/{3}/",
-                ServiceDnsName,
+                ServiceCNAME,
                 instanceCallControlPublicPort,
                 HttpRouteConstants.CallSignalingRoutePrefix,
                 HttpRouteConstants.OnCallbackRoute));
 
             NotificationCallbackUrl = new Uri(string.Format(
                 "https://{0}:{1}/{2}/{3}/",
-                ServiceDnsName,
+				ServiceCNAME,
                 instanceCallControlPublicPort,
                 HttpRouteConstants.CallSignalingRoutePrefix,
                 HttpRouteConstants.OnNotificationRoute));
@@ -166,8 +175,8 @@ namespace WorkerRole
                     InstanceInternalPort = mediaInstanceInternalPort,
                     InstancePublicIPAddress = publicInstanceIpAddress,
                     InstancePublicPort = mediaInstancePublicPort,
-                    ServiceFqdn = ServiceDnsName
-                },
+                    ServiceFqdn = ServiceCNAME
+				},
 
                 ApplicationId = MicrosoftAppId
             };

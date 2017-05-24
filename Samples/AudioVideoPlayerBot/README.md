@@ -4,12 +4,12 @@
 
 AudioVideoPlayerBot is a sample consuming the AudioVideoFramePlayer class.
 
-The AudioVideoFramePlayer class can be used, if the app can provide a little ahead the list of buffers to stream.
-This class will handle audio and video synchronization from the timestamps in the audio/video buffers.
+The AudioVideoFramePlayer class can be used, if the app can provide a list of audio/video buffers, a little ahead of time to stream.
+This class will handle audio and video synchronization using the timestamps in the audio/video buffers.
 
 ## Test the bot
 
-Once deployed, start an audio/video call with the bot, which will beging streaming audio/video from the file locations 
+Once deployed, start an audio/video call with the bot. The bot will begin streaming audio/video from the file locations 
 specified in the configuration.
 
 ## Deploy the bot sample
@@ -41,7 +41,7 @@ Prerequisites and instructions for deploying are [here](https://docs.microsoft.c
 
 ## How it works:
 
-Once the audio/video sockets are created, and the send status event is raised on both sockets,
+Once the audio/video sockets are created, and the send status event is received with Active on both sockets,
 you can create the AudioVideoFramePlayer and attach it to the sockets:
 
 ```cs

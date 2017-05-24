@@ -4,8 +4,8 @@
     <Instances count="1" />
     <ConfigurationSettings>
       <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=$storage$;AccountKey=$storageKey$" />
-      <Setting name="ServiceDnsName" value="$ServiceDnsName$" />
-      <!-- xyz.cloudapp.net-->
+      <Setting name="ServiceDnsName" value="$ServiceDnsName$" /> <!-- xyz.cloudapp.net-->
+      <Setting name="ServiceCNAME" value="" /> <!-- CNAME pointing to the .cloudapp.net if available.-->
       <Setting name="DefaultCertificate" value="$CertificateThumbprint$" />
       <Setting name="AudioFileLocation" value="$audioFileLocation$" />
       <Setting name="VideoFileLocation" value="$videoFileLocation$" />

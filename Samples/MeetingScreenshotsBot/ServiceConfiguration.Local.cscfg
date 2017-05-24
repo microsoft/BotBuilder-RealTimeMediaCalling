@@ -5,6 +5,7 @@
     <ConfigurationSettings>
       <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=$storage$;AccountKey=$storageKey$" />
       <Setting name="ServiceDnsName" value="$ServiceDnsName$" /> <!-- xyz.cloudapp.net-->
+      <Setting name="ServiceCNAME" value="" /> <!-- CNAME pointing to the .cloudapp.net if available.-->
       <Setting name="DefaultCertificate" value="$CertificateThumbprint$" />
       <Setting name="Microsoft.WindowsAzure.Plugins.RemoteForwarder.Enabled" value="true" />
     </ConfigurationSettings>
