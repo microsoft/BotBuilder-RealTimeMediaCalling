@@ -43,7 +43,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
     /// <summary>
     /// The context for this request. It parses the request into <see cref="ParsedCallingRequest"/>.
     /// </summary>
-    internal class RealTimeMediaCallingContext
+    public class RealTimeMediaCallingContext
     {
         /// <summary>
         /// The calling request.

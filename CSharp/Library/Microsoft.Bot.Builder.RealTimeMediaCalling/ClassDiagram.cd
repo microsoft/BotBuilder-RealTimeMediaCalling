@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Interface Name="Microsoft.Bot.Builder.RealTimeMediaCalling.IRealTimeMediaCall" Collapsed="true">
+    <Position X="4.5" Y="4.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IRealTimeMediaCall.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="CallService" />
+    </ShowAsAssociation>
+  </Interface>
+  <Interface Name="Microsoft.Bot.Builder.RealTimeMediaCalling.IRealTimeMediaCallService">
+    <Position X="4.5" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAAgCAAAiCAgAAAAAABAACAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IRealTimeMediaCallService.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="Microsoft.Bot.Builder.RealTimeMediaCalling.IRealTimeMediaBot" Collapsed="true">
+    <Position X="1.5" Y="4.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IRealTimeMediaBot.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="RealTimeMediaBotService" />
+    </ShowAsAssociation>
+  </Interface>
+  <Interface Name="Microsoft.Bot.Builder.RealTimeMediaCalling.IRealTimeMediaBotService">
+    <Position X="1.5" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAQAAAAACAAQAAAAAAAAAAAAAAAACAAAAAIAAAAAAA=</HashCode>
+      <FileName>IRealTimeMediaBotService.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

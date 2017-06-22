@@ -65,11 +65,15 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
          
             builder
-                .Register(c => new RealTimeCallProcessor(c.Resolve<IRealTimeMediaCallServiceSettings>(), c.Resolve<Func<IRealTimeMediaCallService, IRealTimeMediaCall>>()))
+                .RegisterType<RealTimeMediaBotService>()
                 .AsSelf()
-                .As<IRealTimeCallProcessor>()
+                .As<IRealTimeMediaBotService>()
                 .SingleInstance();
 
+            builder
+                .RegisterType<RealTimeMediaCallService>()
+                .AsSelf()
+                .As<IRealTimeMediaCallService>();
         }
     }
 
@@ -85,26 +89,52 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             builder.RegisterModule(new RealTimeMediaCallingModule());
 
             builder
+                .Register((c, p) => p.TypedAs<IRealTimeMediaCallServiceSettings>())
+                .AsSelf()
+                .SingleInstance();
+
+            builder
+                .Register((c, p) => p.TypedAs<Func<IRealTimeMediaBotService, IRealTimeMediaBot>>())
+                .AsSelf()
+                .SingleInstance();
+
+            builder
+                .Register(c =>
+                {
+                    var service = c.Resolve<IRealTimeMediaBotService>();
+                    var makeBot = c.Resolve<Func<IRealTimeMediaBotService, IRealTimeMediaBot>>();
+                    return makeBot(service);
+                })
+                .As<IRealTimeMediaBot>()
+                .SingleInstance();
+
+            builder
                 .Register((c, p) => p.TypedAs<Func<IRealTimeMediaCallService, IRealTimeMediaCall>>())
                 .AsSelf()
                 .SingleInstance();
 
             builder
-                .Register((c, p) => p.TypedAs<IRealTimeMediaCallServiceSettings>())
-                .AsSelf()
-                .SingleInstance();            
+                .Register(c =>
+                {
+                    var service = c.Resolve<IRealTimeMediaCallService>();
+                    var makeBot = c.Resolve<Func<IRealTimeMediaCallService, IRealTimeMediaCall>>();
+                    return makeBot(service);
+                })
+                .As<IRealTimeMediaCall>();
         }
 
         /// <summary>
         /// Register the function to create a bot and to retrieve bot settings
         /// </summary>
-        /// <param name="scope"></param>
-        /// <param name="makeCallingBot"></param>
-        /// <param name="RealTimeMediaCallingSettings"></param>
-        public static void Register(ILifetimeScope scope, Func<IRealTimeMediaCallService, IRealTimeMediaCall> makeCallingBot, IRealTimeMediaCallServiceSettings RealTimeMediaCallingSettings)
-        {            
-            scope.Resolve<Func<IRealTimeMediaCallService, IRealTimeMediaCall>>(TypedParameter.From(makeCallingBot));
-            scope.Resolve<IRealTimeMediaCallServiceSettings>(TypedParameter.From(RealTimeMediaCallingSettings));
+        /// <param name="scope">The lifetime scope</param>
+        /// <param name="settings">The real time media call service settings.</param>
+        /// <param name="makeBot">The function to make a bot.</param>
+        /// <param name="makeCall">The function to make a call.</param>
+        public static void Register(ILifetimeScope scope, IRealTimeMediaCallServiceSettings settings, Func<IRealTimeMediaBotService, IRealTimeMediaBot> makeBot, Func<IRealTimeMediaCallService, IRealTimeMediaCall> makeCall)
+        {
+            scope.Resolve<IRealTimeMediaCallServiceSettings>(TypedParameter.From(settings));
+            scope.Resolve<Func<IRealTimeMediaBotService, IRealTimeMediaBot>>(TypedParameter.From(makeBot));
+            scope.Resolve<Func<IRealTimeMediaCallService, IRealTimeMediaCall>>(TypedParameter.From(makeCall));
         }
     }
 }

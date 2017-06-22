@@ -30,13 +30,12 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+using Autofac;
 using System;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Autofac;
-using Microsoft.Bot.Builder.Calling.ObjectModel.Misc;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
@@ -45,7 +44,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
     /// </summary>
     public static class RealTimeMediaCalling
     {
-        private static readonly IContainer Container;
+        public static readonly IContainer Container;
 
         static RealTimeMediaCalling()
         {
@@ -57,22 +56,28 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <summary>
         /// Register the function to be called to create a bot along with configuration settings.
         /// </summary>
-        /// <param name="makeCallingBot"> The factory method to make the real time media calling bot.</param>
-        /// <param name="realTimeBotServiceSettings"> Configuration settings for the real time media calling bot.</param>
-        public static void RegisterRealTimeMediaCallingBot(Func<IRealTimeMediaCallService, IRealTimeMediaCall> makeCallingBot, IRealTimeMediaCallServiceSettings realTimeBotServiceSettings)
+        /// <param name="settings"> Configuration settings for the real time media calling bot.</param>
+        /// <param name="makeBot"> The factory method to make the real time media bot.</param>
+        /// <param name="makeCall"> The factory method to make the real time media call.</param>
+        public static void RegisterRealTimeMediaCallingBot(IRealTimeMediaCallServiceSettings settings, Func<IRealTimeMediaBotService, IRealTimeMediaBot> makeBot, Func<IRealTimeMediaCallService, IRealTimeMediaCall> makeCall)
         {
             Trace.TraceInformation($"Registering real-time media calling bot");
-            if(realTimeBotServiceSettings.CallbackUrl == null)
+            if (settings == null)
             {
-                throw new ArgumentNullException("callbackUrl");
+                throw new ArgumentNullException(nameof(settings));
             }
 
-            if (realTimeBotServiceSettings.NotificationUrl == null)
+            if (settings.CallbackUrl == null)
             {
-                throw new ArgumentNullException("notificationUrl");
+                throw new ArgumentNullException(nameof(settings.CallbackUrl));
             }
 
-            RealTimeMediaCallingModule_MakeBot.Register(Container, makeCallingBot, realTimeBotServiceSettings);
+            if (settings.NotificationUrl == null)
+            {
+                throw new ArgumentNullException(nameof(settings.NotificationUrl));
+            }
+
+            RealTimeMediaCallingModule_MakeBot.Register(Container, settings, makeBot, makeCall);
         }
 
         /// <summary>
@@ -92,38 +97,36 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 {
                     return GetResponseMessage(parsedRequest.ParseStatusCode, parsedRequest.Content);
                 }
-                else
+
+                try
                 {
-                    try
+                    ResponseResult result;
+                    var bot = scope.Resolve<IRealTimeMediaBot>();
+                    switch (callRequestType)
                     {
-                        ResponseResult result;
-                        var callingBotService = scope.Resolve<IRealTimeCallProcessor>();
-                        switch (callRequestType)
-                        {
-                            case RealTimeMediaCallRequestType.IncomingCall:
-                                result = await callingBotService.ProcessIncomingCallAsync(parsedRequest.Content, parsedRequest.SkypeChainId).ConfigureAwait(false);
-                                break;
+                        case RealTimeMediaCallRequestType.IncomingCall:
+                            result = await bot.RealTimeMediaBotService.ProcessIncomingCallAsync(parsedRequest.Content, parsedRequest.SkypeChainId).ConfigureAwait(false);
+                            break;
 
-                            case RealTimeMediaCallRequestType.CallingEvent:
-                                result = await callingBotService.ProcessCallbackAsync(parsedRequest.Content).ConfigureAwait(false);
-                                break;
+                        case RealTimeMediaCallRequestType.CallingEvent:
+                            result = await bot.RealTimeMediaBotService.ProcessCallbackAsync(parsedRequest.Content).ConfigureAwait(false);
+                            break;
 
-                            case RealTimeMediaCallRequestType.NotificationEvent:
-                                result = await callingBotService.ProcessNotificationAsync(parsedRequest.Content).ConfigureAwait(false);
-                                break;
+                        case RealTimeMediaCallRequestType.NotificationEvent:
+                            result = await bot.RealTimeMediaBotService.ProcessNotificationAsync(parsedRequest.Content).ConfigureAwait(false);
+                            break;
 
-                            default:
-                                result = new ResponseResult(ResponseType.BadRequest, $"Unsupported call request type: {callRequestType}");
-                                break;
-                        }
-
-                        return GetHttpResponseForResult(result);
+                        default:
+                            result = new ResponseResult(ResponseType.BadRequest, $"Unsupported call request type: {callRequestType}");
+                            break;
                     }
-                    catch (Exception e)
-                    {
-                        Trace.TraceError($"RealTimeMediaCallingConversation: {e}");
-                        return GetResponseMessage(HttpStatusCode.InternalServerError, e.ToString());
-                    }
+
+                    return GetHttpResponseForResult(result);
+                }
+                catch (Exception e)
+                {
+                    Trace.TraceError($"RealTimeMediaCallingConversation: {e}");
+                    return GetResponseMessage(HttpStatusCode.InternalServerError, e.ToString());
                 }
             }
         }

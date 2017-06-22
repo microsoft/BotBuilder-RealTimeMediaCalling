@@ -32,6 +32,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 
@@ -89,5 +90,20 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// </summary>
         /// <returns></returns>
         Task EndCall();
-    }  
+    }
+
+    public interface IInternalRealTimeMediaCallService : IRealTimeMediaCallService
+    {
+        string CallLegId { get; set; }
+
+        new string CorrelationId { get; set; }
+
+        Task LocalCleanup();
+
+        Task<RealTimeMediaWorkflow> HandleIncomingCall(Conversation conversation);
+
+        Task<string> ProcessConversationResult(ConversationResult conversationResult);
+
+        Task ProcessNotificationResult(NotificationBase notification);
+    }
 }

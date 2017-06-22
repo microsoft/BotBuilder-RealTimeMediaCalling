@@ -94,8 +94,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Events\RealTimeMediaCallEvent.cs" />
+    <Compile Include="IRealTimeMediaBot.cs" />
     <Compile Include="IRealTimeMediaCall.cs" />
-    <Compile Include="IRealTimeMediaCallProcessor.cs" />
+    <Compile Include="IRealTimeMediaBotService.cs" />
     <Compile Include="LoggingMessageHandler.cs" />
     <Compile Include="RetryMessageHandler.cs" />
     <Compile Include="RealTimeMediaCallingContext.cs" />
@@ -125,11 +127,12 @@
     <Compile Include="RealTimeMediaCalling.cs" />
     <Compile Include="RealTimeMediaCallRequestType.cs" />
     <Compile Include="RealTimeMediaCallingModule.cs" />
-    <Compile Include="RealTimeMediaCallProcessor.cs" />
+    <Compile Include="RealTimeMediaBotService.cs" />
     <Compile Include="RealTimeMediaCallService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="ClassDiagram.cd" />
     <None Include="createpackage.cmd" />
     <None Include="Microsoft.Bot.Builder.RealTimeMediaCalling.nuspec" />
     <None Include="packages.config" />

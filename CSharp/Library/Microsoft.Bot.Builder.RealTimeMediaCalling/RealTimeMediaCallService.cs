@@ -52,7 +52,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
     /// <summary>
     /// Service that handles per call requests
     /// </summary>            
-    internal class RealTimeMediaCallService : IRealTimeMediaCallService
+    public class RealTimeMediaCallService : IInternalRealTimeMediaCallService
     {
         private readonly Uri _callbackUrl;
         private readonly Uri _notificationUrl;
@@ -60,20 +60,18 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         private Uri _subscriptionLink;
         private Uri _callLink;
         
-        private IRealTimeMediaCall _bot;
-
         private Timer _timer;
         private const int CallExpiredTimerInterval = 1000 * 60 * 10; //10 minutes
 
         /// <summary>
         /// Id for this call
         /// </summary>
-        public string CallLegId { get; private set; }
+        public string CallLegId { get; set; }
 
         /// <summary>
         /// CorrelationId for this call.
         /// </summary>
-        public string CorrelationId { get; private set; }
+        public string CorrelationId { get; set; }
 
         /// <summary>
         /// Event raised when bot receives incoming call
@@ -108,48 +106,21 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <summary>
         /// Instantiates the service with settings to handle a call
         /// </summary>
-        /// <param name="callId"></param>
-        /// <param name="skypeChainId"></param>
-        /// <param name="makeBot"></param>
         /// <param name="settings"></param>
-        public RealTimeMediaCallService(string callId, string skypeChainId, Func<IRealTimeMediaCallService, IRealTimeMediaCall> makeBot, IRealTimeMediaCallServiceSettings settings)
+        public RealTimeMediaCallService(IRealTimeMediaCallServiceSettings settings)
         {
-            if(string.IsNullOrEmpty(callId))
-            {
-                throw new ArgumentNullException("callId");
-            }                      
-
-            if (makeBot == null)
-            {
-                throw new ArgumentNullException("makeBot");
-            }
-
             if (settings == null)
             {
-                throw new ArgumentNullException("settings");
+                throw new ArgumentNullException(nameof(settings));
             }
 
             if (settings.CallbackUrl == null || settings.NotificationUrl == null)
             {
                 throw new ArgumentNullException("callback settings");
             }
-
-            if (string.IsNullOrEmpty(skypeChainId))
-            {
-                CorrelationId = Guid.NewGuid().ToString();
-                Trace.TraceInformation(
-                    $"RealTimeMediaCallService No SkypeChainId found. Generating {CorrelationId}");
-            }
-            else
-            {
-                CorrelationId = skypeChainId;
-            }
-
-            CallLegId = callId;
             
             _callbackUrl = settings.CallbackUrl;
             _notificationUrl = settings.NotificationUrl;
-            _bot = makeBot(this);
             _timer = new Timer(CallExpiredTimerCallback, null, CallExpiredTimerInterval, Timeout.Infinite);
         }        
 
@@ -181,7 +152,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// </summary>
         /// <param name="notification">Notification to be sent</param>
         /// <returns></returns>
-        internal Task ProcessNotificationResult(NotificationBase notification)
+        public Task ProcessNotificationResult(NotificationBase notification)
         {
             Trace.TraceInformation(
                 $"RealTimeMediaCallService [{CallLegId}]: Received the notification for {notification.Type} operation, callId: {notification.Id}");
@@ -226,7 +197,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// </summary>
         /// <param name="conversationResult">ConversationResult that has the details of the callback</param>
         /// <returns></returns>
-        internal async Task<string> ProcessConversationResult(ConversationResult conversationResult)
+        public async Task<string> ProcessConversationResult(ConversationResult conversationResult)
         {
             conversationResult.Validate();
             var newWorkflowResult = await PassActionResultToHandler(conversationResult).ConfigureAwait(false);
@@ -282,7 +253,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// </summary>
         /// <param name="conversation">Conversation corresponding to the incoming call</param>
         /// <returns>WorkFlow to be executed for the call</returns>
-        internal async Task<RealTimeMediaWorkflow> HandleIncomingCall(Conversation conversation)
+        public async Task<RealTimeMediaWorkflow> HandleIncomingCall(Conversation conversation)
         {
             Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Received incoming call");
             var incomingCall = new RealTimeMediaIncomingCallEvent(conversation, CreateInitialWorkflow());
@@ -314,7 +285,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             return InvokeHandlerIfSet(eventHandler, outcomeEvent);
         }
 
-        internal Task LocalCleanup()
+        public Task LocalCleanup()
         {
             var eventHandler = OnCallCleanup;
             return InvokeHandlerIfSet(eventHandler, "Cleanup");

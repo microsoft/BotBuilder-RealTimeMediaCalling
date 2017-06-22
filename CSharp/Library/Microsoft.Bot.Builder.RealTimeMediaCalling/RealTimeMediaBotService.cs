@@ -30,51 +30,63 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+using Autofac;
+using Microsoft.Bot.Builder.Calling.Exceptions;
+using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
+using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
+using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
+using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Misc;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Bot.Builder.Calling.Exceptions;
-using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
-using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
-using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Misc;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
     /// <summary>
     /// Processes the incoming requests and invokes the appropriate handlers for the call
     /// </summary>
-    public class RealTimeCallProcessor : IRealTimeCallProcessor
+    public class RealTimeMediaBotService : IRealTimeMediaBotService
     {
+        /// <summary>
+        /// The autofac component context.
+        /// </summary>
+        private readonly IComponentContext _context;
+
+        /// <summary>
+        /// Event raised when a new call is created.
+        /// </summary>
+        public event Func<RealTimeMediaCallEvent, Task> OnCallCreated;
+
+        /// <summary>
+        /// Event raised when an existing call is ended.
+        /// </summary>
+        public event Func<RealTimeMediaCallEvent, Task> OnCallEnded;
+
         /// <summary>
         /// Container for the current active calls on this instance.
         /// </summary>
-        private readonly ConcurrentDictionary<string, RealTimeMediaCallService> _activeCalls;
-      
-        /// <summary>
-        /// Configuration settings
-        /// </summary>
-        IRealTimeMediaCallServiceSettings _settings;
-
-        /// <summary>
-        /// Function to create a bot to deliver events
-        /// </summary>
-        Func<IRealTimeMediaCallService, IRealTimeMediaCall> _makeBot;
+        private ConcurrentDictionary<string, IRealTimeMediaCall> ActiveCalls { get; }
 
         /// <summary>
         /// Instantiates the call processor
         /// </summary>
-        /// <param name="settings">Configuration settings</param>
-        /// <param name="makeBot">Function to create a bot</param>
-        public RealTimeCallProcessor(IRealTimeMediaCallServiceSettings settings, Func<IRealTimeMediaCallService, IRealTimeMediaCall> makeBot)
+        /// <param name="context">The autofac component context</param>
+        public RealTimeMediaBotService(IComponentContext context)
         {
-            if (settings == null)
-                throw new ArgumentNullException(nameof(settings));
+            if (null == context)
+                throw new ArgumentNullException(nameof(context));
 
-            _settings = settings;
-            _makeBot = makeBot;
-            _activeCalls = new ConcurrentDictionary<string, RealTimeMediaCallService>();
+            _context = context;
+            ActiveCalls = new ConcurrentDictionary<string, IRealTimeMediaCall>();
+        }
+
+        private async Task InvokeCallEvent(Func<RealTimeMediaCallEvent, Task> eventHandler, RealTimeMediaCallEvent callEvent)
+        {
+            if (eventHandler != null)
+            {
+                await eventHandler.Invoke(callEvent).ConfigureAwait(false);
+            }
         }
 
         /// <summary>
@@ -106,24 +118,51 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             {
                 Trace.TraceWarning($"Exception in conversation validate {ex}");
                 return new ResponseResult(ResponseType.BadRequest);
-            }            
+            }
 
-            RealTimeMediaCallService service = new RealTimeMediaCallService(conversation.Id, skypeChainId, _makeBot, _settings);            
-            var workflow = await service.HandleIncomingCall(conversation).ConfigureAwait(false);
+            if (string.IsNullOrEmpty(conversation.Id))
+            {
+                throw new InvalidOperationException("No conversation ID found.");
+            }
+
+            var call = _context.Resolve<IRealTimeMediaCall>();
+
+            var callService = call.CallService as IInternalRealTimeMediaCallService;
+            if (null == callService)
+            {
+                throw new InvalidOperationException("Could not create RealTimeMediaCallService.");
+            }
+
+            callService.CallLegId = conversation.Id;
+
+            if (string.IsNullOrEmpty(skypeChainId))
+            {
+                callService.CorrelationId = Guid.NewGuid().ToString();
+                Trace.TraceInformation(
+                    $"RealTimeMediaCallService No SkypeChainId found. Generating {callService.CorrelationId}");
+            }
+            else
+            {
+                callService.CorrelationId = skypeChainId;
+            }
+
+            var workflow = await callService.HandleIncomingCall(conversation).ConfigureAwait(false);
             if (workflow == null)
             {
                 throw new BotCallingServiceException("Incoming call not handled. No workflow produced for incoming call.");
             }
             workflow.Validate();
 
-            RealTimeMediaCallService prevService;
-            if (_activeCalls.TryRemove(conversation.Id, out prevService))
+            var callEvent = new RealTimeMediaCallEvent(conversation.Id, call);
+            await InvokeCallEvent(OnCallCreated, callEvent).ConfigureAwait(false);
+
+            IRealTimeMediaCall prevCall;
+            if (ActiveCalls.TryRemove(conversation.Id, out prevCall))
             {
                 Trace.TraceWarning($"Another call with the same Id {conversation.Id} exists. ending the old call");
+                var prevService = (IInternalRealTimeMediaCallService)prevCall.CallService;
                 await prevService.LocalCleanup().ConfigureAwait(false);
             }
-
-            _activeCalls[conversation.Id] = service;
 
             var serializedResponse = RealTimeMediaSerializer.SerializeToJson(workflow);
             return new ResponseResult(ResponseType.Accepted, serializedResponse);
@@ -158,13 +197,21 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 return new ResponseResult(ResponseType.BadRequest);
             }            
 
-            RealTimeMediaCallService service;
-            if (!_activeCalls.TryGetValue(conversationResult.Id, out service))
+            IRealTimeMediaCall call;
+            if (!ActiveCalls.TryGetValue(conversationResult.Id, out call))
             {
                 Trace.TraceWarning($"CallId {conversationResult.Id} not found");
                 return new ResponseResult(ResponseType.NotFound);
             }
-            return new ResponseResult(ResponseType.Accepted, await service.ProcessConversationResult(conversationResult).ConfigureAwait(false));
+
+            var service = call.CallService as IInternalRealTimeMediaCallService;
+            if (null == service)
+            {
+                Trace.TraceWarning($"Service for CallId {conversationResult.Id} not found");
+                return new ResponseResult(ResponseType.NotFound);
+            }
+            var result = await service.ProcessConversationResult(conversationResult).ConfigureAwait(false);
+            return new ResponseResult(ResponseType.Accepted, result);
         }
 
         /// <summary>
@@ -195,12 +242,20 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             {
                 Trace.TraceWarning($"Exception in notification validate {ex}");
                 return new ResponseResult(ResponseType.BadRequest);
-            }                      
+            }
 
-            RealTimeMediaCallService service;
-            if (!_activeCalls.TryGetValue(notification.Id, out service))
+            IRealTimeMediaCall call;
+            if (!ActiveCalls.TryGetValue(notification.Id, out call))
             {
-                return new ResponseResult(ResponseType.NotFound, $"Call {notification.Id} not found");
+                Trace.TraceWarning($"CallId {notification.Id} not found");
+                return new ResponseResult(ResponseType.NotFound);
+            }
+
+            var service = call.CallService as IInternalRealTimeMediaCallService;
+            if (null == service)
+            {
+                Trace.TraceWarning($"Service for CallId {notification.Id} not found");
+                return new ResponseResult(ResponseType.NotFound);
             }
 
             await service.ProcessNotificationResult(notification).ConfigureAwait(false);

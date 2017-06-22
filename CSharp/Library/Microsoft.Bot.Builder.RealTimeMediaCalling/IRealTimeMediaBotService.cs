@@ -37,6 +37,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder.Calling.Exceptions;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
+using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Misc;
 
@@ -91,8 +92,18 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
     /// <summary>
     /// Processes the incoming requests and invokes the appropriate handlers for the call
     /// </summary>
-    interface IRealTimeCallProcessor
+    public interface IRealTimeMediaBotService
     {
+        /// <summary>
+        /// Event raised when a new call is created.
+        /// </summary>
+        event Func<RealTimeMediaCallEvent, Task> OnCallCreated;
+
+        /// <summary>
+        /// Event raised when an existing call is requested.
+        /// </summary>
+        event Func<RealTimeMediaCallEvent, Task> OnCallEnded;
+
         /// <summary>
         /// Processes incoming call request
         /// </summary>
