@@ -199,6 +199,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CallLogic\MediaSession.cs" />
+    <Compile Include="CallLogic\RealTimeMediaBot.cs" />
     <Compile Include="CallLogic\RealTimeMediaCall.cs" />
     <Compile Include="CallLogic\SpeechRecognitionPCMStream.cs" />
     <Compile Include="CallLogic\SpeechRecognitionStream.cs" />
