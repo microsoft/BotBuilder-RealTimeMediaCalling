@@ -30,16 +30,11 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-using System;
-using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Bot.Builder.Calling.Exceptions;
-using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
-using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
-using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Misc;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
@@ -103,6 +98,23 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// Event raised when an existing call is requested.
         /// </summary>
         event Func<RealTimeMediaCallEvent, Task> OnCallEnded;
+
+        /// <summary>
+        /// Returns the list of all active call ids.
+        /// </summary>
+        IList<string> CallIds { get; }
+
+        /// <summary>
+        /// Returns the list of all active calls.
+        /// </summary>
+        IList<IRealTimeMediaCall> Calls { get; }
+
+        /// <summary>
+        /// Fetches the call for the given id.
+        /// </summary>
+        /// <param name="id">The ID of the call.</param>
+        /// <returns>The real time media call, or null.</returns>
+        IRealTimeMediaCall GetCallForId(string id);
 
         /// <summary>
         /// Processes incoming call request

@@ -38,7 +38,9 @@ using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Misc;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
@@ -67,6 +69,28 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// Container for the current active calls on this instance.
         /// </summary>
         private ConcurrentDictionary<string, IRealTimeMediaCall> ActiveCalls { get; }
+
+        /// <summary>
+        /// Returns the list of all active call ids.
+        /// </summary>
+        public IList<string> CallIds => ActiveCalls.Keys.ToList();
+
+        /// <summary>
+        /// Returns the list of all active calls.
+        /// </summary>
+        public IList<IRealTimeMediaCall> Calls => ActiveCalls.Values.ToList();
+
+        /// <summary>
+        /// Fetches the call for the given id.
+        /// </summary>
+        /// <param name="id">The ID of the call.</param>
+        /// <returns>The real time media call, or null.</returns>
+        public IRealTimeMediaCall GetCallForId(string id)
+        {
+            IRealTimeMediaCall call;
+            ActiveCalls.TryGetValue(id, out call);
+            return call;
+        }
 
         /// <summary>
         /// Instantiates the call processor
@@ -163,6 +187,10 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 var prevService = (IInternalRealTimeMediaCallService)prevCall.CallService;
                 await prevService.LocalCleanup().ConfigureAwait(false);
             }
+
+            // TODO: this is not thread safe.  
+            // If requests for the same call come at the same time one will not be cleaned up.
+            ActiveCalls[conversation.Id] = call;
 
             var serializedResponse = RealTimeMediaSerializer.SerializeToJson(workflow);
             return new ResponseResult(ResponseType.Accepted, serializedResponse);

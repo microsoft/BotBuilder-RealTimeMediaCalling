@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
   <Interface Name="Microsoft.Bot.Builder.RealTimeMediaCalling.IRealTimeMediaCall" Collapsed="true">
-    <Position X="4.5" Y="4.5" Width="2.25" />
+    <Position X="7.25" Y="4.5" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>IRealTimeMediaCall.cs</FileName>
@@ -11,7 +11,7 @@
     </ShowAsAssociation>
   </Interface>
   <Interface Name="Microsoft.Bot.Builder.RealTimeMediaCalling.IRealTimeMediaCallService">
-    <Position X="4.5" Y="0.5" Width="2.25" />
+    <Position X="7.25" Y="0.5" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAAAAAgAAgCAAAiCAgAAAAAABAACAAAAAAAAAAAAAAA=</HashCode>
       <FileName>IRealTimeMediaCallService.cs</FileName>
@@ -29,10 +29,21 @@
   </Interface>
   <Interface Name="Microsoft.Bot.Builder.RealTimeMediaCalling.IRealTimeMediaBotService">
     <Position X="1.5" Y="0.5" Width="2.25" />
+    <AssociationLine Name="Calls" Type="Microsoft.Bot.Builder.RealTimeMediaCalling.IRealTimeMediaCall" ManuallyRouted="true">
+      <Path>
+        <Point X="3.75" Y="1.888" />
+        <Point X="5.688" Y="1.888" />
+        <Point X="5.688" Y="4.781" />
+        <Point X="7.25" Y="4.781" />
+      </Path>
+    </AssociationLine>
     <TypeIdentifier>
-      <HashCode>AAAQAAAAACAAQAAAAAAAAAAAAAAAACAAAAAIAAAAAAA=</HashCode>
+      <HashCode>AAAQAAAAACAAQAAAAAAAAAgAAAQAACAAAAAICAAAAAA=</HashCode>
       <FileName>IRealTimeMediaBotService.cs</FileName>
     </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Calls" />
+    </ShowAsCollectionAssociation>
   </Interface>
   <Font Name="Segoe UI" Size="9" />
 </ClassDiagram>

@@ -19,20 +19,9 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
         {
             public IRealTimeMediaBotService RealTimeMediaBotService { get; }
 
-            public IDictionary<string, IRealTimeMediaCall> ActiveCalls { get; }
-
             public RealTimeMediaBot(IRealTimeMediaBotService service)
             {
-                ActiveCalls = new Dictionary<string, IRealTimeMediaCall>();
-
                 RealTimeMediaBotService = service;
-                RealTimeMediaBotService.OnCallCreated += RealTimeMediaBotServiceOnOnCallCreated;
-            }
-
-            private Task RealTimeMediaBotServiceOnOnCallCreated(RealTimeMediaCallEvent realTimeMediaCallEvent)
-            {
-                ActiveCalls[realTimeMediaCallEvent.ConversationId] = realTimeMediaCallEvent.Call;
-                return Task.CompletedTask;
             }
         }
 
@@ -114,26 +103,26 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
   ""callState"": ""incoming""
 }";
 
-            var bot = (RealTimeMediaBot)iBot;
-            var result = await bot.RealTimeMediaBotService.ProcessIncomingCallAsync(requestJson, null);
+            var service = iBot.RealTimeMediaBotService;
+            var result = await service.ProcessIncomingCallAsync(requestJson, null);
             Assert.AreEqual(ResponseType.Accepted, result.ResponseType);
-            Assert.AreEqual(1, bot.ActiveCalls.Count);
-            Assert.NotNull(bot.ActiveCalls["0b022b87-f255-4667-9335-2335f30ee8de"]);
-            Assert.IsFalse(bot.ActiveCalls.ContainsKey("0b022b88-f255-4667-9335-2335f30ee8de"));
+            Assert.AreEqual(1, service.Calls.Count);
+            Assert.NotNull(service.GetCallForId("0b022b87-f255-4667-9335-2335f30ee8de"));
+            Assert.Null(service.GetCallForId("0b022b88-f255-4667-9335-2335f30ee8de"));
 
-            result = await bot.RealTimeMediaBotService.ProcessIncomingCallAsync(requestJson, Guid.Empty.ToString());
+            result = await service.ProcessIncomingCallAsync(requestJson, Guid.Empty.ToString());
             Assert.AreEqual(ResponseType.Accepted, result.ResponseType);
-            Assert.AreEqual(1, bot.ActiveCalls.Count);
-            Assert.NotNull(bot.ActiveCalls["0b022b87-f255-4667-9335-2335f30ee8de"]);
-            Assert.IsFalse(bot.ActiveCalls.ContainsKey("0b022b88-f255-4667-9335-2335f30ee8de"));
+            Assert.AreEqual(1, service.Calls.Count);
+            Assert.NotNull(service.GetCallForId("0b022b87-f255-4667-9335-2335f30ee8de"));
+            Assert.Null(service.GetCallForId("0b022b88-f255-4667-9335-2335f30ee8de"));
 
             requestJson = requestJson.Replace("0b022b87", "0b022b88");
 
-            result = await bot.RealTimeMediaBotService.ProcessIncomingCallAsync(requestJson, null);
+            result = await service.ProcessIncomingCallAsync(requestJson, null);
             Assert.AreEqual(ResponseType.Accepted, result.ResponseType);
-            Assert.AreEqual(2, bot.ActiveCalls.Count);
-            Assert.NotNull(bot.ActiveCalls["0b022b87-f255-4667-9335-2335f30ee8de"]);
-            Assert.NotNull(bot.ActiveCalls["0b022b88-f255-4667-9335-2335f30ee8de"]);
+            Assert.AreEqual(2, service.Calls.Count);
+            Assert.NotNull(service.GetCallForId("0b022b87-f255-4667-9335-2335f30ee8de"));
+            Assert.NotNull(service.GetCallForId("0b022b88-f255-4667-9335-2335f30ee8de"));
 
             // TODO: There is no cleanup task, as far as I can tell.
         }
