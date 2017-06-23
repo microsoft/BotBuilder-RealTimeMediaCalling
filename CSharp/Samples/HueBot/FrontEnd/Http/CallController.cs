@@ -4,14 +4,13 @@
 *                                                                                    *
 **************************************************/
 
-using System.Net.Http;
-using System.Threading.Tasks;
-using System.Web.Http;
-using FrontEnd.Call;
 using FrontEnd.CallLogic;
 using FrontEnd.Logging;
 using Microsoft.Bot.Builder.RealTimeMediaCalling;
 using Microsoft.Bot.Connector;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace FrontEnd.Http
 {

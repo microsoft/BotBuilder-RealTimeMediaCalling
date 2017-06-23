@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>2.9</ProductVersion>
-    <ProjectGuid>4eabd84f-6ad2-48d5-b286-b86758d4f806</ProjectGuid>
+    <ProjectGuid>{f9618b64-2fd9-4a80-8af3-21842cfb4307}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>HueBot</RootNamespace>

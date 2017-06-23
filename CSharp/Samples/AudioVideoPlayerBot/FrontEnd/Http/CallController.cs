@@ -4,13 +4,13 @@
 *                                                                                    *
 **************************************************/
 
-using System.Net.Http;
-using System.Threading.Tasks;
-using System.Web.Http;
-using FrontEnd.Call;
+using FrontEnd.CallLogic;
 using FrontEnd.Logging;
 using Microsoft.Bot.Builder.RealTimeMediaCalling;
 using Microsoft.Bot.Connector;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace FrontEnd.Http
 {
@@ -25,11 +25,14 @@ namespace FrontEnd.Http
         /// </summary>
         /// <param name="callProcessor"></param>
         static CallController()
-        {            
-            RealTimeMediaCalling.RegisterRealTimeMediaCallingBot(c => { return new RealTimeMediaCall(c); },
-                                                                 new RealTimeMediaCallingBotServiceSettings());
+        {
+            var settings = new RealTimeMediaCallingBotServiceSettings();
+            RealTimeMediaCalling.RegisterRealTimeMediaCallingBot(
+                settings,
+                b => new RealTimeMediaBot(b),
+                c => new RealTimeMediaCall(c));
         }
-        
+
         /// <summary>
         /// Handle an incoming call.
         /// </summary>

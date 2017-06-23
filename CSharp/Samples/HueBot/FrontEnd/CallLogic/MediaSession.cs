@@ -19,7 +19,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CorrelationId = FrontEnd.Logging.CorrelationId;
 
-namespace FrontEnd.Call
+namespace FrontEnd.CallLogic
 {
     /// <summary>
     /// This class handles media related logic for a call.

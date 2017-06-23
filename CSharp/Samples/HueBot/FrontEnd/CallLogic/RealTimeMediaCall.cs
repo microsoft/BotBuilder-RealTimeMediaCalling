@@ -18,7 +18,7 @@ using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Bot.Connector;
 using FrontEnd.Http;
 
-namespace FrontEnd.Call
+namespace FrontEnd.CallLogic
 {
     /// <summary>
     /// This class does all the signaling needed to handle a call.
