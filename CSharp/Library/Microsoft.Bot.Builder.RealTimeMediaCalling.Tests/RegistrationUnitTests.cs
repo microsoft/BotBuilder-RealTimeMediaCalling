@@ -6,7 +6,7 @@ using Moq;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Assert = NUnit.Framework.Assert;
 
@@ -28,6 +28,29 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
         private class RealTimeMediaCall : IRealTimeMediaCall
         {
             public IRealTimeMediaCallService CallService { get; }
+
+            private readonly string _callGuid = Guid.NewGuid().ToString();
+            private string _callId;
+
+            /// <summary>
+            /// Id generated locally that is unique to each RealTimeMediaCall
+            /// </summary>
+            public string CallId
+            {
+                get
+                {
+                    if (null == _callId)
+                    {
+                        _callId = $"{CallService.CorrelationId}:{_callGuid}";
+                    }
+                    return _callId;
+                }
+            }
+
+            /// <summary>
+            /// CorrelationId that needs to be set in the media platform for correlating logs across services
+            /// </summary>
+            public string CorrelationId => CallService.CorrelationId;
 
             public RealTimeMediaCall(IRealTimeMediaCallService service)
             {
@@ -109,6 +132,13 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             Assert.AreEqual(1, service.Calls.Count);
             Assert.NotNull(service.GetCallForId("0b022b87-f255-4667-9335-2335f30ee8de"));
             Assert.Null(service.GetCallForId("0b022b88-f255-4667-9335-2335f30ee8de"));
+
+            var call = service.Calls.First() as RealTimeMediaCall;
+            Assert.NotNull(call);
+            Assert.IsNotEmpty(call.CorrelationId);
+            Assert.IsNotEmpty(call.CallId);
+            Assert.AreEqual(call.CorrelationId, call.CallService.CorrelationId);
+            Assert.IsTrue(call.CallId.StartsWith(call.CorrelationId));
 
             result = await service.ProcessIncomingCallAsync(requestJson, Guid.Empty.ToString());
             Assert.AreEqual(ResponseType.Accepted, result.ResponseType);
