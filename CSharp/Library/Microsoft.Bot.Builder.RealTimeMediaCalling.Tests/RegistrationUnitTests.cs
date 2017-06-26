@@ -8,6 +8,7 @@ using NUnit.Framework;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Bot.Builder.Calling.ObjectModel.Misc;
 using Assert = NUnit.Framework.Assert;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
@@ -56,6 +57,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             {
                 CallService = service;
                 CallService.OnIncomingCallReceived += OnIncomingCallReceived;
+                CallService.OnAnswerAppHostedMediaCompleted += OnAnswerAppHostedMediaCompleted;
                 CallService.OnCallCleanup += OnCallCleanup;
             }
 
@@ -82,6 +84,17 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
                 return Task.CompletedTask;
             }
 
+            private Task OnAnswerAppHostedMediaCompleted(AnswerAppHostedMediaOutcomeEvent answerAppHostedMediaOutcomeEvent)
+            {
+                AnswerAppHostedMediaOutcome answerAppHostedMediaOutcome = answerAppHostedMediaOutcomeEvent.AnswerAppHostedMediaOutcome;
+                if (answerAppHostedMediaOutcome.Outcome != Outcome.Success)
+                {
+                    throw new InvalidOperationException("Answer app hosted media failed.");
+                }
+                answerAppHostedMediaOutcomeEvent.RealTimeMediaWorkflow.NotificationSubscriptions = new[] { NotificationType.CallStateChange, NotificationType.RosterUpdate };
+                return Task.CompletedTask;
+            }
+
             private Task OnCallCleanup()
             {
                 return Task.CompletedTask;
@@ -105,7 +118,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             Assert.NotNull(bot.RealTimeMediaBotService);
             Assert.AreSame(typeof(RealTimeMediaBot), bot.GetType());
 
-            var requestJson = @"
+            var incomingCallJson = @"
 {
   ""id"": ""0b022b87-f255-4667-9335-2335f30ee8de"",
   ""participants"": [
@@ -127,7 +140,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
 }";
 
             var service = bot.RealTimeMediaBotService;
-            var result = await service.ProcessIncomingCallAsync(requestJson, null);
+            var result = await service.ProcessIncomingCallAsync(incomingCallJson, null);
             Assert.AreEqual(ResponseType.Accepted, result.ResponseType);
             Assert.AreEqual(1, service.Calls.Count);
             Assert.NotNull(service.GetCallForId("0b022b87-f255-4667-9335-2335f30ee8de"));
@@ -140,19 +153,40 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             Assert.AreEqual(call.CorrelationId, call.CallService.CorrelationId);
             Assert.IsTrue(call.CallId.StartsWith(call.CorrelationId));
 
-            result = await service.ProcessIncomingCallAsync(requestJson, Guid.Empty.ToString());
+            result = await service.ProcessIncomingCallAsync(incomingCallJson, Guid.Empty.ToString());
             Assert.AreEqual(ResponseType.Accepted, result.ResponseType);
             Assert.AreEqual(1, service.Calls.Count);
             Assert.NotNull(service.GetCallForId("0b022b87-f255-4667-9335-2335f30ee8de"));
             Assert.Null(service.GetCallForId("0b022b88-f255-4667-9335-2335f30ee8de"));
 
-            requestJson = requestJson.Replace("0b022b87", "0b022b88");
+            incomingCallJson = incomingCallJson.Replace("0b022b87", "0b022b88");
 
-            result = await service.ProcessIncomingCallAsync(requestJson, null);
+            result = await service.ProcessIncomingCallAsync(incomingCallJson, null);
             Assert.AreEqual(ResponseType.Accepted, result.ResponseType);
             Assert.AreEqual(2, service.Calls.Count);
             Assert.NotNull(service.GetCallForId("0b022b87-f255-4667-9335-2335f30ee8de"));
             Assert.NotNull(service.GetCallForId("0b022b88-f255-4667-9335-2335f30ee8de"));
+
+            var acceptCallbackJson = @"   
+{
+    ""id"": ""0b022b88-f255-4667-9335-2335f30ee8de"",
+    ""operationOutcome"": {
+        ""type"": ""answerAppHostedMediaOutcome"",
+        ""id"": ""1a1a29f1-4102-4b6c-9b85-bf20d61c1756"",
+        ""outcome"": ""success""
+    },
+    ""callState"": ""established"",
+    ""appState"": ""ddc2d769-30e2-4418-8de5-5d846139add8"",
+    ""links"": {
+        ""call"": ""https://b-pma-uswe-01.plat.skype.com:6702/platform/v1/calls/faff9af3-5fef-443b-bc2c-7027d00e7cc9"",
+        ""subscriptions"": ""https://b-pma-uswe-01.plat.skype.com:6702/platform/v1/calls/faff9af3-5fef-443b-bc2c-7027d00e7cc9/subscriptions"",
+        ""mixer"": ""https://b-pma-uswe-01.plat.skype.com:6702/platform/v1/calls/faff9af3-5fef-443b-bc2c-7027d00e7cc9/mixer"",
+        ""participantLegMetadata"": ""https://b-pma-uswe-01.plat.skype.com:6702/platform/v1/calls/faff9af3-5fef-443b-bc2c-7027d00e7cc9/participantlegmetadata""
+    }
+}";
+
+            result = await bot.RealTimeMediaBotService.ProcessCallbackAsync(acceptCallbackJson);
+            Assert.AreEqual(ResponseType.Accepted, result.ResponseType);
 
             // TODO: There is no cleanup task, as far as I can tell.
         }
