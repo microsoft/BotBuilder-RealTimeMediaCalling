@@ -35,24 +35,35 @@ namespace FrontEnd.CallLogic
         /// </summary>
         public IRealTimeMediaCallService CallService { get; private set; }
 
+        private readonly string _callGuid = Guid.NewGuid().ToString();
+        private string _callId;
+
         /// <summary>
         /// Id generated locally that is unique to each RealTimeMediaCall
         /// </summary>
-        public readonly string CallId;
+        public string CallId
+        {
+            get
+            {
+                if (null == _callId)
+                {
+                    _callId = $"{CallService.CorrelationId}:{_callGuid}";
+                }
+                return _callId;
+            }
+        }
 
         /// <summary>
         /// CorrelationId that needs to be set in the media platform for correlating logs across services
         /// </summary>
-        public readonly string CorrelationId;
-        
+        public string CorrelationId => CallService.CorrelationId;
+
         public RealTimeMediaCall(IRealTimeMediaCallService callService)
         {
             if (callService == null)
                 throw new ArgumentNullException(nameof(callService));
 
             CallService = callService;
-            CorrelationId = callService.CorrelationId;
-            CallId = CorrelationId + ":" + Guid.NewGuid().ToString();
 
             //Register for the events 
             CallService.OnIncomingCallReceived += OnIncomingCallReceived;

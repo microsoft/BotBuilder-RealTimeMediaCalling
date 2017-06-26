@@ -106,7 +106,9 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <summary>
         /// Instantiates the service with settings to handle a call
         /// </summary>
-        /// <param name="settings"></param>
+        /// <param name="settings">The settings for the RTM call service.</param>
+        /// <param name="callLegId">The call id of this leg of the call.</param>
+        /// <param name="correlationId">The correlation id for the e2e flow.</param>
         public RealTimeMediaCallService(IRealTimeMediaCallServiceSettings settings)
         {
             if (settings == null)
@@ -118,7 +120,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             {
                 throw new ArgumentNullException("callback settings");
             }
-            
+
             _callbackUrl = settings.CallbackUrl;
             _notificationUrl = settings.NotificationUrl;
             _timer = new Timer(CallExpiredTimerCallback, null, CallExpiredTimerInterval, Timeout.Infinite);

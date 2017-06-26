@@ -31,6 +31,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.IO;
 using System.Net.Http;
 using Autofac;
 
@@ -101,9 +102,13 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             builder
                 .Register(c =>
                 {
+                    var make = c.ResolveOptional<Func<IRealTimeMediaBotService, IRealTimeMediaBot>>();
+                    if (null == make)
+                    {
+                        return null;
+                    }
                     var service = c.Resolve<IRealTimeMediaBotService>();
-                    var makeBot = c.Resolve<Func<IRealTimeMediaBotService, IRealTimeMediaBot>>();
-                    return makeBot(service);
+                    return make(service);
                 })
                 .As<IRealTimeMediaBot>()
                 .SingleInstance();
@@ -114,11 +119,15 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 .SingleInstance();
 
             builder
-                .Register(c =>
+                .Register((c, p) =>
                 {
+                    var make = c.ResolveOptional<Func<IRealTimeMediaCallService, IRealTimeMediaCall>>();
+                    if (null == make)
+                    {
+                        return null;
+                    }
                     var service = c.Resolve<IRealTimeMediaCallService>();
-                    var makeBot = c.Resolve<Func<IRealTimeMediaCallService, IRealTimeMediaCall>>();
-                    return makeBot(service);
+                    return make(service);
                 })
                 .As<IRealTimeMediaCall>();
         }
@@ -132,6 +141,21 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <param name="makeCall">The function to make a call.</param>
         public static void Register(ILifetimeScope scope, IRealTimeMediaCallServiceSettings settings, Func<IRealTimeMediaBotService, IRealTimeMediaBot> makeBot, Func<IRealTimeMediaCallService, IRealTimeMediaCall> makeCall)
         {
+            if (null == settings)
+            {
+                throw new ArgumentNullException(nameof(settings));
+            }
+
+            if (null == makeBot)
+            {
+                throw new ArgumentNullException(nameof(makeCall));
+            }
+
+            if (null == makeCall)
+            {
+                throw new ArgumentNullException(nameof(makeCall));
+            }
+
             scope.Resolve<IRealTimeMediaCallServiceSettings>(TypedParameter.From(settings));
             scope.Resolve<Func<IRealTimeMediaBotService, IRealTimeMediaBot>>(TypedParameter.From(makeBot));
             scope.Resolve<Func<IRealTimeMediaCallService, IRealTimeMediaCall>>(TypedParameter.From(makeCall));

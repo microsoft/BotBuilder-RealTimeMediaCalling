@@ -73,14 +73,14 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             settings.Setup(a => a.NotificationUrl).Returns(new Uri("https://someuri/notification"));
 
             RealTimeMediaCalling.RegisterRealTimeMediaCallingBot(
-                settings.Object, 
+                settings.Object,
                 a => new RealTimeMediaBot(a),
                 a => new RealTimeMediaCall(a));
-            var iBot = RealTimeMediaCalling.Container.Resolve<IRealTimeMediaBot>();
+            var bot = RealTimeMediaCalling.Container.Resolve<IRealTimeMediaBot>();
 
-            Assert.NotNull(iBot);
-            Assert.NotNull(iBot.RealTimeMediaBotService);
-            Assert.AreSame(typeof(RealTimeMediaBot), iBot.GetType());
+            Assert.NotNull(bot);
+            Assert.NotNull(bot.RealTimeMediaBotService);
+            Assert.AreSame(typeof(RealTimeMediaBot), bot.GetType());
 
             var requestJson = @"
 {
@@ -103,7 +103,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
   ""callState"": ""incoming""
 }";
 
-            var service = iBot.RealTimeMediaBotService;
+            var service = bot.RealTimeMediaBotService;
             var result = await service.ProcessIncomingCallAsync(requestJson, null);
             Assert.AreEqual(ResponseType.Accepted, result.ResponseType);
             Assert.AreEqual(1, service.Calls.Count);
@@ -126,6 +126,5 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
 
             // TODO: There is no cleanup task, as far as I can tell.
         }
-
     }
 }

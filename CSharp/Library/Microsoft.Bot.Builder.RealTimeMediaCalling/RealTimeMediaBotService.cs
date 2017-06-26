@@ -150,20 +150,19 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }
 
             var call = _context.Resolve<IRealTimeMediaCall>();
-
             var callService = call.CallService as IInternalRealTimeMediaCallService;
             if (null == callService)
             {
-                throw new InvalidOperationException("Could not create RealTimeMediaCallService.");
+                throw new InvalidOperationException("Could not create IInternalRealTimeMediaCallService.");
             }
 
             callService.CallLegId = conversation.Id;
-
             if (string.IsNullOrEmpty(skypeChainId))
             {
-                callService.CorrelationId = Guid.NewGuid().ToString();
+                var correlationId = Guid.NewGuid().ToString();
+                callService.CorrelationId = correlationId;
                 Trace.TraceInformation(
-                    $"RealTimeMediaCallService No SkypeChainId found. Generating {callService.CorrelationId}");
+                    $"RealTimeMediaCallService No SkypeChainId found. Generating {correlationId}");
             }
             else
             {

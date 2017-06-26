@@ -92,7 +92,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         Task EndCall();
     }
 
-    public interface IInternalRealTimeMediaCallService : IRealTimeMediaCallService
+    internal interface IInternalRealTimeMediaCallService : IRealTimeMediaCallService
     {
         string CallLegId { get; set; }
 

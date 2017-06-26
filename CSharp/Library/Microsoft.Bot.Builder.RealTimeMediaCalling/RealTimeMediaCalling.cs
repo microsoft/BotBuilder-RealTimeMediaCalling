@@ -101,19 +101,23 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 try
                 {
                     ResponseResult result;
-                    var bot = scope.Resolve<IRealTimeMediaBot>();
+                    IRealTimeMediaBotService service = null;
+                    var bot = scope.ResolveOptional<IRealTimeMediaBot>();
+                    service = null == bot 
+                        ? scope.Resolve<IRealTimeMediaBotService>() 
+                        : bot.RealTimeMediaBotService;
                     switch (callRequestType)
                     {
                         case RealTimeMediaCallRequestType.IncomingCall:
-                            result = await bot.RealTimeMediaBotService.ProcessIncomingCallAsync(parsedRequest.Content, parsedRequest.SkypeChainId).ConfigureAwait(false);
+                            result = await service.ProcessIncomingCallAsync(parsedRequest.Content, parsedRequest.SkypeChainId).ConfigureAwait(false);
                             break;
 
                         case RealTimeMediaCallRequestType.CallingEvent:
-                            result = await bot.RealTimeMediaBotService.ProcessCallbackAsync(parsedRequest.Content).ConfigureAwait(false);
+                            result = await service.ProcessCallbackAsync(parsedRequest.Content).ConfigureAwait(false);
                             break;
 
                         case RealTimeMediaCallRequestType.NotificationEvent:
-                            result = await bot.RealTimeMediaBotService.ProcessNotificationAsync(parsedRequest.Content).ConfigureAwait(false);
+                            result = await service.ProcessNotificationAsync(parsedRequest.Content).ConfigureAwait(false);
                             break;
 
                         default:
