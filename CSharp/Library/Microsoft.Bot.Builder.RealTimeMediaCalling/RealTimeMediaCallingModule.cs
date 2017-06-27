@@ -39,7 +39,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
     /// <summary>
     /// Autofac module for real-time media calling components.
     /// </summary>
-    internal sealed class RealTimeMediaCallingModule : Module
+    public sealed class RealTimeMediaCallingModule : Module
     {
         public static readonly object LifetimeScopeTag = typeof(RealTimeMediaCallingModule);
 
