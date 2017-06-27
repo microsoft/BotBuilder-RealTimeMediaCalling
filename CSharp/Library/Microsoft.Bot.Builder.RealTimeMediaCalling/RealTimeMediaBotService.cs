@@ -236,21 +236,29 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             //we need to extract the ID here from the ConversationResult and cache it since the ID was not available when we were sending the JoinCall request
             if (conversationResult.OperationOutcome.Type == RealTimeMediaValidOutcomes.JoinCallAppHostedMediaOutcome)
             {
-                call = _context.Resolve<IRealTimeMediaCall>();
+                var callLegId = conversationResult.Id;
+                string correlationId;
+                if (string.IsNullOrEmpty(skypeChainId))
+                {
+                    correlationId = Guid.NewGuid().ToString();
+                    Trace.TraceWarning(
+                        $"RealTimeMediaCallService No SkypeChainId found. Generating {correlationId}");
+                }
+                else
+                {
+                    correlationId = skypeChainId;
+                }
+
+                using (var scope = _scope.BeginLifetimeScope(RealTimeMediaCallingModule.LifetimeScopeTag))
+                {
+                    var parameters = new RealTimeMediaCallServiceParameters(callLegId, correlationId);
+                    scope.Resolve<RealTimeMediaCallServiceParameters>(TypedParameter.From(parameters));
+                    call = scope.Resolve<IRealTimeMediaCall>();
+                }
                 var callService = call.CallService as IInternalRealTimeMediaCallService;
                 if (null == callService)
                 {
                     throw new InvalidOperationException("Could not create RealTimeMediaCallService.");
-                }
-                if (string.IsNullOrEmpty(skypeChainId))
-                {
-                    callService.CorrelationId = Guid.NewGuid().ToString();
-                    Trace.TraceInformation(
-                        $"RealTimeMediaCallService No SkypeChainId found. Generating {callService.CorrelationId}");
-                }
-                else
-                {
-                    callService.CorrelationId = skypeChainId;
                 }
                 var callEvent = new RealTimeMediaCallEvent(conversationResult.Id, call);
                 await InvokeCallEvent(OnCallCreated, callEvent).ConfigureAwait(false);
