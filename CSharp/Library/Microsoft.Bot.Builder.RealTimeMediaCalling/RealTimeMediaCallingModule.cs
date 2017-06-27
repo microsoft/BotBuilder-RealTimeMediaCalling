@@ -31,7 +31,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
-using System.IO;
 using System.Net.Http;
 using Autofac;
 
@@ -64,16 +63,23 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                .RegisterType<RealTimeMediaCallingContext>()
                .AsSelf()
                .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
-         
+
+            builder
+                .Register((c, p) => p.TypedAs<RealTimeMediaCallServiceParameters>())
+                .AsSelf()
+                .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
+
             builder
                 .RegisterType<RealTimeMediaBotService>()
                 .AsSelf()
+                .As<IInternalRealTimeMediaBotService>()
                 .As<IRealTimeMediaBotService>()
                 .SingleInstance();
 
             builder
                 .RegisterType<RealTimeMediaCallService>()
                 .AsSelf()
+                .As<IInternalRealTimeMediaCallService>()
                 .As<IRealTimeMediaCallService>();
         }
     }

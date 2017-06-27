@@ -30,12 +30,12 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-using Autofac;
 using System;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Autofac;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
@@ -101,11 +101,8 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 try
                 {
                     ResponseResult result;
-                    IRealTimeMediaBotService service = null;
                     var bot = scope.ResolveOptional<IRealTimeMediaBot>();
-                    service = null == bot 
-                        ? scope.Resolve<IRealTimeMediaBotService>() 
-                        : bot.RealTimeMediaBotService;
+                    var service = (IInternalRealTimeMediaBotService) bot.RealTimeMediaBotService;
                     switch (callRequestType)
                     {
                         case RealTimeMediaCallRequestType.IncomingCall:

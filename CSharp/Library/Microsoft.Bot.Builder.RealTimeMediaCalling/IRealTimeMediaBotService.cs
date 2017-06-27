@@ -30,11 +30,10 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
@@ -115,7 +114,10 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <param name="id">The ID of the call.</param>
         /// <returns>The real time media call, or null.</returns>
         IRealTimeMediaCall GetCallForId(string id);
+    }
 
+    internal interface IInternalRealTimeMediaBotService : IRealTimeMediaBotService
+    {
         /// <summary>
         /// Processes incoming call request
         /// </summary>

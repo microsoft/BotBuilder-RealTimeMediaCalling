@@ -6,93 +6,30 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
-    class RealTimeMediaSession : IInternalRealTimeMediaSession
+    class RealTimeMediaSession : IRealTimeMediaSession
     {
-        private class RealTimeAudioSocket : IRealTimeAudioSocket, IDisposable
+        private IAudioSocket _audioSocket;
+        private readonly List<IVideoSocket> _videoSockets;
+        private IVideoSocket _vbssSocket;
+
+        public string Id { get; }
+
+        public string CorrelationId { get; }
+
+        public IAudioSocket AudioSocket => _audioSocket;
+
+        public IReadOnlyList<IVideoSocket> VideoSockets => _videoSockets;
+
+        public IVideoSocket VbssSocket => _vbssSocket;
+
+        public RealTimeMediaSession(RealTimeMediaCallServiceParameters parameters)
         {
-            public AudioSocket Socket { get; }
-
-            public event EventHandler<AudioMediaReceivedEventArgs> AudioMediaReceived;
-
-            public event EventHandler<AudioSendStatusChangedEventArgs> AudioSendStatusChanged;
-
-            public event EventHandler<DominantSpeakerChangedEventArgs> DominantSpeakerChanged;
-
-            public event EventHandler<ToneReceivedEventArgs> ToneReceived;
-
-            public RealTimeAudioSocket(AudioSocketSettings settings)
-            {
-                throw new NotImplementedException();
-                Socket = new AudioSocket(settings);
-            }
-
-            public void Send(AudioMediaBuffer buffer)
-            {
-                Socket.Send(buffer);
-            }
-
-            public void Dispose()
-            {
-                Socket?.Dispose();
-            }
+            CorrelationId = parameters.CorrelationId;
+            Id = $"{CorrelationId}:{Guid.NewGuid()}";
+            _videoSockets = new List<IVideoSocket>();
         }
 
-        private class RealTimeVideoSocket : IRealTimeVideoSocket, IDisposable
-        {
-            public VideoSocket Socket { get; }
-
-            public int SocketId => Socket.SocketId;
-
-            public event EventHandler<VideoMediaReceivedEventArgs> VideoMediaReceived;
-
-            public event EventHandler<VideoSendStatusChangedEventArgs> VideoSendStatusChanged;
-
-            public RealTimeVideoSocket(VideoSocketSettings settings)
-            {
-                throw new NotImplementedException();
-                Socket = new VideoSocket(settings);
-            }
-
-            public void Send(VideoMediaBuffer buffer)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void Dispose()
-            {
-                Socket?.Dispose();
-            }
-        }
-
-        private RealTimeAudioSocket _audioSocket;
-        private readonly List<RealTimeVideoSocket> _videoSockets;
-        private RealTimeVideoSocket _vbssSocket;
-
-        public string Id { get; private set; }
-
-        private string _correlationId;
-        public string CorrelationId
-        {
-            get => _correlationId;
-            set
-            {
-                this.Id = $"{value}:{Guid.NewGuid()}";
-                _correlationId = value;
-            }
-        }
-
-        public IRealTimeAudioSocket AudioSocket => _audioSocket;
-
-        public IReadOnlyList<IRealTimeVideoSocket> VideoSockets => _videoSockets;
-
-        public IRealTimeVideoSocket VbssSocket => _vbssSocket;
-
-        public RealTimeMediaSession()
-        {
-            _videoSockets = new List<RealTimeVideoSocket>();
-        }
-
-        public IRealTimeAudioSocket AddAudioSocket(AudioSocketSettings settings)
+        public IAudioSocket AddAudioSocket(AudioSocketSettings settings)
         {
             if (null == settings)
             {
@@ -105,23 +42,23 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 throw new InvalidOperationException("An audio socket has already been added");
             }
 
-            _audioSocket = new RealTimeAudioSocket(settings);
+            _audioSocket = new AudioSocket(settings);
             return _audioSocket;
         }
 
-        public IRealTimeVideoSocket AddVideoSocket(VideoSocketSettings settings)
+        public IVideoSocket AddVideoSocket(VideoSocketSettings settings)
         {
             if (null == settings)
             {
                 throw new ArgumentNullException(nameof(settings));
             }
 
-            var videoSocket = new RealTimeVideoSocket(settings);
+            var videoSocket = new VideoSocket(settings);
             _videoSockets.Add(videoSocket);
             return videoSocket;
         }
 
-        public IRealTimeVideoSocket AddVbssSocket(VideoSocketSettings settings)
+        public IVideoSocket AddVbssSocket(VideoSocketSettings settings)
         {
             if (null == settings)
             {
@@ -133,23 +70,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 throw new InvalidOperationException("An audio socket has already been added");
             }
 
-            _vbssSocket = new RealTimeVideoSocket(settings);
+            _vbssSocket = new VideoSocket(settings);
             return _vbssSocket;
         }
 
-        public JObject MediaConfiguration
-        {
-            get
-            {
-                var audioSocket = _audioSocket?.Socket;
-                IList<IVideoSocket> videoSockets = null;
-                if (_videoSockets?.Count > 0)
-                {
-                    videoSockets = _videoSockets.Select(c => (IVideoSocket)c.Socket).ToList();
-                }
-                var vbssSocket = _vbssSocket?.Socket;
-                return MediaPlatform.CreateMediaConfiguration(audioSocket, videoSockets, vbssSocket);
-            }
-        }
+        public JObject MediaConfiguration => 
+            MediaPlatform.CreateMediaConfiguration(_audioSocket, _videoSockets, _vbssSocket);
     }
 }

@@ -34,6 +34,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,18 +43,44 @@ using Microsoft.Bot.Builder.Calling.Events;
 using Microsoft.Bot.Builder.Calling.Exceptions;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Misc;
-using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Misc;
-using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
-using System.Net.Http.Headers;
-using System.Reflection;
+using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
+using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Misc;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
+    internal class RealTimeMediaCallServiceParameters {
+        /// <summary>
+        /// Id for this call
+        /// </summary>
+        public string CallLegId { get; }
+
+        /// <summary>
+        /// CorrelationId for this call.
+        /// </summary>
+        public string CorrelationId { get; }
+
+        public RealTimeMediaCallServiceParameters(string callLegId, string correlationId)
+        {
+            if (null == callLegId)
+            {
+                throw new ArgumentNullException(nameof(callLegId));
+            }
+
+            if (null == correlationId)
+            {
+                throw new ArgumentNullException(nameof(correlationId));
+            }
+
+            CallLegId = callLegId;
+            CorrelationId = correlationId;
+        }
+    }
+
     /// <summary>
     /// Service that handles per call requests
     /// </summary>            
-    public class RealTimeMediaCallService : IInternalRealTimeMediaCallService
+    internal class RealTimeMediaCallService : IInternalRealTimeMediaCallService
     {
         private readonly Uri _callbackUrl;
         private readonly Uri _notificationUrl;
@@ -66,16 +94,12 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <summary>
         /// Id for this call
         /// </summary>
-        public string CallLegId { get; set; }
+        public string CallLegId { get; }
 
         /// <summary>
         /// CorrelationId for this call.
         /// </summary>
-        public string CorrelationId
-        {
-            get => this.MediaSession.CorrelationId;
-            set => ((IInternalRealTimeMediaSession) this.MediaSession).CorrelationId = value;
-        }
+        public string CorrelationId { get; }
 
         /// <summary>
         /// Event raised when bot receives incoming call
@@ -112,10 +136,21 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <summary>
         /// Instantiates the service with settings to handle a call
         /// </summary>
+        /// <param name="parameters">The parameters for the RTM call service.</param>
         /// <param name="settings">The settings for the RTM call service.</param>
         /// <param name="mediaSession">The media session for this call.</param>
-        public RealTimeMediaCallService(IRealTimeMediaCallServiceSettings settings, IRealTimeMediaSession mediaSession)
+        public RealTimeMediaCallService(RealTimeMediaCallServiceParameters parameters, IRealTimeMediaCallServiceSettings settings, IRealTimeMediaSession mediaSession)
         {
+            if (parameters == null)
+            {
+                throw new ArgumentNullException(nameof(parameters));
+            }
+
+            if (string.IsNullOrWhiteSpace(parameters.CallLegId) || string.IsNullOrWhiteSpace(parameters.CorrelationId))
+            {
+                throw new ArgumentNullException("call parameters");
+            }
+
             if (settings == null)
             {
                 throw new ArgumentNullException(nameof(settings));
@@ -131,9 +166,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 throw new ArgumentNullException(nameof(mediaSession));
             }
 
-            MediaSession = mediaSession;
+            CallLegId = parameters.CallLegId;
+            CorrelationId = parameters.CorrelationId;
             _callbackUrl = settings.CallbackUrl;
             _notificationUrl = settings.NotificationUrl;
+            MediaSession = mediaSession;
             _timer = new Timer(CallExpiredTimerCallback, null, CallExpiredTimerInterval, Timeout.Infinite);
         }        
 

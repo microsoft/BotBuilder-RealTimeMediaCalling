@@ -99,9 +99,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
     internal interface IInternalRealTimeMediaCallService : IRealTimeMediaCallService
     {
-        string CallLegId { get; set; }
-
-        new string CorrelationId { get; set; }
+        string CallLegId { get; }
 
         Task LocalCleanup();
 
