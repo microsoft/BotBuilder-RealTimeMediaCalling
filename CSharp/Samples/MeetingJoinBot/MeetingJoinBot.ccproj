@@ -55,6 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <PublishProfile Include="Profiles\MeetingJoinBot.azurePubxml" />
+    <PublishProfile Include="Profiles\TixMeetingJoinBotProduction.azurePubxml" />
   </ItemGroup>
   <!-- Import the target files for this project template -->
   <PropertyGroup>
