@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Bot.Builder.RealTimeMediaCalling", "Library\Microsoft.Bot.Builder.RealTimeMediaCalling\Microsoft.Bot.Builder.RealTimeMediaCalling.csproj", "{F1BFB900-F608-44BA-8A04-FDF5EC27EC1C}"
 EndProject
@@ -32,6 +32,14 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkerRole", "Samples\MeetingScreenshotsBot\WorkerRole\WorkerRole.csproj", "{DCB04B51-8726-4762-AE57-FACC1D112C99}"
 EndProject
 Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "MeetingScreenshotsBot", "Samples\MeetingScreenshotsBot\MeetingScreenshotsBot.ccproj", "{CCD83013-9504-4716-ABFB-59881139A531}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MeetingJoinBot", "MeetingJoinBot", "{7D8BF5BC-986F-40A2-994E-738E88F3EA13}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontEnd", "Samples\MeetingJoinBot\FrontEnd\FrontEnd.csproj", "{20FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkerRole", "Samples\MeetingJoinBot\WorkerRole\WorkerRole.csproj", "{FCB04B51-8726-4762-AE57-FACC1D112C99}"
+EndProject
+Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "MeetingJoinBot", "Samples\MeetingJoinBot\MeetingJoinBot.ccproj", "{DCD83013-9504-4716-ABFB-59881139A531}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -129,6 +137,29 @@ Global
 		{CCD83013-9504-4716-ABFB-59881139A531}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CCD83013-9504-4716-ABFB-59881139A531}.Release|x64.ActiveCfg = Release|Any CPU
 		{CCD83013-9504-4716-ABFB-59881139A531}.Release|x64.Build.0 = Release|Any CPU
+		{20FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{20FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{20FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{20FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB}.Debug|x64.Build.0 = Debug|Any CPU
+		{20FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{20FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{20FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB}.Release|x64.ActiveCfg = Release|Any CPU
+		{20FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB}.Release|x64.Build.0 = Release|Any CPU
+		{FCB04B51-8726-4762-AE57-FACC1D112C99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCB04B51-8726-4762-AE57-FACC1D112C99}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FCB04B51-8726-4762-AE57-FACC1D112C99}.Debug|x64.Build.0 = Debug|Any CPU
+		{FCB04B51-8726-4762-AE57-FACC1D112C99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCB04B51-8726-4762-AE57-FACC1D112C99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCB04B51-8726-4762-AE57-FACC1D112C99}.Release|x64.ActiveCfg = Release|Any CPU
+		{FCB04B51-8726-4762-AE57-FACC1D112C99}.Release|x64.Build.0 = Release|Any CPU
+		{DCD83013-9504-4716-ABFB-59881139A531}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCD83013-9504-4716-ABFB-59881139A531}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCD83013-9504-4716-ABFB-59881139A531}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DCD83013-9504-4716-ABFB-59881139A531}.Debug|x64.Build.0 = Debug|Any CPU
+		{DCD83013-9504-4716-ABFB-59881139A531}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCD83013-9504-4716-ABFB-59881139A531}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCD83013-9504-4716-ABFB-59881139A531}.Release|x64.ActiveCfg = Release|Any CPU
+		{DCD83013-9504-4716-ABFB-59881139A531}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -146,5 +177,9 @@ Global
 		{E0FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB} = {8D8BF5BC-986F-40A2-994E-738E88F3EA13}
 		{DCB04B51-8726-4762-AE57-FACC1D112C99} = {8D8BF5BC-986F-40A2-994E-738E88F3EA13}
 		{CCD83013-9504-4716-ABFB-59881139A531} = {8D8BF5BC-986F-40A2-994E-738E88F3EA13}
+		{7D8BF5BC-986F-40A2-994E-738E88F3EA13} = {F3A52B01-1D3B-4637-905B-CBE0F80CFFC4}
+		{20FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB} = {7D8BF5BC-986F-40A2-994E-738E88F3EA13}
+		{FCB04B51-8726-4762-AE57-FACC1D112C99} = {7D8BF5BC-986F-40A2-994E-738E88F3EA13}
+		{DCD83013-9504-4716-ABFB-59881139A531} = {7D8BF5BC-986F-40A2-994E-738E88F3EA13}
 	EndGlobalSection
 EndGlobal

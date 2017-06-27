@@ -49,10 +49,16 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         /// </summary>
         public const string VideoSubscriptionOutcome = "videoSubscriptionOutcome";
 
+        /// <summary>
+        /// The outcome of joining a call for bots that use bot hosted media stack.
+        /// </summary>
+        public const string JoinCallAppHostedMediaOutcome = "joinCallAppHostedMediaOutcome";
+
         internal static void Initialize()
         {
             ValidOutcomes.Outcomes.Add(AnswerAppHostedMediaOutcome);
             ValidOutcomes.Outcomes.Add(VideoSubscriptionOutcome);
+            ValidOutcomes.Outcomes.Add(JoinCallAppHostedMediaOutcome);
         }
     }
 }

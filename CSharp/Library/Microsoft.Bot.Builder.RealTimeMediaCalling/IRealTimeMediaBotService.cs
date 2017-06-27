@@ -128,8 +128,9 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// Processes requests sent to the callback url
         /// </summary>
         /// <param name="content">Content from the request</param>
+        /// <param name="skypeChainId">X-Microsoft-Skype-Chain-Id header value used to associate calls across different services</param>
         /// <returns></returns>
-        Task<ResponseResult> ProcessCallbackAsync(string content);
+        Task<ResponseResult> ProcessCallbackAsync(string content , string skypeChainId);
 
         /// <summary>
         /// Processes requests sent to notification url

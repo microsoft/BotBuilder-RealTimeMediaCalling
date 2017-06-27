@@ -44,6 +44,9 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
     /// </summary>
     public static class RealTimeMediaCalling
     {
+        /// <summary>
+        /// The container used to inject various services when registering the bot
+        /// </summary>
         public static readonly IContainer Container;
 
         static RealTimeMediaCalling()
@@ -113,7 +116,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                             break;
 
                         case RealTimeMediaCallRequestType.CallingEvent:
-                            result = await service.ProcessCallbackAsync(parsedRequest.Content).ConfigureAwait(false);
+                            result = await service.ProcessCallbackAsync(parsedRequest.Content, parsedRequest.SkypeChainId).ConfigureAwait(false);
                             break;
 
                         case RealTimeMediaCallRequestType.NotificationEvent:

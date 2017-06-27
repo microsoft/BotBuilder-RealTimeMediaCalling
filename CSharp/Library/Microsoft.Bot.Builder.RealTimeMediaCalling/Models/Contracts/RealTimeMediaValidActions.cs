@@ -52,7 +52,12 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         /// VideoSubscription
         /// </summary>
         public const string VideoSubscriptionAction = "videoSubscription";
-        
+
+        /// <summary>
+        /// Join ongoing call for bots that use in-app media stack.
+        /// </summary>
+        public const string JoinCallAppHostedMediaAction = "joinCallAppHostedMedia";
+
         /// <summary>
         /// Dictionary of valid actions and their relative order
         /// +ve order reflect operations after and including call acceptance
@@ -62,11 +67,13 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         {
             {AnswerAppHostedMediaAction, 1},
             {VideoSubscriptionAction, 1},
+            { JoinCallAppHostedMediaAction, 1}
         };
 
         private static readonly string[] exclusiveActions = new string[]
         {
-            AnswerAppHostedMediaAction
+            AnswerAppHostedMediaAction,
+            JoinCallAppHostedMediaAction
         };
         
         private static bool IsValidAction(string action)

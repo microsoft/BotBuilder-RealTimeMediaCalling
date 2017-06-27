@@ -62,7 +62,12 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// Event raised when the bot gets the outcome of AnswerAppHostedMedia action. If the operation was successful the call is established
         /// </summary>
         event Func<AnswerAppHostedMediaOutcomeEvent, Task> OnAnswerAppHostedMediaCompleted;
-        
+
+        /// <summary>
+        /// Event raised when the bot gets the outcome of JoinCallAppHostedMedia action. If the operation was successful the call is established
+        /// </summary>
+        event Func<JoinCallAppHostedMediaOutcomeEvent, Task> OnJoinCallAppHostedMediaCompleted;
+
         /// <summary>
         /// Event raised when the bot gets call state change notification
         /// </summary>
@@ -84,6 +89,13 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <param name="videoSubscription">Details regarding the subscription like the source to subscribe, socket on which subscription needs to be done, etc</param>
         /// <returns></returns>
         Task Subscribe(VideoSubscription videoSubscription);
+
+        /// <summary>
+        /// Join an existing multi-party conversation
+        /// </summary>
+        /// <param name="joinCallAppHostedMedia">details regarding the conversation to be joined</param>
+        /// <returns></returns>
+        Task JoinCall(JoinCallAppHostedMedia joinCallAppHostedMedia);
 
         /// <summary>
         /// Terminate the call

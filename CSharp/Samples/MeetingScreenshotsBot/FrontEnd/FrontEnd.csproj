@@ -333,9 +333,11 @@
     <Error Condition="!Exists('..\..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.props'))" />
     <Error Condition="!Exists('..\..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.targets'))" />
     <Error Condition="!Exists('..\..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\build\Microsoft.Skype.Bots.Media.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\build\Microsoft.Skype.Bots.Media.targets'))" />
+    <Error Condition="!Exists('..\..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets'))" />
   </Target>
   <Import Project="..\..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.targets" Condition="Exists('..\..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.targets')" />
   <Import Project="..\..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\build\Microsoft.Skype.Bots.Media.targets" Condition="Exists('..\..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\build\Microsoft.Skype.Bots.Media.targets')" />
+  <Import Project="..\..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

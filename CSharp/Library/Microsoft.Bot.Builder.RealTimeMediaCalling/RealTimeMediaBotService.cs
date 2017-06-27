@@ -71,6 +71,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         private ConcurrentDictionary<string, IRealTimeMediaCall> ActiveCalls { get; }
 
         /// <summary>
+        /// Container for the joinTokens(null if call can't be joined) of all current active calls on this instance.
+        /// </summary>
+        private ConcurrentDictionary<string, string> ActiveJoinTokens { get; }
+
+        /// <summary>
         /// Returns the list of all active call ids.
         /// </summary>
         public IList<string> CallIds => ActiveCalls.Keys.ToList();
@@ -168,6 +173,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             {
                 callService.CorrelationId = skypeChainId;
             }
+            //TODO store jointoken, if present, to ActiveJoinTokens
 
             var workflow = await callService.HandleIncomingCall(conversation).ConfigureAwait(false);
             if (workflow == null)
@@ -200,7 +206,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// </summary>
         /// <param name="content">The content of request</param>
         /// <returns>Returns the response that should be sent to the sender of POST request</returns>
-        public async Task<ResponseResult> ProcessCallbackAsync(string content)
+        public async Task<ResponseResult> ProcessCallbackAsync(string content, string skypeChainId)
         {
             ConversationResult conversationResult;
             if (content == null)
@@ -225,7 +231,32 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }            
 
             IRealTimeMediaCall call;
-            if (!ActiveCalls.TryGetValue(conversationResult.Id, out call))
+            //we need to extract the ID here from the ConversationResult and cache it since the ID was not available when we were sending the JoinCall request
+            if (conversationResult.OperationOutcome.Type == RealTimeMediaValidOutcomes.JoinCallAppHostedMediaOutcome)
+            {
+                call = _context.Resolve<IRealTimeMediaCall>();
+                var callService = call.CallService as IInternalRealTimeMediaCallService;
+                if (null == callService)
+                {
+                    throw new InvalidOperationException("Could not create RealTimeMediaCallService.");
+                }
+                if (string.IsNullOrEmpty(skypeChainId))
+                {
+                    callService.CorrelationId = Guid.NewGuid().ToString();
+                    Trace.TraceInformation(
+                        $"RealTimeMediaCallService No SkypeChainId found. Generating {callService.CorrelationId}");
+                }
+                else
+                {
+                    callService.CorrelationId = skypeChainId;
+                }
+                var callEvent = new RealTimeMediaCallEvent(conversationResult.Id, call);
+                await InvokeCallEvent(OnCallCreated, callEvent).ConfigureAwait(false);
+
+                ActiveCalls[conversationResult.Id] = call;
+            }
+
+            else if (!ActiveCalls.TryGetValue(conversationResult.Id, out call))
             {
                 Trace.TraceWarning($"CallId {conversationResult.Id} not found");
                 return new ResponseResult(ResponseType.NotFound);
@@ -235,7 +266,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             if (null == service)
             {
                 Trace.TraceWarning($"Service for CallId {conversationResult.Id} not found");
-                return new ResponseResult(ResponseType.NotFound);
+                return new ResponseResult(ResponseType.NotFound, $"Service for CallId {conversationResult.Id} not found");
             }
             var result = await service.ProcessConversationResult(conversationResult).ConfigureAwait(false);
             return new ResponseResult(ResponseType.Accepted, result);

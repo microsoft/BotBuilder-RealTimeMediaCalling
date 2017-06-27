@@ -40,6 +40,16 @@
     <Folder Include="Profiles" />
     <Folder Include="WorkerRoleContent\" />
   </ItemGroup>
+   <ItemGroup>
+    <ProjectReference Include="WorkerRole\WorkerRole.csproj">
+      <Name>WorkerRole</Name>
+      <Project>{9F593A7B-8935-4BC8-9FBB-C3A9E3BC2A23}</Project>
+      <Private>True</Private>
+      <RoleType>Worker</RoleType>
+      <RoleName>WorkerRole</RoleName>
+      <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <DiagnosticsConfiguration Include="WorkerRoleContent\diagnostics.wadcfgx" />
   </ItemGroup>

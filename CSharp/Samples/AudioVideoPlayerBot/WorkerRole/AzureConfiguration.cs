@@ -39,10 +39,12 @@ namespace WorkerRole
         private const string InstanceMediaControlEndpointKey = "InstanceMediaControlEndpoint";
         private const string ServiceDnsNameKey = "ServiceDnsName";
         private const string ServiceCNAMEKey = "ServiceCNAME";
+        private const string PlaceCallEndpointUrlKey = "PlaceCallEndpointUrl";
         private const string DefaultCertificateKey = "DefaultCertificate";
         private const string MicrosoftAppIdKey = "MicrosoftAppId";
         private const string AudioFilePathKey = "AudioFileLocation";
         private const string VideoFilePathKey = "VideoFileLocation";
+        private const string DefaultPlaceCallEndpointUrl = "https://pma.plat.skype.com:6448/platform/v1/calls";
 
         //Prefix of the InstanceId from the RoleEnvironment 
         private const string InstanceIdToken = "in_";
@@ -72,6 +74,8 @@ namespace WorkerRole
         public Uri CallControlCallbackUrl { get; private set; }
 
         public Uri NotificationCallbackUrl { get; private set; }
+
+        public Uri PlaceCallEndpointUrl { get; private set; }
 
         public string AudioFileLocation { get; private set; }
 
@@ -104,6 +108,8 @@ namespace WorkerRole
             {
                 ServiceCNAME = ServiceDnsName;
             }
+
+            PlaceCallEndpointUrl = new Uri(GetString(PlaceCallEndpointUrlKey, true) ?? DefaultPlaceCallEndpointUrl);
 
             AudioFileLocation = GetString(AudioFilePathKey);
             VideoFileLocation = GetString(VideoFilePathKey);
