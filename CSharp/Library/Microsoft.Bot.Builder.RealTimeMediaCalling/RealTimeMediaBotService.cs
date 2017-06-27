@@ -48,7 +48,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
     /// <summary>
     /// Processes the incoming requests and invokes the appropriate handlers for the call
     /// </summary>
-    public class RealTimeMediaBotService : IInternalRealTimeMediaBotService
+    internal class RealTimeMediaBotService : IInternalRealTimeMediaBotService
     {
         /// <summary>
         /// The autofac lifetime scope.

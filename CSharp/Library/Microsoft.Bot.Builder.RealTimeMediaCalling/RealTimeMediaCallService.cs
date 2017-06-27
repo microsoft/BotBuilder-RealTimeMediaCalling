@@ -49,7 +49,7 @@ using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Misc;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
-    public class RealTimeMediaCallServiceParameters {
+    internal class RealTimeMediaCallServiceParameters {
         /// <summary>
         /// Id for this call
         /// </summary>
@@ -80,7 +80,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
     /// <summary>
     /// Service that handles per call requests
     /// </summary>            
-    public class RealTimeMediaCallService : IInternalRealTimeMediaCallService
+    internal class RealTimeMediaCallService : IInternalRealTimeMediaCallService
     {
         private readonly Uri _callbackUrl;
         private readonly Uri _notificationUrl;
