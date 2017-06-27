@@ -30,9 +30,11 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+using System;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.Calling.Events;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
 {
@@ -57,6 +59,25 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
         {
             get { return ResultingWorkflow as RealTimeMediaWorkflow;  }
             set { ResultingWorkflow = value; }
+        }
+
+        public void Answer(JObject mediaConfiguration, string operationId, params NotificationType[] subscriptions)
+        {
+            if (null == operationId)
+            {
+                operationId = Guid.NewGuid().ToString();
+            }
+
+            this.RealTimeMediaWorkflow.Actions = new ActionBase[]
+            {
+                new AnswerAppHostedMedia
+                {
+                    MediaConfiguration = mediaConfiguration,
+                    OperationId = operationId
+                }
+            };
+
+            this.RealTimeMediaWorkflow.NotificationSubscriptions = subscriptions;
         }
     }
 }

@@ -85,7 +85,7 @@ namespace FrontEnd.CallLogic
         {
             _correlationId = correlationId;
             this.Id = id;
-            RealTimeMediaCall = call;
+            this.RealTimeMediaCall = call;
 
             Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{this.Id}]: Call created");
 
@@ -98,7 +98,7 @@ namespace FrontEnd.CallLogic
                     CallId = correlationId
                 });
 
-                Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{this.Id}]:Created AudioSocket");
+                Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{this.Id}]: Created AudioSocket");
 
                 // video socket
                 _videoSocket = new VideoSocket(new VideoSocketSettings
@@ -116,7 +116,7 @@ namespace FrontEnd.CallLogic
                 //Video socket events
                 _videoSocket.VideoMediaReceived += OnVideoMediaReceived;
 
-                MediaConfiguration = MediaPlatform.CreateMediaConfiguration(_audioSocket, _videoSocket);
+                this.MediaConfiguration = MediaPlatform.CreateMediaConfiguration(_audioSocket, _videoSocket);
 
                 Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{this.Id}]: MediaConfiguration={MediaConfiguration.ToString(Formatting.Indented)}");
             }

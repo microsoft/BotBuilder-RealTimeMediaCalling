@@ -9,9 +9,11 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.Bot.Builder.RealTimeMediaCalling</RootNamespace>
     <AssemblyName>Microsoft.Bot.Builder.RealTimeMediaCalling</AssemblyName>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -58,6 +60,9 @@
     <Reference Include="Microsoft.Rest.ClientRuntime, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.Rest.ClientRuntime.2.3.8\lib\net452\Microsoft.Rest.ClientRuntime.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Skype.Bots.Media, Version=1.5.0.1177, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=AMD64">
+      <HintPath>..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\lib\Microsoft.Skype.Bots.Media.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -73,6 +78,9 @@
     </Reference>
     <Reference Include="System.Net.Http.WebRequest" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.25.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Threading.Tasks.Dataflow.4.5.25\lib\dotnet\System.Threading.Tasks.Dataflow.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
       <Private>True</Private>
@@ -89,7 +97,9 @@
     <Compile Include="IRealTimeMediaBot.cs" />
     <Compile Include="IRealTimeMediaCall.cs" />
     <Compile Include="IRealTimeMediaBotService.cs" />
+    <Compile Include="IRealTimeMediaSession.cs" />
     <Compile Include="LoggingMessageHandler.cs" />
+    <Compile Include="RealTimeMediaSession.cs" />
     <Compile Include="RetryMessageHandler.cs" />
     <Compile Include="RealTimeMediaCallingContext.cs" />
     <Compile Include="Events\AnswerAppHostedMediaOutcomeEvent.cs" />
@@ -122,13 +132,130 @@
     <Compile Include="RealTimeMediaCallService.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\InstallMPServiceImpCounters.ps1">
+      <Link>skype_media_lib\InstallMPServiceImpCounters.ps1</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\MediaPerf.ini">
+      <Link>skype_media_lib\MediaPerf.ini</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\MediaPlatformStartupScript.bat">
+      <Link>skype_media_lib\MediaPlatformStartupScript.bat</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\TraceFormat\default.tmx">
+      <Link>skype_media_lib\TraceFormat\default.tmx</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\TraceFormat\default_media.tmx">
+      <Link>skype_media_lib\TraceFormat\default_media.tmx</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="app.config" />
     <None Include="ClassDiagram.cd" />
     <None Include="createpackage.cmd" />
     <None Include="Microsoft.Bot.Builder.RealTimeMediaCalling.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\EtlReader.dll">
+      <Link>skype_media_lib\EtlReader.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\MediaPerf.dll">
+      <Link>skype_media_lib\MediaPerf.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\MediaPerf.h">
+      <Link>skype_media_lib\MediaPerf.h</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\Microsoft.Applications.Telemetry.dll">
+      <Link>skype_media_lib\Microsoft.Applications.Telemetry.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\Microsoft.Applications.Telemetry.Server.dll">
+      <Link>skype_media_lib\Microsoft.Applications.Telemetry.Server.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\Microsoft.Bond.dll">
+      <Link>skype_media_lib\Microsoft.Bond.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\Microsoft.Bond.Interfaces.dll">
+      <Link>skype_media_lib\Microsoft.Bond.Interfaces.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\Microsoft.Rtc.ClsContracts.dll">
+      <Link>skype_media_lib\Microsoft.Rtc.ClsContracts.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\Microsoft.Rtc.ClsLite.dll">
+      <Link>skype_media_lib\Microsoft.Rtc.ClsLite.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\Microsoft.Rtc.Internal.Media.dll">
+      <Link>skype_media_lib\Microsoft.Rtc.Internal.Media.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\Microsoft.Rtc.Internal.Media.MediaApi.dll">
+      <Link>skype_media_lib\Microsoft.Rtc.Internal.Media.MediaApi.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\Microsoft.Skype.ECS.Client.dll">
+      <Link>skype_media_lib\Microsoft.Skype.ECS.Client.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\MPAzAppHost.dll">
+      <Link>skype_media_lib\MPAzAppHost.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\MPServiceHostLib.dll">
+      <Link>skype_media_lib\MPServiceHostLib.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\MPServiceImp.dll">
+      <Link>skype_media_lib\MPServiceImp.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\rtmcodecs.dll">
+      <Link>skype_media_lib\rtmcodecs.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\RtmMvrCs.dll">
+      <Link>skype_media_lib\RtmMvrCs.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\rtmpal.dll">
+      <Link>skype_media_lib\rtmpal.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\Skype.ECS.Criteria.dll">
+      <Link>skype_media_lib\Skype.ECS.Criteria.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\Skype.ECS.Utilities.dll">
+      <Link>skype_media_lib\Skype.ECS.Utilities.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\SkypeRT.dll">
+      <Link>skype_media_lib\SkypeRT.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\TraceFormat\default.xml">
+      <Link>skype_media_lib\TraceFormat\default.xml</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\build\Microsoft.Skype.Bots.Media.targets" Condition="Exists('..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\build\Microsoft.Skype.Bots.Media.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\build\Microsoft.Skype.Bots.Media.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\build\Microsoft.Skype.Bots.Media.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

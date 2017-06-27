@@ -71,7 +71,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <summary>
         /// CorrelationId for this call.
         /// </summary>
-        public string CorrelationId { get; set; }
+        public string CorrelationId
+        {
+            get => this.MediaSession.CorrelationId;
+            set => ((IInternalRealTimeMediaSession) this.MediaSession).CorrelationId = value;
+        }
 
         /// <summary>
         /// Event raised when bot receives incoming call
@@ -103,13 +107,14 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// </summary>
         public event Func<Task> OnCallCleanup;
 
+        public IRealTimeMediaSession MediaSession { get; }
+
         /// <summary>
         /// Instantiates the service with settings to handle a call
         /// </summary>
         /// <param name="settings">The settings for the RTM call service.</param>
-        /// <param name="callLegId">The call id of this leg of the call.</param>
-        /// <param name="correlationId">The correlation id for the e2e flow.</param>
-        public RealTimeMediaCallService(IRealTimeMediaCallServiceSettings settings)
+        /// <param name="mediaSession">The media session for this call.</param>
+        public RealTimeMediaCallService(IRealTimeMediaCallServiceSettings settings, IRealTimeMediaSession mediaSession)
         {
             if (settings == null)
             {
@@ -121,6 +126,12 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 throw new ArgumentNullException("callback settings");
             }
 
+            if (mediaSession == null)
+            {
+                throw new ArgumentNullException(nameof(mediaSession));
+            }
+
+            MediaSession = mediaSession;
             _callbackUrl = settings.CallbackUrl;
             _notificationUrl = settings.NotificationUrl;
             _timer = new Timer(CallExpiredTimerCallback, null, CallExpiredTimerInterval, Timeout.Infinite);

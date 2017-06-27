@@ -103,17 +103,9 @@ namespace FrontEnd.CallLogic
 
             //handles the media for this call like creating sockets, registering for events on the socket and sending/receiving media
             MediaSession = new MediaSession(CallId, CorrelationId, this);
-            incomingCallEvent.RealTimeMediaWorkflow.Actions = new ActionBase[]
-                {
-                    new AnswerAppHostedMedia
-                    {
-                        MediaConfiguration = MediaSession.MediaConfiguration,
-                        OperationId = Guid.NewGuid().ToString()
-                    }
-                };
 
             //subscribe for roster changes and call state changes
-            incomingCallEvent.RealTimeMediaWorkflow.NotificationSubscriptions = new NotificationType[] { NotificationType.RosterUpdate, NotificationType.CallStateChange};
+            incomingCallEvent.Answer(MediaSession.MediaConfiguration, null, NotificationType.RosterUpdate, NotificationType.CallStateChange);
             ThreadId = incomingCallEvent.IncomingCall.ThreadId;
             
             Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] Answering the call");
@@ -140,7 +132,8 @@ namespace FrontEnd.CallLogic
                     answerAppHostedMediaOutcomeEvent.RealTimeMediaWorkflow.NotificationSubscriptions = new NotificationType[] { NotificationType.CallStateChange, NotificationType.RosterUpdate };
                 }
                 return Task.CompletedTask;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] threw {ex.ToString()}");
                 throw;

@@ -79,6 +79,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         event Func<Task> OnCallCleanup;
 
         /// <summary>
+        /// The media session for this call.
+        /// </summary>
+        IRealTimeMediaSession MediaSession { get; }
+
+        /// <summary>
         /// Subscribe to video or video-based screen sharing channel
         /// </summary>
         /// <param name="videoSubscription">Details regarding the subscription like the source to subscribe, socket on which subscription needs to be done, etc</param>
