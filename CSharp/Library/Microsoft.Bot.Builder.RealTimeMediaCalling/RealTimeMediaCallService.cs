@@ -34,6 +34,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -41,14 +43,40 @@ using Microsoft.Bot.Builder.Calling.Events;
 using Microsoft.Bot.Builder.Calling.Exceptions;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Misc;
-using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Misc;
-using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
-using System.Net.Http.Headers;
-using System.Reflection;
+using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
+using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Misc;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
+    public class RealTimeMediaCallServiceParameters {
+        /// <summary>
+        /// Id for this call
+        /// </summary>
+        public string CallLegId { get; }
+
+        /// <summary>
+        /// CorrelationId for this call.
+        /// </summary>
+        public string CorrelationId { get; }
+
+        public RealTimeMediaCallServiceParameters(string callLegId, string correlationId)
+        {
+            if (null == callLegId)
+            {
+                throw new ArgumentNullException(nameof(callLegId));
+            }
+
+            if (null == correlationId)
+            {
+                throw new ArgumentNullException(nameof(correlationId));
+            }
+
+            CallLegId = callLegId;
+            CorrelationId = correlationId;
+        }
+    }
+
     /// <summary>
     /// Service that handles per call requests
     /// </summary>            
@@ -107,9 +135,8 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// Instantiates the service with settings to handle a call
         /// </summary>
         /// <param name="settings">The settings for the RTM call service.</param>
-        /// <param name="callLegId">The call id of this leg of the call.</param>
-        /// <param name="correlationId">The correlation id for the e2e flow.</param>
-        public RealTimeMediaCallService(IRealTimeMediaCallServiceSettings settings)
+        /// <param name="parameters">The parameters for the RTM call service.</param>
+        public RealTimeMediaCallService(IRealTimeMediaCallServiceSettings settings, RealTimeMediaCallServiceParameters parameters)
         {
             if (settings == null)
             {
@@ -121,6 +148,18 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 throw new ArgumentNullException("callback settings");
             }
 
+            if (parameters == null)
+            {
+                throw new ArgumentNullException(nameof(parameters));
+            }
+
+            if (string.IsNullOrWhiteSpace(parameters.CallLegId) || string.IsNullOrWhiteSpace(parameters.CorrelationId))
+            {
+                throw new ArgumentNullException("call parameters");
+            }
+
+            CallLegId = parameters.CallLegId;
+            CorrelationId = parameters.CorrelationId;
             _callbackUrl = settings.CallbackUrl;
             _notificationUrl = settings.NotificationUrl;
             _timer = new Timer(CallExpiredTimerCallback, null, CallExpiredTimerInterval, Timeout.Infinite);

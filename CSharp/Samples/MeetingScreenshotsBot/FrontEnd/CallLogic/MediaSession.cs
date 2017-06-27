@@ -3,12 +3,12 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
-using CorrelationId = FrontEnd.Logging.CorrelationId;
+using System.Threading.Tasks;
 using FrontEnd.Logging;
 using Microsoft.Skype.Bots.Media;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Threading.Tasks;
+using CorrelationId = FrontEnd.Logging.CorrelationId;
 
 namespace FrontEnd.CallLogic
 {

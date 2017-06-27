@@ -1,13 +1,13 @@
-﻿using Autofac;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Autofac;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Moq;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Assert = NUnit.Framework.Assert;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
@@ -29,34 +29,24 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
         {
             public IRealTimeMediaCallService CallService { get; }
 
-            private readonly string _callGuid = Guid.NewGuid().ToString();
-            private string _callId;
+            /// <summary>
+            /// CorrelationId that needs to be set in the media platform for correlating logs across services
+            /// </summary>
+            public string CorrelationId { get; }
 
             /// <summary>
             /// Id generated locally that is unique to each RealTimeMediaCall
             /// </summary>
-            public string CallId
-            {
-                get
-                {
-                    if (null == _callId)
-                    {
-                        _callId = $"{CallService.CorrelationId}:{_callGuid}";
-                    }
-                    return _callId;
-                }
-            }
-
-            /// <summary>
-            /// CorrelationId that needs to be set in the media platform for correlating logs across services
-            /// </summary>
-            public string CorrelationId => CallService.CorrelationId;
+            public string CallId { get; }
 
             public RealTimeMediaCall(IRealTimeMediaCallService service)
             {
                 CallService = service;
                 CallService.OnIncomingCallReceived += OnIncomingCallReceived;
                 CallService.OnCallCleanup += OnCallCleanup;
+
+                CorrelationId = service.CorrelationId;
+                CallId = $"{service.CorrelationId}:{Guid.NewGuid()}";
             }
 
             private Task OnIncomingCallReceived(RealTimeMediaIncomingCallEvent realTimeMediaIncomingCallEvent)
@@ -126,7 +116,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
   ""callState"": ""incoming""
 }";
 
-            var service = bot.RealTimeMediaBotService;
+            var service = bot.RealTimeMediaBotService as IInternalRealTimeMediaBotService;
             var result = await service.ProcessIncomingCallAsync(requestJson, null);
             Assert.AreEqual(ResponseType.Accepted, result.ResponseType);
             Assert.AreEqual(1, service.Calls.Count);

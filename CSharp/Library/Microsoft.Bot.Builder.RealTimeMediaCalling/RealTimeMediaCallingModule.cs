@@ -61,6 +61,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
 
             builder
+                .Register((c, p) => p.TypedAs<RealTimeMediaCallServiceParameters>())
+                .AsSelf()
+                .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
+
+            builder
                .RegisterType<RealTimeMediaCallingContext>()
                .AsSelf()
                .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
@@ -68,12 +73,14 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             builder
                 .RegisterType<RealTimeMediaBotService>()
                 .AsSelf()
+                .As<IInternalRealTimeMediaBotService>()
                 .As<IRealTimeMediaBotService>()
                 .SingleInstance();
 
             builder
                 .RegisterType<RealTimeMediaCallService>()
                 .AsSelf()
+                .As<IInternalRealTimeMediaCallService>()
                 .As<IRealTimeMediaCallService>();
         }
     }

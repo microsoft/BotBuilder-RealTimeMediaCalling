@@ -101,11 +101,8 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 try
                 {
                     ResponseResult result;
-                    IRealTimeMediaBotService service = null;
                     var bot = scope.ResolveOptional<IRealTimeMediaBot>();
-                    service = null == bot 
-                        ? scope.Resolve<IRealTimeMediaBotService>() 
-                        : bot.RealTimeMediaBotService;
+                    var service = (IInternalRealTimeMediaBotService) bot.RealTimeMediaBotService;
                     switch (callRequestType)
                     {
                         case RealTimeMediaCallRequestType.IncomingCall:
