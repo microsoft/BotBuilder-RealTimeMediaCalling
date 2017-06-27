@@ -30,30 +30,30 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-using Autofac;
-using Microsoft.Bot.Builder.Calling.Exceptions;
-using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
-using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
-using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
-using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Misc;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Autofac;
+using Microsoft.Bot.Builder.Calling.Exceptions;
+using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
+using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
+using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
+using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Misc;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
     /// <summary>
     /// Processes the incoming requests and invokes the appropriate handlers for the call
     /// </summary>
-    public class RealTimeMediaBotService : IRealTimeMediaBotService
+    internal class RealTimeMediaBotService : IInternalRealTimeMediaBotService
     {
         /// <summary>
-        /// The autofac component context.
+        /// The autofac lifetime scope.
         /// </summary>
-        private readonly IComponentContext _context;
+        private readonly ILifetimeScope _scope;
 
         /// <summary>
         /// Event raised when a new call is created.
@@ -100,13 +100,13 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <summary>
         /// Instantiates the call processor
         /// </summary>
-        /// <param name="context">The autofac component context</param>
-        public RealTimeMediaBotService(IComponentContext context)
+        /// <param name="scope">The autofac lifetime scope</param>
+        public RealTimeMediaBotService(ILifetimeScope scope)
         {
-            if (null == context)
-                throw new ArgumentNullException(nameof(context));
+            if (null == scope)
+                throw new ArgumentNullException(nameof(scope));
 
-            _context = context;
+            _scope = scope;
             ActiveCalls = new ConcurrentDictionary<string, IRealTimeMediaCall>();
         }
 
@@ -149,29 +149,31 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 return new ResponseResult(ResponseType.BadRequest);
             }
 
-            if (string.IsNullOrEmpty(conversation.Id))
-            {
-                throw new InvalidOperationException("No conversation ID found.");
-            }
-
-            var call = _context.Resolve<IRealTimeMediaCall>();
-            var callService = call.CallService as IInternalRealTimeMediaCallService;
-            if (null == callService)
-            {
-                throw new InvalidOperationException("Could not create IInternalRealTimeMediaCallService.");
-            }
-
-            callService.CallLegId = conversation.Id;
+            var callLegId = conversation.Id;
+            string correlationId;
             if (string.IsNullOrEmpty(skypeChainId))
             {
-                var correlationId = Guid.NewGuid().ToString();
-                callService.CorrelationId = correlationId;
-                Trace.TraceInformation(
+                correlationId = Guid.NewGuid().ToString();
+                Trace.TraceWarning(
                     $"RealTimeMediaCallService No SkypeChainId found. Generating {correlationId}");
             }
             else
             {
-                callService.CorrelationId = skypeChainId;
+                correlationId = skypeChainId;
+            }
+
+            IRealTimeMediaCall call;
+            using (var scope = _scope.BeginLifetimeScope(RealTimeMediaCallingModule.LifetimeScopeTag))
+            {
+                var parameters = new RealTimeMediaCallServiceParameters(callLegId, correlationId);
+                scope.Resolve<RealTimeMediaCallServiceParameters>(TypedParameter.From(parameters));
+                call = scope.Resolve<IRealTimeMediaCall>();
+            }
+
+            var callService = call.CallService as IInternalRealTimeMediaCallService;
+            if (null == callService)
+            {
+                throw new InvalidOperationException("Could not create IInternalRealTimeMediaCallService.");
             }
             //TODO store jointoken, if present, to ActiveJoinTokens
 

@@ -31,7 +31,6 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
-using System.IO;
 using System.Net.Http;
 using Autofac;
 
@@ -40,7 +39,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
     /// <summary>
     /// Autofac module for real-time media calling components.
     /// </summary>
-    internal sealed class RealTimeMediaCallingModule : Module
+    public sealed class RealTimeMediaCallingModule : Module
     {
         public static readonly object LifetimeScopeTag = typeof(RealTimeMediaCallingModule);
 
@@ -61,6 +60,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
 
             builder
+                .Register((c, p) => p.TypedAs<RealTimeMediaCallServiceParameters>())
+                .AsSelf()
+                .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
+
+            builder
                .RegisterType<RealTimeMediaCallingContext>()
                .AsSelf()
                .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
@@ -68,12 +72,14 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             builder
                 .RegisterType<RealTimeMediaBotService>()
                 .AsSelf()
+                .As<IInternalRealTimeMediaBotService>()
                 .As<IRealTimeMediaBotService>()
                 .SingleInstance();
 
             builder
                 .RegisterType<RealTimeMediaCallService>()
                 .AsSelf()
+                .As<IInternalRealTimeMediaCallService>()
                 .As<IRealTimeMediaCallService>();
         }
     }

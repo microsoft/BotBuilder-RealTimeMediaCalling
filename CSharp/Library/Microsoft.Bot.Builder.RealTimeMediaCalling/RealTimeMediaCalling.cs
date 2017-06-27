@@ -30,12 +30,13 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-using Autofac;
 using System;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Autofac;
+using Microsoft.Bot.Builder.Calling;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
@@ -103,31 +104,8 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
                 try
                 {
-                    ResponseResult result;
-                    IRealTimeMediaBotService service = null;
-                    var bot = scope.ResolveOptional<IRealTimeMediaBot>();
-                    service = null == bot 
-                        ? scope.Resolve<IRealTimeMediaBotService>() 
-                        : bot.RealTimeMediaBotService;
-                    switch (callRequestType)
-                    {
-                        case RealTimeMediaCallRequestType.IncomingCall:
-                            result = await service.ProcessIncomingCallAsync(parsedRequest.Content, parsedRequest.SkypeChainId).ConfigureAwait(false);
-                            break;
-
-                        case RealTimeMediaCallRequestType.CallingEvent:
-                            result = await service.ProcessCallbackAsync(parsedRequest.Content, parsedRequest.SkypeChainId).ConfigureAwait(false);
-                            break;
-
-                        case RealTimeMediaCallRequestType.NotificationEvent:
-                            result = await service.ProcessNotificationAsync(parsedRequest.Content).ConfigureAwait(false);
-                            break;
-
-                        default:
-                            result = new ResponseResult(ResponseType.BadRequest, $"Unsupported call request type: {callRequestType}");
-                            break;
-                    }
-
+                    var bot = scope.Resolve<IRealTimeMediaBot>();
+                    var result = await bot.ProcessAsync(parsedRequest, callRequestType).ConfigureAwait(false);
                     return GetHttpResponseForResult(result);
                 }
                 catch (Exception e)
@@ -136,6 +114,35 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                     return GetResponseMessage(HttpStatusCode.InternalServerError, e.ToString());
                 }
             }
+        }
+
+        public static async Task<ResponseResult> ProcessAsync(
+            this IRealTimeMediaBot bot, 
+            ParsedCallingRequest parsedRequest,
+            RealTimeMediaCallRequestType callRequestType)
+        {
+            ResponseResult result;
+            var service = (IInternalRealTimeMediaBotService) bot.RealTimeMediaBotService;
+            switch (callRequestType)
+            {
+                case RealTimeMediaCallRequestType.IncomingCall:
+                    result = await service.ProcessIncomingCallAsync(parsedRequest.Content, parsedRequest.SkypeChainId)
+                        .ConfigureAwait(false);
+                    break;
+
+                case RealTimeMediaCallRequestType.CallingEvent:
+                    result = await service.ProcessCallbackAsync(parsedRequest.Content, parsedRequest.SkypeChainId).ConfigureAwait(false);
+                    break;
+
+                case RealTimeMediaCallRequestType.NotificationEvent:
+                    result = await service.ProcessNotificationAsync(parsedRequest.Content).ConfigureAwait(false);
+                    break;
+
+                default:
+                    result = new ResponseResult(ResponseType.BadRequest, $"Unsupported call request type: {callRequestType}");
+                    break;
+            }
+            return result;
         }
 
         private static HttpResponseMessage GetResponseMessage(HttpStatusCode statusCode, string content)
