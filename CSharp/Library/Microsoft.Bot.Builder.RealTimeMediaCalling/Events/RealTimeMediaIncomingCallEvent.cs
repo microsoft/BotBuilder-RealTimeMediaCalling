@@ -61,7 +61,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
             set { ResultingWorkflow = value; }
         }
 
-        public void Answer(JObject mediaConfiguration, string operationId, params NotificationType[] subscriptions)
+        public void Answer(IRealTimeMediaSession mediaSession, string operationId, params NotificationType[] subscriptions)
         {
             if (null == operationId)
             {
@@ -72,7 +72,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
             {
                 new AnswerAppHostedMedia
                 {
-                    MediaConfiguration = mediaConfiguration,
+                    MediaConfiguration = mediaSession.MediaConfiguration,
                     OperationId = operationId
                 }
             };

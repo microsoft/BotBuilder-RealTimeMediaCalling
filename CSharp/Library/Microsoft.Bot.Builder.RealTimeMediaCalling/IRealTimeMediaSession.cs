@@ -1,6 +1,5 @@
-﻿using Microsoft.Skype.Bots.Media;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Microsoft.Skype.Bots.Media;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
