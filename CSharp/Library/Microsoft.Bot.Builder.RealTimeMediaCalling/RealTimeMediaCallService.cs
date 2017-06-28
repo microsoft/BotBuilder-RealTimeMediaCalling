@@ -174,7 +174,9 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             CorrelationId = parameters.CorrelationId;
             _callbackUrl = settings.CallbackUrl;
             _notificationUrl = settings.NotificationUrl;
-            _placeCallEndpointUrl = string.IsNullOrEmpty(settings.PlaceCallEndpointUrl.ToString())?_defaultPlaceCallEndpointUrl : settings.PlaceCallEndpointUrl;
+            _placeCallEndpointUrl = string.IsNullOrEmpty(settings.PlaceCallEndpointUrl?.ToString())
+                ? _defaultPlaceCallEndpointUrl 
+                : settings.PlaceCallEndpointUrl;
             _botId = settings.BotId;
             _botSecret = settings.BotSecret;
             Task.Run(async () =>

@@ -71,16 +71,15 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
          
             builder
                 .RegisterType<RealTimeMediaBotService>()
-                .AsSelf()
                 .As<IInternalRealTimeMediaBotService>()
                 .As<IRealTimeMediaBotService>()
                 .SingleInstance();
 
             builder
                 .RegisterType<RealTimeMediaCallService>()
-                .AsSelf()
                 .As<IInternalRealTimeMediaCallService>()
-                .As<IRealTimeMediaCallService>();
+                .As<IRealTimeMediaCallService>()
+                .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
         }
     }
 
