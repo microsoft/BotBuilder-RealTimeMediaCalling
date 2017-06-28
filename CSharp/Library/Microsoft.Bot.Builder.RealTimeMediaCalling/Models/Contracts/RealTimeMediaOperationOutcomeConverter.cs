@@ -58,7 +58,10 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
             {
                 return new VideoSubscriptionOutcome();
             }
-
+            else if (String.Equals(type, RealTimeMediaValidOutcomes.JoinCallAppHostedMediaOutcome, StringComparison.OrdinalIgnoreCase))
+            {
+                return new JoinCallAppHostedMediaOutcome();
+            }
             return base.Create(objectType, jsonObject);
         }
     }

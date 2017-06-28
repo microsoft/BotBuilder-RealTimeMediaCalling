@@ -1,5 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Microsoft.Bot.Builder.RealTimeMediaCalling.Events.RealTimeMediaIncomingCallEvent">
+    <Position X="1.25" Y="5.75" Width="2.75" />
+    <Members>
+      <Method Name="RealTimeMediaIncomingCallEvent" Hidden="true" />
+      <Property Name="RealTimeMediaWorkflow" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAQAAAAAAAAAAAAQAAAAAAAAAAAAAAAgAAAIA=</HashCode>
+      <FileName>Events\RealTimeMediaIncomingCallEvent.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="MediaSession" />
+    </ShowAsAssociation>
+  </Class>
   <Interface Name="Microsoft.Bot.Builder.RealTimeMediaCalling.IRealTimeMediaCall" Collapsed="true">
     <Position X="5.25" Y="4.5" Width="2.25" />
     <TypeIdentifier>
@@ -13,12 +27,9 @@
   <Interface Name="Microsoft.Bot.Builder.RealTimeMediaCalling.IRealTimeMediaCallService">
     <Position X="5.25" Y="0.5" Width="2.25" />
     <TypeIdentifier>
-      <HashCode>AAAAQAgAAgCAAAiCAgAAAAAABAACAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAQAgAAgSAAAiCAgAAAAAABABCAAAAAAAAAAAAAAA=</HashCode>
       <FileName>IRealTimeMediaCallService.cs</FileName>
     </TypeIdentifier>
-    <ShowAsAssociation>
-      <Property Name="MediaSession" />
-    </ShowAsAssociation>
   </Interface>
   <Interface Name="Microsoft.Bot.Builder.RealTimeMediaCalling.IRealTimeMediaBot" Collapsed="true">
     <Position X="1.5" Y="4.5" Width="2.25" />
@@ -49,25 +60,25 @@
     </ShowAsCollectionAssociation>
   </Interface>
   <Interface Name="Microsoft.Bot.Builder.RealTimeMediaCalling.IRealTimeMediaSession">
-    <Position X="9" Y="0.5" Width="2" />
-    <AssociationLine Name="VbssSocket" Type="Microsoft.Skype.Bots.Media.IVideoSocket" FixedFromPoint="true">
-      <Path>
-        <Point X="10.625" Y="2.824" />
-        <Point X="10.625" Y="4.25" />
-      </Path>
-    </AssociationLine>
+    <Position X="5.25" Y="5.75" Width="2.25" />
     <AssociationLine Name="VideoSockets" Type="Microsoft.Skype.Bots.Media.IVideoSocket" FixedFromPoint="true" FixedToPoint="true">
       <Path>
-        <Point X="11" Y="1.812" />
-        <Point X="11.482" Y="1.812" />
-        <Point X="11.482" Y="4.25" />
+        <Point X="7.5" Y="6.953" />
+        <Point X="7.982" Y="6.953" />
+        <Point X="7.982" Y="9.5" />
       </Path>
       <MemberNameLabel ManuallyPlaced="true">
         <Position X="-1.015" Y="0.081" />
       </MemberNameLabel>
     </AssociationLine>
+    <AssociationLine Name="VbssSocket" Type="Microsoft.Skype.Bots.Media.IVideoSocket" FixedFromPoint="true">
+      <Path>
+        <Point X="7.078" Y="7.882" />
+        <Point X="7.078" Y="9.5" />
+      </Path>
+    </AssociationLine>
     <TypeIdentifier>
-      <HashCode>AAAGAAAAAACAAAAAAAAAAACgAABIAABAAQAAAAAAAAA=</HashCode>
+      <HashCode>AAAGAAAAAACAAAAAAAAAAACgAAAIAABAAQAAAAAAAAA=</HashCode>
       <FileName>IRealTimeMediaSession.cs</FileName>
     </TypeIdentifier>
     <ShowAsAssociation>
@@ -79,11 +90,11 @@
     </ShowAsCollectionAssociation>
   </Interface>
   <Interface Name="Microsoft.Skype.Bots.Media.IAudioSocket" Collapsed="true">
-    <Position X="8.25" Y="4.25" Width="1.5" />
+    <Position X="4.75" Y="9.5" Width="1.5" />
     <TypeIdentifier />
   </Interface>
   <Interface Name="Microsoft.Skype.Bots.Media.IVideoSocket" Collapsed="true">
-    <Position X="10.25" Y="4.25" Width="1.5" />
+    <Position X="6.75" Y="9.5" Width="1.5" />
     <TypeIdentifier />
   </Interface>
   <Font Name="Segoe UI" Size="9" />

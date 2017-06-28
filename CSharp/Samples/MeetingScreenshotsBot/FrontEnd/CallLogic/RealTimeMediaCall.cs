@@ -105,7 +105,17 @@ namespace FrontEnd.CallLogic
             MediaSession = new MediaSession(CallId, CorrelationId, this);
 
             //subscribe for roster changes and call state changes
-            incomingCallEvent.Answer(MediaSession.MediaConfiguration, null, NotificationType.RosterUpdate, NotificationType.CallStateChange);
+            incomingCallEvent.RealTimeMediaWorkflow.Actions = new ActionBase[]
+            {
+                new AnswerAppHostedMedia
+                {
+                    MediaConfiguration = MediaSession.MediaConfiguration,
+                    OperationId = Guid.NewGuid().ToString()
+                }
+            };
+
+            incomingCallEvent.RealTimeMediaWorkflow.NotificationSubscriptions = new [] { NotificationType.RosterUpdate, NotificationType.CallStateChange };
+
             ThreadId = incomingCallEvent.IncomingCall.ThreadId;
             
             Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] Answering the call");

@@ -50,5 +50,22 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// For example "https://testservice.azurewebsites.net/api/calling/notification" 
         /// </summary>
         Uri NotificationUrl { get; }
+
+        /// <summary>
+        /// Url that the bot uses to make an outbound call request, used for both outgoing join or place call
+        /// For example "https://pma-dev-uswe-01.plat-dev.skype.net:6448/platform/v1/calls" 
+        /// </summary>
+        Uri PlaceCallEndpointUrl { get; }
+
+        /// <summary>
+        /// BotId used to authenticate outgoing call requests to PMA
+        /// </summary>
+        string BotId { get; }
+
+        /// <summary>
+        /// BotSecret used to authenticate outgoing call requests to PMA
+        /// </summary>
+        string BotSecret { get; }
+
     }
 }

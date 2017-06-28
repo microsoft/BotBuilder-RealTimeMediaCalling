@@ -33,6 +33,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
@@ -44,6 +46,7 @@ using Microsoft.Bot.Builder.Calling.Exceptions;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Misc;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
+using Microsoft.Skype.Calling.ServiceAgents.MSA;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Misc;
 
@@ -84,13 +87,17 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
     {
         private readonly Uri _callbackUrl;
         private readonly Uri _notificationUrl;
-
+        private readonly Uri _placeCallEndpointUrl;
+        private readonly Uri _defaultPlaceCallEndpointUrl = new Uri("https://pma.plat.skype.com:6448/platform/v1/calls");
         private Uri _subscriptionLink;
         private Uri _callLink;
         
         private Timer _timer;
         private const int CallExpiredTimerInterval = 1000 * 60 * 10; //10 minutes
 
+        private string _botId;
+        private string _botSecret;
+        private string _botToken;
         /// <summary>
         /// Id for this call
         /// </summary>
@@ -125,6 +132,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// Event raised when bot receives roster update notification
         /// </summary>
         public event Func<RosterUpdateNotification, Task> OnRosterUpdateNotification;
+
+        /// <summary>
+        /// Event raised when the bot gets the outcome of JoinCallAppHostedMedia action. If the operation was successful the call is established
+        /// </summary>
+        public event Func<JoinCallAppHostedMediaOutcomeEvent, Task> OnJoinCallAppHostedMediaCompleted;
 
         /// <summary>
         /// Event raised when bot needs to cleanup an existing call
@@ -171,6 +183,14 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             _callbackUrl = settings.CallbackUrl;
             _notificationUrl = settings.NotificationUrl;
             MediaSession = mediaSession;
+            _placeCallEndpointUrl = string.IsNullOrEmpty(settings.PlaceCallEndpointUrl.ToString())?_defaultPlaceCallEndpointUrl : settings.PlaceCallEndpointUrl;
+            _botId = settings.BotId;
+            _botSecret = settings.BotSecret;
+            Task.Run(async () =>
+            {
+                    _botToken = await GetBotToken(_botId, _botSecret).ConfigureAwait(false);
+            });
+
             _timer = new Timer(CallExpiredTimerCallback, null, CallExpiredTimerInterval, Timeout.Infinite);
         }        
 
@@ -276,6 +296,20 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Disposing call expiry timer");
                 _timer.Dispose();
             }
+            else if (conversationResult.OperationOutcome.Type == RealTimeMediaValidOutcomes.JoinCallAppHostedMediaOutcome && conversationResult.OperationOutcome.Outcome == Outcome.Success)
+            {
+                Uri link;
+
+                if (conversationResult.Links.TryGetValue("call", out link))
+                {
+                    _callLink = link;
+                    Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Caching call link {link}");
+                }
+                expectEmptyActions = true;
+
+                Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Disposing call expiry timer");
+                _timer.Dispose();
+            }
 
             newWorkflowResult.Validate(expectEmptyActions);
             return RealTimeMediaSerializer.SerializeToJson(newWorkflowResult);
@@ -290,7 +324,10 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             {
                 case RealTimeMediaValidOutcomes.AnswerAppHostedMediaOutcome:
                     return HandleAnswerAppHostedMediaOutcome(receivedConversationResult, receivedConversationResult.OperationOutcome as AnswerAppHostedMediaOutcome);
-                
+
+                case RealTimeMediaValidOutcomes.JoinCallAppHostedMediaOutcome:
+                    return HandleJoinAppHostedMediaOutcome(receivedConversationResult, receivedConversationResult.OperationOutcome as JoinCallAppHostedMediaOutcome);
+
                 case ValidOutcomes.WorkflowValidationOutcome:
                     return HandleWorkflowValidationOutcome(receivedConversationResult, receivedConversationResult.OperationOutcome as WorkflowValidationOutcome);
             }
@@ -318,6 +355,12 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
             return incomingCall.RealTimeMediaWorkflow;
         }
+        private Task<RealTimeMediaWorkflow> HandleJoinAppHostedMediaOutcome(ConversationResult conversationResult, JoinCallAppHostedMediaOutcome joinCallAppHostedMediaOutcome)
+        {
+            var outcomeEvent = new JoinCallAppHostedMediaOutcomeEvent(conversationResult, CreateInitialWorkflow(), joinCallAppHostedMediaOutcome);
+            var eventHandler = OnJoinCallAppHostedMediaCompleted;
+            return InvokeHandlerIfSet(eventHandler, outcomeEvent);
+        }
 
         private Task<RealTimeMediaWorkflow> HandleAnswerAppHostedMediaOutcome(ConversationResult conversationResult, AnswerAppHostedMediaOutcome answerAppHostedMediaOutcome)
         {            
@@ -335,6 +378,9 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             return InvokeHandlerIfSet(eventHandler, outcomeEvent);
         }
 
+        /// <summary>
+        /// Clean up any local call
+        /// </summary>
         public Task LocalCleanup()
         {
             var eventHandler = OnCallCleanup;
@@ -381,6 +427,85 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             {
                 Trace.TraceError($"RealTimeMediaCallService [{CallLegId}]: Received error while sending request to subscribe participant. Message: {exception}");
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// send outgoing request to join an existing conversation
+        /// </summary>
+        /// <param name="joinCallAppHostedMedia"></param>
+        /// <returns></returns>
+        public async Task JoinCall(JoinCallAppHostedMedia joinCallAppHostedMedia)
+        {
+            if (joinCallAppHostedMedia != null && joinCallAppHostedMedia.JoinToken == null)
+            {
+                throw new InvalidOperationException($"[{CallLegId}]: No meeting link was present in the joinCallAppHostedMedia");
+            }
+            var workFlow = new RealTimeMediaWorkflow();
+            workFlow.Actions = new ActionBase[]
+            {
+                joinCallAppHostedMedia
+            };
+            HttpContent content = new StringContent(RealTimeMediaSerializer.SerializeToJson(workFlow), Encoding.UTF8, "application/json");
+
+            //join call
+            try
+            {
+                Trace.TraceInformation(
+                        $"RealTimeMediaCallService [{CallLegId}]: Sending join call request");
+
+                //TODO: add retries & logging
+                using (var request = new HttpRequestMessage(HttpMethod.Post, _placeCallEndpointUrl) { Content = content })
+                {
+
+                    request.Headers.Add("X-Microsoft-Skype-Chain-ID", CorrelationId);
+                    request.Headers.Add("X-Microsoft-Skype-Message-ID", Guid.NewGuid().ToString());
+
+                    var client = GetHttpClient();
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _botToken);
+                    var response = await client.SendAsync(request).ConfigureAwait(false);
+
+
+                    if (response.StatusCode == HttpStatusCode.Forbidden)
+                    {
+                        //token might be expired, get token again using bot id and secret and re-try 1 more time
+                        Trace.TraceInformation("Token might be expired, get a new token and re-try for one more time.");
+                        var token = await GetBotToken(_botId, _botSecret).ConfigureAwait(false);
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _botToken);
+                        response = await client.SendAsync(request).ConfigureAwait(false);
+                        Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Response to re-tried join call: {response}");
+                    }
+                    response.EnsureSuccessStatusCode();
+                    Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Response to join call: {response}");
+
+                }
+            }
+            catch (Exception exception)
+            {
+                Trace.TraceError($"RealTimeMediaCallService [{CallLegId}]: Received error while sending request to subscribe participant. Message: {exception}");
+                throw;
+            }
+
+        }
+
+        /// <summary>
+        /// Method to obtain bot token from AAD
+        /// </summary>
+        /// <param name="botId"></param>
+        /// <param name="botSecret"></param>
+        /// <returns></returns>
+        private async Task<string> GetBotToken(string botId, string botSecret)
+        {
+            using (var tokenClient = new MsaAuthTokenService(
+                new Uri(@"https://login.microsoftonline.com/common/oauth2/v2.0/token"),
+                botId,
+                botSecret,
+                @"https://api.botframework.com/.default",
+                null))
+            {
+                await tokenClient.Init().ConfigureAwait(false);
+                var accessToken = tokenClient.Token;
+                return accessToken;
             }
         }
 

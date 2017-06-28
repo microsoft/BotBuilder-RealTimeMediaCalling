@@ -45,6 +45,11 @@ namespace FrontEnd
         Uri NotificationCallbackUrl { get; }
 
         /// <summary>
+        /// The remote endpoint that any outgoing call targets
+        /// </summary>
+        Uri PlaceCallEndpointUrl { get; }
+
+        /// <summary>
         /// MicrosoftAppId generated at the time of registration of the bot
         /// </summary>
         string MicrosoftAppId { get; }

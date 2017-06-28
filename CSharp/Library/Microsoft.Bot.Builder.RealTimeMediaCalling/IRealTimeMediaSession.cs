@@ -21,7 +21,5 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         IVideoSocket AddVideoSocket(VideoSocketSettings settings);
 
         IVideoSocket AddVbssSocket(VideoSocketSettings settings);
-
-        JObject MediaConfiguration { get; }
     }
 }

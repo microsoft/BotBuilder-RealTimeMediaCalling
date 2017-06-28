@@ -175,7 +175,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
     }
 }";
 
-            result = await service.ProcessCallbackAsync(acceptCallbackJson);
+            result = await service.ProcessCallbackAsync(acceptCallbackJson, null);
             Assert.AreEqual(ResponseType.Accepted, result.ResponseType);
 
             // TODO: There is no cleanup task, as far as I can tell.

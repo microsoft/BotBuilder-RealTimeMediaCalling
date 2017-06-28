@@ -1,7 +1,6 @@
-﻿using Microsoft.Skype.Bots.Media;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using Microsoft.Skype.Bots.Media;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
@@ -73,8 +72,5 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             _vbssSocket = new VideoSocket(settings);
             return _vbssSocket;
         }
-
-        public JObject MediaConfiguration => 
-            MediaPlatform.CreateMediaConfiguration(_audioSocket, _videoSockets, _vbssSocket);
     }
 }

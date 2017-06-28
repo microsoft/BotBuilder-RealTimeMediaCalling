@@ -31,9 +31,11 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.Collections.Generic;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.Calling.Events;
+using Microsoft.Skype.Bots.Media;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
@@ -55,29 +57,53 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
         /// <summary>
         /// Workflow associated with the event
         /// </summary>
-        public RealTimeMediaWorkflow RealTimeMediaWorkflow
+        private RealTimeMediaWorkflow RealTimeMediaWorkflow
         {
             get { return ResultingWorkflow as RealTimeMediaWorkflow;  }
-            set { ResultingWorkflow = value; }
         }
 
-        public void Answer(IRealTimeMediaSession mediaSession, string operationId, params NotificationType[] subscriptions)
-        {
-            if (null == operationId)
-            {
-                operationId = Guid.NewGuid().ToString();
-            }
+        public IRealTimeMediaSession MediaSession { get; private set; }
 
+        public void Answer(IRealTimeMediaSession mediaSession, params NotificationType[] subscriptions)
+        {
+            var mediaConfiguration = MediaPlatform.CreateMediaConfiguration(
+                mediaSession.AudioSocket,
+                new List<IVideoSocket>(mediaSession.VideoSockets),
+                mediaSession.VbssSocket);
+
+            this.MediaSession = mediaSession;
             this.RealTimeMediaWorkflow.Actions = new ActionBase[]
             {
                 new AnswerAppHostedMedia
                 {
-                    MediaConfiguration = mediaSession.MediaConfiguration,
-                    OperationId = operationId
+                    MediaConfiguration = mediaConfiguration,
+                    OperationId = Guid.NewGuid().ToString()
                 }
             };
 
             this.RealTimeMediaWorkflow.NotificationSubscriptions = subscriptions;
+        }
+
+        public void Reject()
+        {
+            this.RealTimeMediaWorkflow.Actions = new ActionBase[]
+            {
+                new Reject()
+                {
+                    OperationId = Guid.NewGuid().ToString()
+                }
+            };
+        }
+
+        public void Transfer()
+        {
+            this.RealTimeMediaWorkflow.Actions = new ActionBase[]
+            {
+                new Reject()
+                {
+                    OperationId = Guid.NewGuid().ToString()
+                }
+            };
         }
     }
 }

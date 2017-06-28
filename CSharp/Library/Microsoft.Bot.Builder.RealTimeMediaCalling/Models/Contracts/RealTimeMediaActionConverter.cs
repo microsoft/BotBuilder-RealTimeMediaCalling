@@ -66,7 +66,10 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
             {
                 return new VideoSubscription();
             }
-            
+            else if (String.Equals(type, RealTimeMediaValidActions.JoinCallAppHostedMediaAction, StringComparison.OrdinalIgnoreCase))
+            {
+                return new JoinCallAppHostedMedia();
+            }
             throw new ArgumentException(String.Format("The given action '{0}' is not supported!", type));
         }
     }
