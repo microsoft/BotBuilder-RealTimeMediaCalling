@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.props" Condition="Exists('..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.props')" />
+  <Import Project="..\..\packages\Bond.CSharp.5.3.1\build\Bond.CSharp.props" Condition="Exists('..\..\packages\Bond.CSharp.5.3.1\build\Bond.CSharp.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -42,19 +42,23 @@
       <HintPath>..\..\packages\Autofac.4.6.0\lib\net45\Autofac.dll</HintPath>
     </Reference>
     <Reference Include="Bond, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Bond.Core.CSharp.4.2.1\lib\net45\Bond.dll</HintPath>
+      <HintPath>..\..\packages\Bond.Core.CSharp.5.3.1\lib\net45\Bond.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Bond.Attributes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Bond.Core.CSharp.4.2.1\lib\net45\Bond.Attributes.dll</HintPath>
+      <HintPath>..\..\packages\Bond.Core.CSharp.5.3.1\lib\net45\Bond.Attributes.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Bond.IO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Bond.Core.CSharp.4.2.1\lib\net45\Bond.IO.dll</HintPath>
+      <HintPath>..\..\packages\Bond.Core.CSharp.5.3.1\lib\net45\Bond.IO.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Bond.JSON, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Bond.Runtime.CSharp.4.2.1\lib\net45\Bond.JSON.dll</HintPath>
+      <HintPath>..\..\packages\Bond.Runtime.CSharp.5.3.1\lib\net45\Bond.JSON.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Bond.Reflection, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Bond.Core.CSharp.5.3.1\lib\net45\Bond.Reflection.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Castle.Core, Version=4.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
@@ -88,7 +92,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Azure.KeyVault.WebKey, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.Azure.KeyVault.WebKey.2.0.4\lib\net45\Microsoft.Azure.KeyVault.WebKey.dll</HintPath>
+      <HintPath>..\..\packages\Microsoft.Azure.KeyVault.WebKey.2.0.6\lib\net452\Microsoft.Azure.KeyVault.WebKey.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Bond, Version=3.0.7.0, Culture=neutral, PublicKeyToken=cf7230938fec607f, processorArchitecture=MSIL">
@@ -238,6 +242,7 @@
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="nunit.framework, Version=3.7.1.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\..\packages\NUnit.3.7.1\lib\net45\nunit.framework.dll</HintPath>
@@ -303,10 +308,10 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\..\packages\Microsoft.Cloud.InstrumentationFramework.3.0.6.23\build\Microsoft.Cloud.InstrumentationFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Cloud.InstrumentationFramework.3.0.6.23\build\Microsoft.Cloud.InstrumentationFramework.targets'))" />
     <Error Condition="!Exists('..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets'))" />
-    <Error Condition="!Exists('..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.props'))" />
-    <Error Condition="!Exists('..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Bond.CSharp.5.3.1\build\Bond.CSharp.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Bond.CSharp.5.3.1\build\Bond.CSharp.props'))" />
+    <Error Condition="!Exists('..\..\packages\Bond.CSharp.5.3.1\build\Bond.CSharp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Bond.CSharp.5.3.1\build\Bond.CSharp.targets'))" />
   </Target>
   <Import Project="..\..\packages\Microsoft.Cloud.InstrumentationFramework.3.0.6.23\build\Microsoft.Cloud.InstrumentationFramework.targets" Condition="Exists('..\..\packages\Microsoft.Cloud.InstrumentationFramework.3.0.6.23\build\Microsoft.Cloud.InstrumentationFramework.targets')" />
   <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
-  <Import Project="..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.targets" Condition="Exists('..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.targets')" />
+  <Import Project="..\..\packages\Bond.CSharp.5.3.1\build\Bond.CSharp.targets" Condition="Exists('..\..\packages\Bond.CSharp.5.3.1\build\Bond.CSharp.targets')" />
 </Project>

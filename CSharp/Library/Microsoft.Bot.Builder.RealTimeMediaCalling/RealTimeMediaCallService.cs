@@ -462,7 +462,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                         //token might be expired, get token again using bot id and secret and re-try 1 more time
                         Trace.TraceInformation("Token might be expired, get a new token and re-try for one more time.");
                         var token = await GetBotToken(_botId, _botSecret).ConfigureAwait(false);
-                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _botToken);
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                         response = await client.SendAsync(request).ConfigureAwait(false);
                         Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Response to re-tried join call: {response}");
                     }
