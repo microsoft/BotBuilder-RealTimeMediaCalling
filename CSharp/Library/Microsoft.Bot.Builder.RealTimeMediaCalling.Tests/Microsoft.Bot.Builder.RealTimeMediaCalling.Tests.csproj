@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\Bond.CSharp.3.0.6\build\Bond.CSharp.props" Condition="Exists('..\..\packages\Bond.CSharp.3.0.6\build\Bond.CSharp.props')" />
+  <Import Project="..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.props" Condition="Exists('..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -42,19 +42,19 @@
       <HintPath>..\..\packages\Autofac.4.6.0\lib\net45\Autofac.dll</HintPath>
     </Reference>
     <Reference Include="Bond, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Bond.Runtime.CSharp.3.0.6\lib\net45\Bond.dll</HintPath>
+      <HintPath>..\..\packages\Bond.Core.CSharp.4.2.1\lib\net45\Bond.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Bond.Attributes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Bond.Runtime.CSharp.3.0.6\lib\net45\Bond.Attributes.dll</HintPath>
+      <HintPath>..\..\packages\Bond.Core.CSharp.4.2.1\lib\net45\Bond.Attributes.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Bond.IO, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Bond.Runtime.CSharp.3.0.6\lib\net45\Bond.IO.dll</HintPath>
+      <HintPath>..\..\packages\Bond.Core.CSharp.4.2.1\lib\net45\Bond.IO.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Bond.JSON, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Bond.Runtime.CSharp.3.0.6\lib\net45\Bond.JSON.dll</HintPath>
+      <HintPath>..\..\packages\Bond.Runtime.CSharp.4.2.1\lib\net45\Bond.JSON.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Castle.Core, Version=4.1.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
@@ -63,24 +63,12 @@
     <Reference Include="Chronic, Version=0.3.2.0, Culture=neutral, PublicKeyToken=3bd1f1ef638b0d3c, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Chronic.Signed.0.3.2\lib\net40\Chronic.dll</HintPath>
     </Reference>
-    <Reference Include="CLITrouterClient, Version=1.0.6381.4935, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=AMD64">
-      <HintPath>..\..\packages\Microsoft.Skype.ClientShared.Transport.TrouterClient.x64.2017.14.00.57\lib\net452\CLITrouterClient.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Hyak.Common, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Hyak.Common.1.0.2\lib\net45\Hyak.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="JetBrains.Annotations, Version=9.2.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
       <HintPath>..\..\packages\JetBrains.Annotations.9.2.0\lib\net20\JetBrains.Annotations.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="ManagedTrouterClient, Version=2017.14.0.57, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=AMD64">
-      <HintPath>..\..\packages\Microsoft.Skype.ClientShared.Transport.TrouterClient.x64.2017.14.00.57\lib\net452\ManagedTrouterClient.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="ManagedTrouterClientCommon, Version=2017.14.0.57, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.Skype.ClientShared.Transport.TrouterClient.x64.2017.14.00.57\lib\net452\ManagedTrouterClientCommon.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Azure.Common, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -177,36 +165,36 @@
       <HintPath>..\..\packages\Microsoft.Rest.ClientRuntime.Azure.3.3.1\lib\net45\Microsoft.Rest.ClientRuntime.Azure.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Skype.Calling.Common, Version=1.31.88.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.Skype.Calling.Common.1.31.88\lib\net462\Microsoft.Skype.Calling.Common.dll</HintPath>
+    <Reference Include="Microsoft.Skype.Calling.Common, Version=1.31.13.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Skype.Calling.Common.1.31.13\lib\net462\Microsoft.Skype.Calling.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Skype.Calling.Common.Metrics, Version=1.31.88.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.Skype.Calling.Common.Metrics.1.31.88\lib\net462\Microsoft.Skype.Calling.Common.Metrics.dll</HintPath>
+    <Reference Include="Microsoft.Skype.Calling.Common.Metrics, Version=1.31.13.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Skype.Calling.Common.Metrics.1.31.13\lib\net462\Microsoft.Skype.Calling.Common.Metrics.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Skype.Calling.Framework, Version=1.31.88.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.Skype.Calling.Framework.1.31.88\lib\net462\Microsoft.Skype.Calling.Framework.dll</HintPath>
+    <Reference Include="Microsoft.Skype.Calling.Framework, Version=1.31.13.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Skype.Calling.Framework.1.31.13\lib\net462\Microsoft.Skype.Calling.Framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Skype.Calling.ServiceAgents, Version=1.31.88.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.Skype.Calling.ServiceAgents.1.31.88\lib\net462\Microsoft.Skype.Calling.ServiceAgents.dll</HintPath>
+    <Reference Include="Microsoft.Skype.Calling.ServiceAgents, Version=1.31.13.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Skype.Calling.ServiceAgents.1.31.13\lib\net462\Microsoft.Skype.Calling.ServiceAgents.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Skype.Calling.StorageService, Version=1.31.88.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.Skype.Calling.StorageService.Client.1.31.88\lib\net462\Microsoft.Skype.Calling.StorageService.dll</HintPath>
+    <Reference Include="Microsoft.Skype.Calling.StorageService, Version=1.31.13.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Skype.Calling.StorageService.Client.1.31.13\lib\net462\Microsoft.Skype.Calling.StorageService.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Skype.Calling.StorageService.Client, Version=1.31.88.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.Skype.Calling.StorageService.Client.1.31.88\lib\net462\Microsoft.Skype.Calling.StorageService.Client.dll</HintPath>
+    <Reference Include="Microsoft.Skype.Calling.StorageService.Client, Version=1.31.13.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Skype.Calling.StorageService.Client.1.31.13\lib\net462\Microsoft.Skype.Calling.StorageService.Client.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Skype.Calling.StorageService.Interface, Version=1.31.88.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.Skype.Calling.StorageService.Client.1.31.88\lib\net462\Microsoft.Skype.Calling.StorageService.Interface.dll</HintPath>
+    <Reference Include="Microsoft.Skype.Calling.StorageService.Interface, Version=1.31.13.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Skype.Calling.StorageService.Client.1.31.13\lib\net462\Microsoft.Skype.Calling.StorageService.Interface.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Skype.Calling.StorageService.Redis, Version=1.31.88.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Microsoft.Skype.Calling.StorageService.Client.1.31.88\lib\net462\Microsoft.Skype.Calling.StorageService.Redis.dll</HintPath>
+    <Reference Include="Microsoft.Skype.Calling.StorageService.Redis, Version=1.31.13.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Microsoft.Skype.Calling.StorageService.Client.1.31.13\lib\net462\Microsoft.Skype.Calling.StorageService.Redis.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Skype.Data.Telemetry.Client, Version=1.0.0.441, Culture=neutral, PublicKeyToken=ffe01d0f25e9b4f1, processorArchitecture=MSIL">
@@ -300,13 +288,6 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
-    <None Include="x64\release\include\Common.hpp" />
-    <None Include="x64\release\include\DLLTrouterClient.hpp" />
-    <None Include="x64\release\include\IDLLHttpMessage.hpp" />
-    <None Include="x64\release\include\IListener.hpp" />
-    <None Include="x64\release\include\ITrouterClientHost.hpp" />
-    <None Include="x64\release\lib\CLITrouterClient.lib" />
-    <None Include="x64\release\lib\DLLTrouterClient.lib" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Bot.Builder.RealTimeMediaCalling\Microsoft.Bot.Builder.RealTimeMediaCalling.csproj">
@@ -314,29 +295,18 @@
       <Name>Microsoft.Bot.Builder.RealTimeMediaCalling</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="DLLTrouterClient.dll" />
-    <Content Include="DLLTrouterClient.pdb" />
-    <Content Include="x64\release\lib\CLITrouterClient.dll" />
-    <Content Include="x64\release\lib\CLITrouterClient.pdb" />
-    <Content Include="x64\release\lib\DLLTrouterClient.dll" />
-    <Content Include="x64\release\lib\DLLTrouterClient.pdb" />
-  </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
-  <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
-    <Error Condition="!Exists('..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
-    <Error Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
-  </Target>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\..\packages\Bond.CSharp.3.0.6\build\Bond.CSharp.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Bond.CSharp.3.0.6\build\Bond.CSharp.props'))" />
-    <Error Condition="!Exists('..\..\packages\Bond.CSharp.3.0.6\build\Bond.CSharp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Bond.CSharp.3.0.6\build\Bond.CSharp.targets'))" />
     <Error Condition="!Exists('..\..\packages\Microsoft.Cloud.InstrumentationFramework.3.0.6.23\build\Microsoft.Cloud.InstrumentationFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Cloud.InstrumentationFramework.3.0.6.23\build\Microsoft.Cloud.InstrumentationFramework.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.props'))" />
+    <Error Condition="!Exists('..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.targets'))" />
   </Target>
-  <Import Project="..\..\packages\Bond.CSharp.3.0.6\build\Bond.CSharp.targets" Condition="Exists('..\..\packages\Bond.CSharp.3.0.6\build\Bond.CSharp.targets')" />
   <Import Project="..\..\packages\Microsoft.Cloud.InstrumentationFramework.3.0.6.23\build\Microsoft.Cloud.InstrumentationFramework.targets" Condition="Exists('..\..\packages\Microsoft.Cloud.InstrumentationFramework.3.0.6.23\build\Microsoft.Cloud.InstrumentationFramework.targets')" />
+  <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
+  <Import Project="..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.targets" Condition="Exists('..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.targets')" />
 </Project>

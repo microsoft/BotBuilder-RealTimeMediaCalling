@@ -79,24 +79,12 @@
       <HintPath>..\..\..\packages\Chronic.Signed.0.3.2\lib\net40\Chronic.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="CLITrouterClient, Version=1.0.6381.4935, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=AMD64">
-      <HintPath>..\..\..\packages\Microsoft.Skype.ClientShared.Transport.TrouterClient.x64.2017.14.00.57\lib\net452\CLITrouterClient.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Hyak.Common, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\packages\Hyak.Common.1.0.2\lib\net45\Hyak.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="JetBrains.Annotations, Version=9.2.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
       <HintPath>..\..\..\packages\JetBrains.Annotations.9.2.0\lib\net20\JetBrains.Annotations.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="ManagedTrouterClient, Version=2017.14.0.57, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=AMD64">
-      <HintPath>..\..\..\packages\Microsoft.Skype.ClientShared.Transport.TrouterClient.x64.2017.14.00.57\lib\net452\ManagedTrouterClient.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="ManagedTrouterClientCommon, Version=2017.14.0.57, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.Skype.ClientShared.Transport.TrouterClient.x64.2017.14.00.57\lib\net452\ManagedTrouterClientCommon.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Azure.Common, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -224,36 +212,36 @@
       <Private>True</Private>
       <SpecificVersion>True</SpecificVersion>
     </Reference>
-    <Reference Include="Microsoft.Skype.Calling.Common, Version=1.31.88.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.Skype.Calling.Common.1.31.88\lib\net462\Microsoft.Skype.Calling.Common.dll</HintPath>
+    <Reference Include="Microsoft.Skype.Calling.Common, Version=1.31.13.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Microsoft.Skype.Calling.Common.1.31.13\lib\net462\Microsoft.Skype.Calling.Common.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Skype.Calling.Common.Metrics, Version=1.31.88.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.Skype.Calling.Common.Metrics.1.31.88\lib\net462\Microsoft.Skype.Calling.Common.Metrics.dll</HintPath>
+    <Reference Include="Microsoft.Skype.Calling.Common.Metrics, Version=1.31.13.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Microsoft.Skype.Calling.Common.Metrics.1.31.13\lib\net462\Microsoft.Skype.Calling.Common.Metrics.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Skype.Calling.Framework, Version=1.31.88.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.Skype.Calling.Framework.1.31.88\lib\net462\Microsoft.Skype.Calling.Framework.dll</HintPath>
+    <Reference Include="Microsoft.Skype.Calling.Framework, Version=1.31.13.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Microsoft.Skype.Calling.Framework.1.31.13\lib\net462\Microsoft.Skype.Calling.Framework.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Skype.Calling.ServiceAgents, Version=1.31.88.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.Skype.Calling.ServiceAgents.1.31.88\lib\net462\Microsoft.Skype.Calling.ServiceAgents.dll</HintPath>
+    <Reference Include="Microsoft.Skype.Calling.ServiceAgents, Version=1.31.13.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Microsoft.Skype.Calling.ServiceAgents.1.31.13\lib\net462\Microsoft.Skype.Calling.ServiceAgents.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Skype.Calling.StorageService, Version=1.31.88.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.Skype.Calling.StorageService.Client.1.31.88\lib\net462\Microsoft.Skype.Calling.StorageService.dll</HintPath>
+    <Reference Include="Microsoft.Skype.Calling.StorageService, Version=1.31.13.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Microsoft.Skype.Calling.StorageService.Client.1.31.13\lib\net462\Microsoft.Skype.Calling.StorageService.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Skype.Calling.StorageService.Client, Version=1.31.88.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.Skype.Calling.StorageService.Client.1.31.88\lib\net462\Microsoft.Skype.Calling.StorageService.Client.dll</HintPath>
+    <Reference Include="Microsoft.Skype.Calling.StorageService.Client, Version=1.31.13.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Microsoft.Skype.Calling.StorageService.Client.1.31.13\lib\net462\Microsoft.Skype.Calling.StorageService.Client.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Skype.Calling.StorageService.Interface, Version=1.31.88.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.Skype.Calling.StorageService.Client.1.31.88\lib\net462\Microsoft.Skype.Calling.StorageService.Interface.dll</HintPath>
+    <Reference Include="Microsoft.Skype.Calling.StorageService.Interface, Version=1.31.13.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Microsoft.Skype.Calling.StorageService.Client.1.31.13\lib\net462\Microsoft.Skype.Calling.StorageService.Interface.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Skype.Calling.StorageService.Redis, Version=1.31.88.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\packages\Microsoft.Skype.Calling.StorageService.Client.1.31.88\lib\net462\Microsoft.Skype.Calling.StorageService.Redis.dll</HintPath>
+    <Reference Include="Microsoft.Skype.Calling.StorageService.Redis, Version=1.31.13.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Microsoft.Skype.Calling.StorageService.Client.1.31.13\lib\net462\Microsoft.Skype.Calling.StorageService.Redis.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Skype.Data.Telemetry.Client, Version=1.0.0.441, Culture=neutral, PublicKeyToken=ffe01d0f25e9b4f1, processorArchitecture=MSIL">
@@ -409,13 +397,6 @@
     </None>
     <None Include="app.config" />
     <None Include="packages.config" />
-    <None Include="x64\release\include\Common.hpp" />
-    <None Include="x64\release\include\DLLTrouterClient.hpp" />
-    <None Include="x64\release\include\IDLLHttpMessage.hpp" />
-    <None Include="x64\release\include\IListener.hpp" />
-    <None Include="x64\release\include\ITrouterClientHost.hpp" />
-    <None Include="x64\release\lib\CLITrouterClient.lib" />
-    <None Include="x64\release\lib\DLLTrouterClient.lib" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\src\skype_media_lib\EtlReader.dll">
@@ -512,14 +493,6 @@
       <Project>{f1bfb900-f608-44ba-8a04-fdf5ec27ec1c}</Project>
       <Name>Microsoft.Bot.Builder.RealTimeMediaCalling</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="DLLTrouterClient.dll" />
-    <Content Include="DLLTrouterClient.pdb" />
-    <Content Include="x64\release\lib\CLITrouterClient.dll" />
-    <Content Include="x64\release\lib\CLITrouterClient.pdb" />
-    <Content Include="x64\release\lib\DLLTrouterClient.dll" />
-    <Content Include="x64\release\lib\DLLTrouterClient.pdb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
