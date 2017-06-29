@@ -35,7 +35,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -47,7 +46,6 @@ using Microsoft.Bot.Builder.Calling.ObjectModel.Misc;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Misc;
-using Microsoft.Skype.Calling.Common.Logging;
 using Microsoft.Skype.Calling.ServiceAgents.MSA;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
@@ -83,11 +81,6 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// Container for the current active calls on this instance.
         /// </summary>
         private ConcurrentDictionary<string, Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall>> ActiveCalls { get; }
-
-        /// <summary>
-        /// Container for the joinTokens(null if call can't be joined) of all current active calls on this instance.
-        /// </summary>
-        private ConcurrentDictionary<string, string> ActiveJoinTokens { get; }
 
         /// <summary>
         /// Returns the list of all active call ids.
@@ -159,10 +152,16 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 joinCallAppHostedMedia
             };
             await currentCall.Item1.HandleJoinCall(workFlow).ConfigureAwait(false);
+
             await AddCall(correlationId, currentCall).ConfigureAwait(false);
 
             HttpContent content = new StringContent(RealTimeMediaSerializer.SerializeToJson(workFlow), Encoding.UTF8, "application/json");
 
+            await PlaceCall(content, correlationId).ConfigureAwait(false);
+        }
+
+        protected virtual async Task PlaceCall(HttpContent content, string correlationId)
+        {
             var placeCallEndpointUrl = _settings.PlaceCallEndpointUrl;
             if (null == placeCallEndpointUrl)
             {
@@ -173,10 +172,10 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             try
             {
                 Trace.TraceInformation(
-                        "RealTimeMediaBotService :Sending join call request");
+                    "RealTimeMediaBotService :Sending join call request");
 
                 //TODO: add retries & logging
-                using (var request = new HttpRequestMessage(HttpMethod.Post, placeCallEndpointUrl) { Content = content })
+                using (var request = new HttpRequestMessage(HttpMethod.Post, placeCallEndpointUrl) {Content = content})
                 {
                     var token = await GetBotToken(_settings.BotId, _settings.BotSecret).ConfigureAwait(false);
 
@@ -190,16 +189,16 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                     var response = await client.SendAsync(request).ConfigureAwait(false);
                     response.EnsureSuccessStatusCode();
                     Trace.TraceInformation($"RealTimeMediaBotService [{correlationId}]: Response to join call: {response}");
-
                 }
             }
             catch (Exception exception)
             {
-                Trace.TraceError($"RealTimeMediaBotService [{correlationId}]: Received error while sending request to subscribe participant. Message: {exception}");
+                Trace.TraceError(
+                    $"RealTimeMediaBotService [{correlationId}]: Received error while sending request to subscribe participant. Message: {exception}");
                 throw;
             }
-
         }
+
         /// <summary>
         /// Method to obtain bot token from AAD
         /// </summary>
@@ -208,6 +207,16 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <returns></returns>
         internal async Task<string> GetBotToken(string botId, string botSecret)
         {
+            if (null == botId)
+            {
+                throw new ArgumentNullException(nameof(botId));
+            }
+
+            if (null == botSecret)
+            {
+                throw new ArgumentNullException(nameof(botSecret));
+            }
+
             using (var tokenClient = new MsaAuthTokenService(
                 new Uri(@"https://login.microsoftonline.com/common/oauth2/v2.0/token"),
                 botId,
@@ -287,7 +296,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         {
             IRealTimeMediaCall call;
             IInternalRealTimeMediaCallService callService;
-            using (var scope = _scope.BeginLifetimeScope(RealTimeMediaCallingModule.LifetimeScopeTag))
+            using (var scope = _scope.BeginLifetimeScope(RealTimeMediaCallingScope.LifetimeScopeTag))
             {
                 var parameters = new RealTimeMediaCallServiceParameters(callLegId, correlationId);
                 scope.Resolve<RealTimeMediaCallServiceParameters>(TypedParameter.From(parameters));
