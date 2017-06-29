@@ -168,11 +168,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 placeCallEndpointUrl = _defaultPlaceCallEndpointUrl;
             }
 
-            //join call
+            //place the call
             try
             {
                 Trace.TraceInformation(
-                    "RealTimeMediaBotService :Sending join call request");
+                    "RealTimeMediaBotService :Sending place call request");
 
                 //TODO: add retries & logging
                 using (var request = new HttpRequestMessage(HttpMethod.Post, placeCallEndpointUrl) {Content = content})
@@ -426,7 +426,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 Trace.TraceWarning($"CallId {notification.Id} not found");
                 return new ResponseResult(ResponseType.NotFound);
             }
-            if (notification.Type == NotificationType.CallStateChange && (notification as CallStateChangeNotification).CurrentState == CallState.Terminated)
+            if (notification.Type == NotificationType.CallStateChange && (notification as CallStateChangeNotification)?.CurrentState == CallState.Terminated)
             {
                 await EndCall(notification.Id, currentCall).ConfigureAwait(false);
             }
