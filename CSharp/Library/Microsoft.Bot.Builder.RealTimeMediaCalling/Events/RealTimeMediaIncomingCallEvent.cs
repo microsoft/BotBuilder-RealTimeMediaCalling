@@ -30,13 +30,12 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-using System;
-using System.Collections.Generic;
+using Microsoft.Bot.Builder.Calling.Events;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
-using Microsoft.Bot.Builder.Calling.Events;
 using Microsoft.Skype.Bots.Media;
-using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
 {
@@ -46,32 +45,34 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
     public class RealTimeMediaIncomingCallEvent : IncomingCallEvent
     {
         /// <summary>
+        /// Workflow associated with the event
+        /// </summary>
+        private RealTimeMediaWorkflow RealTimeMediaWorkflow => 
+            ResultingWorkflow as RealTimeMediaWorkflow;
+
+        internal IReadOnlyMediaSession MediaSession { get; private set; }
+
+        /// <summary>
         /// EventArg for the RealTimeMediaIncomingCallEvent event raised on <see cref="IRealTimeMediaCallService"/>.
         /// </summary>
         /// <param name="conversation">Conversation for the incoming call</param>
         /// <param name="resultingWorkflow">Workflow to be returned on completion</param>
-        public RealTimeMediaIncomingCallEvent(Conversation conversation, RealTimeMediaWorkflow resultingWorkflow): base(conversation, resultingWorkflow)
+        public RealTimeMediaIncomingCallEvent(Conversation conversation, RealTimeMediaWorkflow resultingWorkflow)
+            : base(conversation, resultingWorkflow)
         {
         }
 
-        /// <summary>
-        /// Workflow associated with the event
-        /// </summary>
-        private RealTimeMediaWorkflow RealTimeMediaWorkflow
+        public void Answer(IReadOnlyMediaSession mediaSession)
         {
-            get { return ResultingWorkflow as RealTimeMediaWorkflow;  }
-        }
+            IList<IVideoSocket> videoSockets = mediaSession.VideoSockets?.Count > 0 
+                ? new List<IVideoSocket>(mediaSession.VideoSockets) 
+                : null;
 
-        public IRealTimeMediaSession MediaSession { get; private set; }
-
-        public void Answer(IRealTimeMediaSession mediaSession, params NotificationType[] subscriptions)
-        {
             var mediaConfiguration = MediaPlatform.CreateMediaConfiguration(
                 mediaSession.AudioSocket,
-                new List<IVideoSocket>(mediaSession.VideoSockets),
+                videoSockets,
                 mediaSession.VbssSocket);
 
-            this.MediaSession = mediaSession;
             this.RealTimeMediaWorkflow.Actions = new ActionBase[]
             {
                 new AnswerAppHostedMedia
@@ -81,7 +82,8 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
                 }
             };
 
-            this.RealTimeMediaWorkflow.NotificationSubscriptions = subscriptions;
+            this.MediaSession = mediaSession;
+            this.RealTimeMediaWorkflow.NotificationSubscriptions = mediaSession.Subscriptions;
         }
 
         public void Reject()

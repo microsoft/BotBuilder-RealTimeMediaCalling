@@ -33,7 +33,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -46,9 +45,9 @@ using Microsoft.Bot.Builder.Calling.Exceptions;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Misc;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
-using Microsoft.Skype.Calling.ServiceAgents.MSA;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Misc;
+using Microsoft.Skype.Calling.ServiceAgents.MSA;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
@@ -116,7 +115,17 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <summary>
         /// Event raised when the bot gets the outcome of Answer action. If the operation was successful the call is established
         /// </summary>
-        public event Func<AnswerAppHostedMediaOutcomeEvent, Task> OnAnswerAppHostedMediaCompleted;
+//        public event Func<AnswerAppHostedMediaOutcomeEvent, Task> OnAnswerAppHostedMediaCompleted;
+
+        /// <summary>
+        /// Event raised when the bot gets the outcome of AnswerAppHostedMedia action and the call is established.
+        /// </summary>
+        public event Func<Task> OnAnswerSucceeded;
+
+        /// <summary>
+        /// Event raised when the bot gets the outcome of AnswerAppHostedMedia action but the call failed.
+        /// </summary>
+        public event Func<AnswerAppHostedMediaOutcomeEvent, Task> OnAnswerFailed;
 
         /// <summary>
         /// Event raised when specified workflow fails to be validated by Bot platform
@@ -143,15 +152,25 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// </summary>
         public event Func<Task> OnCallCleanup;
 
-        public IRealTimeMediaSession MediaSession { get; }
+        /// <summary>
+        /// Create a media session for this call.
+        /// </summary>
+        public IRealTimeMediaSession CreateMediaSession(params NotificationType[] subscriptions)
+        {
+            return new RealTimeMediaSession(CorrelationId, subscriptions);
+        }
+
+        /// <summary>
+        /// Create a media session for this call.
+        /// </summary>
+        public IReadOnlyMediaSession CurrentMediaSession { get; private set; }
 
         /// <summary>
         /// Instantiates the service with settings to handle a call
         /// </summary>
         /// <param name="parameters">The parameters for the RTM call service.</param>
         /// <param name="settings">The settings for the RTM call service.</param>
-        /// <param name="mediaSession">The media session for this call.</param>
-        public RealTimeMediaCallService(RealTimeMediaCallServiceParameters parameters, IRealTimeMediaCallServiceSettings settings, IRealTimeMediaSession mediaSession)
+        public RealTimeMediaCallService(RealTimeMediaCallServiceParameters parameters, IRealTimeMediaCallServiceSettings settings)
         {
             if (parameters == null)
             {
@@ -160,7 +179,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
             if (string.IsNullOrWhiteSpace(parameters.CallLegId) || string.IsNullOrWhiteSpace(parameters.CorrelationId))
             {
-                throw new ArgumentNullException("call parameters");
+                throw new ArgumentNullException("call instance parameters");
             }
 
             if (settings == null)
@@ -170,20 +189,16 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
             if (settings.CallbackUrl == null || settings.NotificationUrl == null)
             {
-                throw new ArgumentNullException("callback settings");
-            }
-
-            if (mediaSession == null)
-            {
-                throw new ArgumentNullException(nameof(mediaSession));
+                throw new ArgumentNullException("call global settings");
             }
 
             CallLegId = parameters.CallLegId;
             CorrelationId = parameters.CorrelationId;
             _callbackUrl = settings.CallbackUrl;
             _notificationUrl = settings.NotificationUrl;
-            MediaSession = mediaSession;
-            _placeCallEndpointUrl = string.IsNullOrEmpty(settings.PlaceCallEndpointUrl.ToString())?_defaultPlaceCallEndpointUrl : settings.PlaceCallEndpointUrl;
+            _placeCallEndpointUrl = string.IsNullOrEmpty(settings.PlaceCallEndpointUrl?.ToString())
+                ? _defaultPlaceCallEndpointUrl 
+                : settings.PlaceCallEndpointUrl;
             _botId = settings.BotId;
             _botSecret = settings.BotSecret;
             Task.Run(async () =>
@@ -315,7 +330,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             return RealTimeMediaSerializer.SerializeToJson(newWorkflowResult);
         }
 
-        private Task<RealTimeMediaWorkflow> PassActionResultToHandler(ConversationResult receivedConversationResult)
+        private Task<Workflow> PassActionResultToHandler(ConversationResult receivedConversationResult)
         {
             Trace.TraceInformation(
                 $"RealTimeMediaCallService [{CallLegId}]: Received the outcome for {receivedConversationResult.OperationOutcome.Type} operation, callId: {receivedConversationResult.OperationOutcome.Id}");
@@ -340,10 +355,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// </summary>
         /// <param name="conversation">Conversation corresponding to the incoming call</param>
         /// <returns>WorkFlow to be executed for the call</returns>
-        public async Task<RealTimeMediaWorkflow> HandleIncomingCall(Conversation conversation)
+        public async Task<Workflow> HandleIncomingCall(Conversation conversation)
         {
             Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Received incoming call");
             var incomingCall = new RealTimeMediaIncomingCallEvent(conversation, CreateInitialWorkflow());
+
             var eventHandler = OnIncomingCallReceived;
             if (eventHandler != null)
                 await eventHandler.Invoke(incomingCall).ConfigureAwait(false);
@@ -353,23 +369,44 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 return null;
             }
 
-            return incomingCall.RealTimeMediaWorkflow;
+            this.CurrentMediaSession = incomingCall.MediaSession;
+            return incomingCall.ResultingWorkflow;
         }
-        private Task<RealTimeMediaWorkflow> HandleJoinAppHostedMediaOutcome(ConversationResult conversationResult, JoinCallAppHostedMediaOutcome joinCallAppHostedMediaOutcome)
+
+        private Task<Workflow> HandleJoinAppHostedMediaOutcome(ConversationResult conversationResult, JoinCallAppHostedMediaOutcome joinCallAppHostedMediaOutcome)
         {
             var outcomeEvent = new JoinCallAppHostedMediaOutcomeEvent(conversationResult, CreateInitialWorkflow(), joinCallAppHostedMediaOutcome);
             var eventHandler = OnJoinCallAppHostedMediaCompleted;
             return InvokeHandlerIfSet(eventHandler, outcomeEvent);
         }
 
-        private Task<RealTimeMediaWorkflow> HandleAnswerAppHostedMediaOutcome(ConversationResult conversationResult, AnswerAppHostedMediaOutcome answerAppHostedMediaOutcome)
-        {            
-            var outcomeEvent = new AnswerAppHostedMediaOutcomeEvent(conversationResult, CreateInitialWorkflow(), answerAppHostedMediaOutcome);
-            var eventHandler = OnAnswerAppHostedMediaCompleted;
-            return InvokeHandlerIfSet(eventHandler, outcomeEvent);
+        private async Task<Workflow> HandleAnswerAppHostedMediaOutcome(ConversationResult conversationResult, AnswerAppHostedMediaOutcome answerAppHostedMediaOutcome)
+        {
+            try
+            {
+                Trace.TraceInformation($"[{CorrelationId}] OnAnswerAppHostedMediaCompleted");
+                var workflow = CreateInitialWorkflow();
+                if (answerAppHostedMediaOutcome.Outcome == Outcome.Failure)
+                {
+                    Trace.TraceWarning($"[{CorrelationId}] AnswerAppHostedMedia failed with reason: {answerAppHostedMediaOutcome.FailureReason}");
+                    var answerFailedEvent = new AnswerAppHostedMediaOutcomeEvent(conversationResult, workflow, answerAppHostedMediaOutcome);
+                    await InvokeHandlerIfSet(OnAnswerFailed, answerFailedEvent).ConfigureAwait(false);
+                }
+                else
+                {
+                    await InvokeHandlerIfSet(OnAnswerSucceeded, "OnAnswerSucceeded").ConfigureAwait(false);
+                    workflow.NotificationSubscriptions = CurrentMediaSession.Subscriptions;
+                }
+                return workflow;
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError($"[{CorrelationId}] threw {ex}");
+                throw;
+            }
         }
 
-        private Task<RealTimeMediaWorkflow> HandleWorkflowValidationOutcome(
+        private Task<Workflow> HandleWorkflowValidationOutcome(
             ConversationResult conversationResult,
             WorkflowValidationOutcome workflowValidationOutcome)
         {
@@ -543,12 +580,12 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }
         }
 
-        private async Task<RealTimeMediaWorkflow> InvokeHandlerIfSet<T>(Func<T, Task> action, T outcomeEventBase) where T : OutcomeEventBase
+        private async Task<Workflow> InvokeHandlerIfSet<T>(Func<T, Task> action, T outcomeEventBase) where T : OutcomeEventBase
         {
             if (action != null)
             {
                 await action.Invoke(outcomeEventBase).ConfigureAwait(false);
-                return outcomeEventBase.ResultingWorkflow as RealTimeMediaWorkflow;
+                return outcomeEventBase.ResultingWorkflow;
             }
             throw new BotCallingServiceException($"[{CallLegId}]: No event handler set for {outcomeEventBase.ConversationResult.OperationOutcome.Type} outcome");
         }

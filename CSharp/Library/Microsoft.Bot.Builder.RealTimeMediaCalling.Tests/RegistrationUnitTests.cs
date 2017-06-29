@@ -6,6 +6,7 @@ using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Misc;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
+using Microsoft.Skype.Bots.Media;
 using Moq;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
@@ -44,45 +45,31 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             {
                 CallService = service;
                 CallService.OnIncomingCallReceived += OnIncomingCallReceived;
-                CallService.OnAnswerAppHostedMediaCompleted += OnAnswerAppHostedMediaCompleted;
+                CallService.OnAnswerSucceeded += OnAnswerSucceeded;
                 CallService.OnCallCleanup += OnCallCleanup;
 
                 CorrelationId = service.CorrelationId;
                 CallId = $"{service.CorrelationId}:{Guid.NewGuid()}";
             }
 
+            private Task OnAnswerSucceeded()
+            {
+                return Task.CompletedTask;
+            }
+
             private Task OnIncomingCallReceived(RealTimeMediaIncomingCallEvent realTimeMediaIncomingCallEvent)
             {
-                JObject mediaConfiguration;
-                using (var writer = new JTokenWriter())
-                {
-                    writer.WriteRaw("MediaConfiguration");
-                    mediaConfiguration = new JObject { { "Token", writer.Token } };
-                }
-
-                realTimeMediaIncomingCallEvent.RealTimeMediaWorkflow.Actions = new ActionBase[]
-                {
-                    new AnswerAppHostedMedia
-                    {
-                        MediaConfiguration = mediaConfiguration,
-                        OperationId = Guid.NewGuid().ToString()
-                    }
-                };
-
-                realTimeMediaIncomingCallEvent.RealTimeMediaWorkflow.NotificationSubscriptions = new[] { NotificationType.CallStateChange };
+                var mediaSession = CallService.CreateMediaSession(NotificationType.CallStateChange);
+                var audioSocket = mediaSession.SetAudioSocket(new AudioSocketSettings());
+                audioSocket.AudioMediaReceived += AudioSocket_AudioMediaReceived;
+                realTimeMediaIncomingCallEvent.Answer(mediaSession);
 
                 return Task.CompletedTask;
             }
 
-            private Task OnAnswerAppHostedMediaCompleted(AnswerAppHostedMediaOutcomeEvent answerAppHostedMediaOutcomeEvent)
+            private void AudioSocket_AudioMediaReceived(object sender, AudioMediaReceivedEventArgs e)
             {
-                AnswerAppHostedMediaOutcome answerAppHostedMediaOutcome = answerAppHostedMediaOutcomeEvent.AnswerAppHostedMediaOutcome;
-                if (answerAppHostedMediaOutcome.Outcome != Outcome.Success)
-                {
-                    throw new InvalidOperationException("Answer app hosted media failed.");
-                }
-                answerAppHostedMediaOutcomeEvent.RealTimeMediaWorkflow.NotificationSubscriptions = new[] { NotificationType.CallStateChange, NotificationType.RosterUpdate };
-                return Task.CompletedTask;
+                throw new NotImplementedException();
             }
 
             private Task OnCallCleanup()
@@ -136,18 +123,26 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             Assert.NotNull(service.GetCallForId("0b022b87-f255-4667-9335-2335f30ee8de"));
             Assert.Null(service.GetCallForId("0b022b88-f255-4667-9335-2335f30ee8de"));
 
-            var call = service.Calls.First() as RealTimeMediaCall;
-            Assert.NotNull(call);
-            Assert.IsNotEmpty(call.CorrelationId);
-            Assert.IsNotEmpty(call.CallId);
-            Assert.AreEqual(call.CorrelationId, call.CallService.CorrelationId);
-            Assert.IsTrue(call.CallId.StartsWith(call.CorrelationId));
+            var call1 = service.GetCallForId("0b022b87-f255-4667-9335-2335f30ee8de") as RealTimeMediaCall;
+            Assert.NotNull(call1);
+            Assert.IsNotEmpty(call1.CorrelationId);
+            Assert.IsNotEmpty(call1.CallId);
+            Assert.AreEqual(call1.CorrelationId, call1.CallService.CorrelationId);
+            Assert.IsTrue(call1.CallId.StartsWith(call1.CorrelationId));
 
             result = await service.ProcessIncomingCallAsync(incomingCallJson, Guid.Empty.ToString());
             Assert.AreEqual(ResponseType.Accepted, result.ResponseType);
             Assert.AreEqual(1, service.Calls.Count);
             Assert.NotNull(service.GetCallForId("0b022b87-f255-4667-9335-2335f30ee8de"));
             Assert.Null(service.GetCallForId("0b022b88-f255-4667-9335-2335f30ee8de"));
+
+            var call2 = service.GetCallForId("0b022b87-f255-4667-9335-2335f30ee8de") as RealTimeMediaCall;
+            Assert.NotNull(call2);
+            Assert.IsNotEmpty(call2.CorrelationId);
+            Assert.IsNotEmpty(call2.CallId);
+            Assert.AreEqual(call2.CorrelationId, call2.CallService.CorrelationId);
+            Assert.IsTrue(call2.CallId.StartsWith(call2.CorrelationId));
+            Assert.AreNotEqual(call1, call2);
 
             incomingCallJson = incomingCallJson.Replace("0b022b87", "0b022b88");
 
@@ -156,6 +151,15 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             Assert.AreEqual(2, service.Calls.Count);
             Assert.NotNull(service.GetCallForId("0b022b87-f255-4667-9335-2335f30ee8de"));
             Assert.NotNull(service.GetCallForId("0b022b88-f255-4667-9335-2335f30ee8de"));
+
+            var call3 = service.GetCallForId("0b022b88-f255-4667-9335-2335f30ee8de") as RealTimeMediaCall;
+            Assert.NotNull(call3);
+            Assert.IsNotEmpty(call3.CorrelationId);
+            Assert.IsNotEmpty(call3.CallId);
+            Assert.AreEqual(call3.CorrelationId, call3.CallService.CorrelationId);
+            Assert.IsTrue(call3.CallId.StartsWith(call3.CorrelationId));
+            Assert.AreNotEqual(call1, call3);
+            Assert.AreNotEqual(call2, call3);
 
             var acceptCallbackJson = @"   
 {

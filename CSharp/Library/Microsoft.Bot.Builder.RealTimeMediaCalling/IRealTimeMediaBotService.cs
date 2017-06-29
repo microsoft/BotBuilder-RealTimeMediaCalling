@@ -34,6 +34,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
+using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
@@ -114,6 +115,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <param name="id">The ID of the call.</param>
         /// <returns>The real time media call, or null.</returns>
         IRealTimeMediaCall GetCallForId(string id);
+
+        /// <summary>
+        /// Create a media session for an adhoc call.
+        /// </summary>
+        IRealTimeMediaSession CreateMediaSession(string correlationId, params NotificationType[] subscriptions);
     }
 
     internal interface IInternalRealTimeMediaBotService : IRealTimeMediaBotService

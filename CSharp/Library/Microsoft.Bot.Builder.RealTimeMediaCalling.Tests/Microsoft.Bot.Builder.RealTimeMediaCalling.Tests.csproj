@@ -166,6 +166,9 @@
       <HintPath>..\..\packages\Microsoft.Rest.ClientRuntime.Azure.3.3.1\lib\net45\Microsoft.Rest.ClientRuntime.Azure.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.Skype.Bots.Media, Version=1.5.0.1177, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=AMD64">
+      <HintPath>..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\lib\Microsoft.Skype.Bots.Media.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Skype.Calling.Common, Version=1.31.13.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.Skype.Calling.Common.1.31.13\lib\net462\Microsoft.Skype.Calling.Common.dll</HintPath>
       <Private>True</Private>
@@ -277,6 +280,10 @@
       <HintPath>..\..\packages\System.Spatial.5.6.4\lib\net40\System.Spatial.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.5.25.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Threading.Tasks.Dataflow.4.5.25\lib\dotnet\System.Threading.Tasks.Dataflow.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.AspNet.WebApi.Core.5.2.3\lib\net45\System.Web.Http.dll</HintPath>
     </Reference>
@@ -306,8 +313,10 @@
     <Error Condition="!Exists('..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets'))" />
     <Error Condition="!Exists('..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.props'))" />
     <Error Condition="!Exists('..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.targets'))" />
+    <Error Condition="!Exists('..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\build\Microsoft.Skype.Bots.Media.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\build\Microsoft.Skype.Bots.Media.targets'))" />
   </Target>
   <Import Project="..\..\packages\Microsoft.Cloud.InstrumentationFramework.3.0.6.23\build\Microsoft.Cloud.InstrumentationFramework.targets" Condition="Exists('..\..\packages\Microsoft.Cloud.InstrumentationFramework.3.0.6.23\build\Microsoft.Cloud.InstrumentationFramework.targets')" />
   <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
   <Import Project="..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.targets" Condition="Exists('..\..\packages\Bond.CSharp.4.2.1\build\Bond.CSharp.targets')" />
+  <Import Project="..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\build\Microsoft.Skype.Bots.Media.targets" Condition="Exists('..\..\packages\Microsoft.Skype.Bots.Media.1.5.0.1177-alpha\build\Microsoft.Skype.Bots.Media.targets')" />
 </Project>

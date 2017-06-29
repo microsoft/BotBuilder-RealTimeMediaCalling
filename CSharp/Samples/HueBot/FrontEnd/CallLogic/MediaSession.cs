@@ -17,6 +17,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Bot.Builder.RealTimeMediaCalling;
 using CorrelationId = FrontEnd.Logging.CorrelationId;
 
 namespace FrontEnd.CallLogic
@@ -31,21 +32,6 @@ namespace FrontEnd.CallLogic
         /// The long dictation URL
         /// </summary>
         private static readonly Uri LongDictationUrl = new Uri(@"wss://speech.platform.bing.com/api/service/recognition/continuous");
-
-        /// <summary>
-        /// Unique correlationID of this particular call.
-        /// </summary>
-        private readonly string _correlationId;
-
-        /// <summary>
-        /// The audio socket created for this particular call.
-        /// </summary>
-        private readonly AudioSocket _audioSocket;
-
-        /// <summary>
-        /// The video socket created for this particular call.
-        /// </summary>
-        private readonly VideoSocket _videoSocket;
 
         /// <summary>
         /// Indicates if the call has been disposed
@@ -89,52 +75,34 @@ namespace FrontEnd.CallLogic
 
         private const int _speechRecognitionTaskTimeOut = 2000;
 
-        #endregion
+        private IRealTimeMediaSession _mediaSession;
 
-        #region Properties
-        /// <summary>
-        /// The Id of this call.
-        /// </summary>
-        public string Id { get; private set; }
-
-        /// <summary>
-        /// The opaque media configuration object sent back to the Skype platform when answering a call.
-        /// </summary>
-        public JObject MediaConfiguration { get; private set; }
-
-        /// <summary>
-        /// Implementation of IRealTimeMediaCall that handles incoming and outgoing requests
-        /// </summary>
-        public readonly RealTimeMediaCall RealTimeMediaCall;
         #endregion
 
         #region Public Methods
+
         /// <summary>
         /// Create a new instance of the MediaSession.
         /// </summary>
-        /// <param name="callerSkypeId"></param>
-        /// <param name="startOutbound"></param>
-        public MediaSession(string id, string correlationId, RealTimeMediaCall call)
+        /// <param name="mediaSession"></param>
+        public MediaSession(IRealTimeMediaSession mediaSession)
         {
-            _correlationId = CorrelationId.GetCurrentId();
-            this.Id = id;
-            RealTimeMediaCall = call;
+            _mediaSession = mediaSession;
             _speechRecoginitionFinished = new ManualResetEvent(false);
 
-            Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{this.Id}]: Call created");
+            Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{_mediaSession.Id}]: Call created");
 
             try
             {
-                _audioSocket = new AudioSocket(new AudioSocketSettings
+                var audioSocket = mediaSession.SetAudioSocket(new AudioSocketSettings
                 {
                     StreamDirections = StreamDirection.Sendrecv,
                     SupportedAudioFormat = AudioFormat.Pcm16K, // audio format is currently fixed at PCM 16 KHz.
-                    CallId = correlationId
                 });
 
-                Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{this.Id}]:Created AudioSocket");
+                Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{_mediaSession.Id}]: Created AudioSocket");
 
-                _videoSocket = new VideoSocket(new VideoSocketSettings
+                var videoSocket = mediaSession.SetVideoSocket(new VideoSocketSettings
                 {
                     StreamDirections = StreamDirection.Sendrecv,
                     ReceiveColorFormat = VideoColorFormat.NV12,
@@ -153,23 +121,18 @@ namespace FrontEnd.CallLogic
                         VideoFormat.NV12_960x540_30Fps,
                         VideoFormat.NV12_424x240_15Fps
                     },
-                    CallId = correlationId
                 });
 
-                Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{this.Id}]: Created VideoSocket");
+                Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{_mediaSession.Id}]: Created VideoSocket");
 
 
                 //audio socket events
-                _audioSocket.AudioMediaReceived += OnAudioMediaReceived;
-                _audioSocket.AudioSendStatusChanged += OnAudioSendStatusChanged;
+                audioSocket.AudioMediaReceived += OnAudioMediaReceived;
+                audioSocket.AudioSendStatusChanged += OnAudioSendStatusChanged;
 
                 //Video socket events
-                _videoSocket.VideoMediaReceived += OnVideoMediaReceived;
-                _videoSocket.VideoSendStatusChanged += OnVideoSendStatusChanged;
-
-                MediaConfiguration = MediaPlatform.CreateMediaConfiguration(_audioSocket, _videoSocket);
-
-                Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{this.Id}]: MediaConfiguration={MediaConfiguration.ToString(Formatting.Indented)}");
+                videoSocket.VideoMediaReceived += OnVideoMediaReceived;
+                videoSocket.VideoSendStatusChanged += OnVideoSendStatusChanged;
 
                 StartSpeechRecognition();
             }
@@ -190,22 +153,20 @@ namespace FrontEnd.CallLogic
             {
                 if (Interlocked.CompareExchange(ref _disposed, 1, 0) == 0)
                 {
-                    Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{this.Id}]: Disposing Call");
+                    Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{_mediaSession.Id}]: Disposing Call");
                     _sendAudio = false;
 
-                    if (_audioSocket != null)
+                    if (_mediaSession.AudioSocket != null)
                     {
-                        _audioSocket.AudioMediaReceived -= OnAudioMediaReceived;
-                        _audioSocket.AudioSendStatusChanged -= OnAudioSendStatusChanged;
-                        _audioSocket.Dispose();
+                        _mediaSession.AudioSocket.AudioMediaReceived -= OnAudioMediaReceived;
+                        _mediaSession.AudioSocket.AudioSendStatusChanged -= OnAudioSendStatusChanged;
                     }
                     _sendVideo = false;
 
-                    if (_videoSocket != null)
+                    if (_mediaSession.VideoSocket != null)
                     {
-                        _videoSocket.VideoMediaReceived -= OnVideoMediaReceived;
-                        _videoSocket.VideoSendStatusChanged -= OnVideoSendStatusChanged;
-                        _videoSocket.Dispose();
+                        _mediaSession.VideoSocket.VideoMediaReceived -= OnVideoMediaReceived;
+                        _mediaSession.VideoSocket.VideoSendStatusChanged -= OnVideoSendStatusChanged;
                     }
 
                     _recognitionCts?.Cancel();
@@ -214,13 +175,14 @@ namespace FrontEnd.CallLogic
                         Log.Error(new CallerInfo(), LogContext.FrontEnd, "SpeechRecoginition task did not finish within expected time");
                     }
 
+                    _mediaSession?.Dispose();
                     _recognitionCts?.Dispose();
                     _recognitionStream?.Dispose();
                 }
             }
             catch (Exception ex)
             {
-                Log.Warning(new CallerInfo(), LogContext.FrontEnd, $"[{this.Id}]: Ignoring exception in dispose {ex}");
+                Log.Warning(new CallerInfo(), LogContext.FrontEnd, $"[{_mediaSession.Id}]: Ignoring exception in dispose {ex}");
             }
         }
         #endregion
@@ -251,21 +213,21 @@ namespace FrontEnd.CallLogic
 
                             await _speechClient.RecognizeAsync(new SpeechInput(_recognitionStream, requestMetadata), _recognitionCts.Token);
                         }
-                        Log.Info(new CallerInfo(), LogContext.Media, $"[{this.Id}]: Speech recognize completed.");
+                        Log.Info(new CallerInfo(), LogContext.Media, $"[{_mediaSession.Id}]: Speech recognize completed.");
                     }
                     catch (Exception exception)
                     {
-                        Log.Error(new CallerInfo(), LogContext.Media, $"[{this.Id}]: Speech recognize threw exception {exception.ToString()}");
+                        Log.Error(new CallerInfo(), LogContext.Media, $"[{_mediaSession.Id}]: Speech recognize threw exception {exception.ToString()}");
                     }
 
                     if (_recognitionCts.IsCancellationRequested)
                     {
-                        Log.Info(new CallerInfo(), LogContext.Media, $"[{this.Id}]:Speech recognition cancelled because it was cancelled or max exception count was hit");
+                        Log.Info(new CallerInfo(), LogContext.Media, $"[{_mediaSession.Id}]:Speech recognition cancelled because it was cancelled or max exception count was hit");
                         break;
                     }
 
                     Stream oldStream = _recognitionStream;
-                    Log.Info(new CallerInfo(), LogContext.Media, $"[{this.Id}]: Restart speech recognition as the call is still alive. Speech recognition could have been completed because of babble/silence timeout");
+                    Log.Info(new CallerInfo(), LogContext.Media, $"[{_mediaSession.Id}]: Restart speech recognition as the call is still alive. Speech recognition could have been completed because of babble/silence timeout");
 
                     _recognitionStream = new SpeechRecognitionPcmStream(16000);
                     oldStream.Dispose();
@@ -273,22 +235,22 @@ namespace FrontEnd.CallLogic
 
                 _speechRecoginitionFinished.Set();
             }
-            ).ForgetAndLogException(string.Format("Failed to start the SpeechRecognition Task for Id: {0}", Id));
+            ).ForgetAndLogException(string.Format("Failed to start the SpeechRecognition Task for Id: {0}", _mediaSession.Id));
         }
 
         #region Event Handling Methods
         #region Speech
         public Task OnRecognitionResult(RecognitionResult result)
         {
-            CorrelationId.SetCurrentId(_correlationId);
+            CorrelationId.SetCurrentId(_mediaSession.CorrelationId);
             if (result.RecognitionStatus != RecognitionStatus.Success)
             {
-                Log.Info(new CallerInfo(), LogContext.Media, $"[{this.Id}]: Speech recognize result {result.RecognitionStatus}");
+                Log.Info(new CallerInfo(), LogContext.Media, $"[{_mediaSession.Id}]: Speech recognize result {result.RecognitionStatus}");
                 return Task.CompletedTask;
             }
             else
             {
-                Log.Info(new CallerInfo(), LogContext.Media, $"[{this.Id}]: Speech recognize success");
+                Log.Info(new CallerInfo(), LogContext.Media, $"[{_mediaSession.Id}]: Speech recognize success");
             }
 
             //since we had a success recognition
@@ -297,7 +259,7 @@ namespace FrontEnd.CallLogic
                 foreach (RecognitionPhrase phrase in result.Phrases)
                 {
                     string message = phrase.DisplayText.ToLower();
-                    Log.Info(new CallerInfo(), LogContext.Media, $"[{this.Id}]: Received from speech api {message}");
+                    Log.Info(new CallerInfo(), LogContext.Media, $"[{_mediaSession.Id}]: Received from speech api {message}");
 
                     int redIndex = message.LastIndexOf("red");
                     int blueIndex = message.LastIndexOf("blue");
@@ -322,12 +284,12 @@ namespace FrontEnd.CallLogic
                         DefaultHueColor = Color.Green;
                     }
 
-                    Log.Info(new CallerInfo(), LogContext.Media, $"[{this.Id}]: Changing hue to {DefaultHueColor.ToString()}");
+                    Log.Info(new CallerInfo(), LogContext.Media, $"[{_mediaSession.Id}]: Changing hue to {DefaultHueColor.ToString()}");
                 }
             }
             catch (Exception ex)
             {
-                Log.Info(new CallerInfo(), LogContext.Media, $"[{this.Id}]: Exception in OnRecognitionResult {ex.ToString()}");
+                Log.Info(new CallerInfo(), LogContext.Media, $"[{_mediaSession.Id}]: Exception in OnRecognitionResult {ex.ToString()}");
             }
             return Task.CompletedTask;
         }
@@ -342,11 +304,11 @@ namespace FrontEnd.CallLogic
         /// <param name="e"></param>
         private void OnAudioSendStatusChanged(object sender, AudioSendStatusChangedEventArgs e)
         {
-            CorrelationId.SetCurrentId(_correlationId);
+            CorrelationId.SetCurrentId(_mediaSession.CorrelationId);
             Log.Info(
                 new CallerInfo(),
                 LogContext.Media,
-                $"[{this.Id}]: AudioSendStatusChangedEventArgs(MediaSendStatus={e.MediaSendStatus})"
+                $"[{_mediaSession.Id}]: AudioSendStatusChangedEventArgs(MediaSendStatus={e.MediaSendStatus})"
                 );
 
             if (e.MediaSendStatus == MediaSendStatus.Active && _sendAudio == false)
@@ -369,12 +331,12 @@ namespace FrontEnd.CallLogic
                 return;
             }
 
-            CorrelationId.SetCurrentId(_correlationId);
+            CorrelationId.SetCurrentId(_mediaSession.CorrelationId);
             Log.Verbose(
                 new CallerInfo(),
                 LogContext.Media,
                 "[{0}] [AudioMediaReceivedEventArgs(Data=<{1}>, Length={2}, Timestamp={3}, AudioFormat={4})]",
-                this.Id,
+                _mediaSession.Id,
                 e.Buffer.Data.ToString(),
                 e.Buffer.Length,
                 e.Buffer.Timestamp,
@@ -383,7 +345,7 @@ namespace FrontEnd.CallLogic
             try
             {
                 var audioSendBuffer = new AudioSendBuffer(e.Buffer, AudioFormat.Pcm16K, (UInt64)DateTime.Now.Ticks);
-                _audioSocket.Send(audioSendBuffer);
+                _mediaSession.AudioSocket.Send(audioSendBuffer);
 
                 byte[] buffer = new byte[e.Buffer.Length];
                 Marshal.Copy(e.Buffer.Data, buffer, 0, (int)e.Buffer.Length);
@@ -396,12 +358,12 @@ namespace FrontEnd.CallLogic
                 }
                 catch (ObjectDisposedException)
                 {
-                    Log.Info(new CallerInfo(), LogContext.Media, $"[{this.Id}]: Write on recognitionStream threw ObjectDisposed");
+                    Log.Info(new CallerInfo(), LogContext.Media, $"[{_mediaSession.Id}]: Write on recognitionStream threw ObjectDisposed");
                 }
             }
             catch (Exception ex)
             {
-                Log.Error(new CallerInfo(), LogContext.Media, $"[{this.Id}]: Caught exception when attempting to send audio buffer {ex.ToString()}");
+                Log.Error(new CallerInfo(), LogContext.Media, $"[{_mediaSession.Id}]: Caught exception when attempting to send audio buffer {ex.ToString()}");
             }
             finally
             {
@@ -421,13 +383,13 @@ namespace FrontEnd.CallLogic
         {
             try
             {
-                CorrelationId.SetCurrentId(_correlationId);
+                CorrelationId.SetCurrentId(_mediaSession.CorrelationId);
 
                 Log.Verbose(
                     new CallerInfo(),
                     LogContext.Media,
                     "[{0}] [VideoMediaReceivedEventArgs(Data=<{1}>, Length={2}, Timestamp={3}, Width={4}, Height={5}, ColorFormat={6}, FrameRate={7})]",
-                    this.Id,
+                    _mediaSession.Id,
                     e.Buffer.Data.ToString(),
                     e.Buffer.Length,
                     e.Buffer.Timestamp,
@@ -445,11 +407,11 @@ namespace FrontEnd.CallLogic
 
                 VideoFormat sendVideoFormat = GetSendVideoFormat(e.Buffer.VideoFormat);
                 var videoSendBuffer = new VideoSendBuffer(buffer, (uint)buffer.Length, sendVideoFormat);
-                _videoSocket.Send(videoSendBuffer);
+                _mediaSession.VideoSocket.Send(videoSendBuffer);
             }
             catch (Exception ex)
             {
-                Log.Error(new CallerInfo(), LogContext.Media, $"[{this.Id}]: Exception in VideoMediaReceived {ex.ToString()}");
+                Log.Error(new CallerInfo(), LogContext.Media, $"[{_mediaSession.Id}]: Exception in VideoMediaReceived {ex.ToString()}");
             }
             finally
             {
@@ -577,20 +539,20 @@ namespace FrontEnd.CallLogic
         /// <param name="e"></param>
         private void OnVideoSendStatusChanged(object sender, VideoSendStatusChangedEventArgs e)
         {
-            CorrelationId.SetCurrentId(_correlationId);
+            CorrelationId.SetCurrentId(_mediaSession.CorrelationId);
 
             Log.Info(
                 new CallerInfo(),
                 LogContext.Media,
                 "[{0}]: [VideoSendStatusChangedEventArgs(MediaSendStatus=<{1}>;PreferredVideoSourceFormat=<{2}>]",
-                this.Id,
+                _mediaSession.Id,
                 e.MediaSendStatus,
                 e.PreferredVideoSourceFormat.VideoColorFormat);
 
             if (e.MediaSendStatus == MediaSendStatus.Active && _sendVideo == false)
             {
                 //Start sending video once the Video Status changes to Active
-                Log.Info(new CallerInfo(), LogContext.Media, $"[{this.Id}] Start sending video");
+                Log.Info(new CallerInfo(), LogContext.Media, $"[{_mediaSession.Id}] Start sending video");
 
                 _sendVideo = true;
             }

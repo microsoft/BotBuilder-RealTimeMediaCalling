@@ -61,7 +61,17 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <summary>
         /// Event raised when the bot gets the outcome of AnswerAppHostedMedia action. If the operation was successful the call is established
         /// </summary>
-        event Func<AnswerAppHostedMediaOutcomeEvent, Task> OnAnswerAppHostedMediaCompleted;
+//        event Func<AnswerAppHostedMediaOutcomeEvent, Task> OnAnswerAppHostedMediaCompleted;
+
+        /// <summary>
+        /// Event raised when the bot gets the outcome of AnswerAppHostedMedia action and the call is established.
+        /// </summary>
+        event Func<Task> OnAnswerSucceeded;
+
+        /// <summary>
+        /// Event raised when the bot gets the outcome of AnswerAppHostedMedia action but the call failed.
+        /// </summary>
+        event Func<AnswerAppHostedMediaOutcomeEvent, Task> OnAnswerFailed;
 
         /// <summary>
         /// Event raised when the bot gets the outcome of JoinCallAppHostedMedia action. If the operation was successful the call is established
@@ -84,9 +94,14 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         event Func<Task> OnCallCleanup;
 
         /// <summary>
-        /// The media session for this call.
+        /// Create a media session for this call.
         /// </summary>
-        IRealTimeMediaSession MediaSession { get; }
+        IRealTimeMediaSession CreateMediaSession(params NotificationType[] subscriptions);
+
+        /// <summary>
+        /// The current media session for this call.
+        /// </summary>
+        IReadOnlyMediaSession CurrentMediaSession { get; }
 
         /// <summary>
         /// Subscribe to video or video-based screen sharing channel
@@ -115,7 +130,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
         Task LocalCleanup();
 
-        Task<RealTimeMediaWorkflow> HandleIncomingCall(Conversation conversation);
+        Task<Workflow> HandleIncomingCall(Conversation conversation);
 
         Task<string> ProcessConversationResult(ConversationResult conversationResult);
 

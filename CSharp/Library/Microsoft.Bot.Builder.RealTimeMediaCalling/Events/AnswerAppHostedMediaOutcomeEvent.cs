@@ -52,6 +52,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
         {
             if (outcome == null)
                 throw new ArgumentNullException(nameof(outcome));
+
             AnswerAppHostedMediaOutcome = outcome;
         }
 
@@ -60,13 +61,5 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
         /// </summary>
         public AnswerAppHostedMediaOutcome AnswerAppHostedMediaOutcome { get; set; }
 
-        /// <summary>
-        /// Workflow associated with the AnswerAppHostedMediaOutcome event
-        /// </summary>
-        public RealTimeMediaWorkflow RealTimeMediaWorkflow
-        {
-            get { return ResultingWorkflow as RealTimeMediaWorkflow; }
-            set { ResultingWorkflow = value; }
-        }
     }
 }

@@ -35,23 +35,10 @@ namespace FrontEnd.CallLogic
         /// </summary>
         public IRealTimeMediaCallService CallService { get; private set; }
 
-        private readonly string _callGuid = Guid.NewGuid().ToString();
-        private string _callId;
-
         /// <summary>
         /// Id generated locally that is unique to each RealTimeMediaCall
         /// </summary>
-        public string CallId
-        {
-            get
-            {
-                if (null == _callId)
-                {
-                    _callId = $"{CallService.CorrelationId}:{_callGuid}";
-                }
-                return _callId;
-            }
-        }
+        public string CallId => CallService.CurrentMediaSession.Id;
 
         /// <summary>
         /// CorrelationId that needs to be set in the media platform for correlating logs across services
@@ -67,7 +54,8 @@ namespace FrontEnd.CallLogic
 
             //Register for the events 
             CallService.OnIncomingCallReceived += OnIncomingCallReceived;
-            CallService.OnAnswerAppHostedMediaCompleted += OnAnswerAppHostedMediaCompleted;
+            CallService.OnAnswerSucceeded += OnAnswerSucceeded;
+            CallService.OnAnswerFailed += OnAnswerFailed;
             CallService.OnCallStateChangeNotification += OnCallStateChangeNotification;
             CallService.OnCallCleanup += OnCallCleanup;
         }
@@ -76,45 +64,28 @@ namespace FrontEnd.CallLogic
         {
             Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] OnIncomingCallReceived");
 
-            MediaSession = new MediaSession(CallId, CorrelationId, this);
-            incomingCallEvent.RealTimeMediaWorkflow.Actions = new ActionBase[]
-                {
-                    new AnswerAppHostedMedia
-                    {
-                        MediaConfiguration = MediaSession.MediaConfiguration,
-                        OperationId = Guid.NewGuid().ToString()
-                    }
-                };
-
-            incomingCallEvent.RealTimeMediaWorkflow.NotificationSubscriptions = new NotificationType[] { NotificationType.CallStateChange};
+            var mediaSession = CallService.CreateMediaSession(NotificationType.CallStateChange);
+            MediaSession = new MediaSession(mediaSession);
+            incomingCallEvent.Answer(mediaSession);
 
             Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] Answering the call");
 
             return Task.CompletedTask;
         }
 
-        private Task OnAnswerAppHostedMediaCompleted(AnswerAppHostedMediaOutcomeEvent answerAppHostedMediaOutcomeEvent)
+        private Task OnAnswerSucceeded()
         {
-            try
-            {
-                Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] OnAnswerAppHostedMediaCompleted");
-                AnswerAppHostedMediaOutcome answerAppHostedMediaOutcome = answerAppHostedMediaOutcomeEvent.AnswerAppHostedMediaOutcome;
-                if (answerAppHostedMediaOutcome.Outcome == Outcome.Failure)
-                {
-                    Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] AnswerAppHostedMedia failed with reason: {answerAppHostedMediaOutcome.FailureReason}");
-                    //cleanup internal resources
-                    MediaSession.Dispose();
-                }
-                else
-                {
-                    answerAppHostedMediaOutcomeEvent.RealTimeMediaWorkflow.NotificationSubscriptions = new NotificationType[] { NotificationType.CallStateChange};
-                }
-                return Task.CompletedTask;
-            } catch (Exception ex)
-            {
-                Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] threw {ex.ToString()}");
-                throw;
-            }
+            Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] OnAnswerSucceded");
+            return Task.CompletedTask;
+        }
+
+        private Task OnAnswerFailed(AnswerAppHostedMediaOutcomeEvent answerFailedEvent)
+        {
+            var outcome = answerFailedEvent.AnswerAppHostedMediaOutcome;
+            Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] OnAnswerFailed failed with reason: {outcome.FailureReason}");
+            //cleanup internal resources
+            MediaSession.Dispose();
+            return Task.CompletedTask;
         }
 
         /// <summary>
