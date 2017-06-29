@@ -18,7 +18,7 @@ using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Bot.Connector;
 using FrontEnd.Http;
 
-namespace FrontEnd.CallLogic
+namespace FrontEnd.Call
 {
     /// <summary>
     /// This class does all the signaling needed to handle a call.
@@ -35,35 +35,24 @@ namespace FrontEnd.CallLogic
         /// </summary>
         public IRealTimeMediaCallService CallService { get; private set; }
 
-        private readonly string _callGuid = Guid.NewGuid().ToString();
-        private string _callId;
-
         /// <summary>
         /// Id generated locally that is unique to each RealTimeMediaCall
         /// </summary>
-        public string CallId
-        {
-            get
-            {
-                if (null == _callId)
-                {
-                    _callId = $"{CallService.CorrelationId}:{_callGuid}";
-                }
-                return _callId;
-            }
-        }
+        public readonly string CallId;
 
         /// <summary>
         /// CorrelationId that needs to be set in the media platform for correlating logs across services
         /// </summary>
-        public string CorrelationId => CallService.CorrelationId;
-
+        public readonly string CorrelationId;
+        
         public RealTimeMediaCall(IRealTimeMediaCallService callService)
         {
             if (callService == null)
                 throw new ArgumentNullException(nameof(callService));
 
             CallService = callService;
+            CorrelationId = callService.CorrelationId;
+            CallId = CorrelationId + ":" + Guid.NewGuid().ToString();
 
             //Register for the events 
             CallService.OnIncomingCallReceived += OnIncomingCallReceived;
