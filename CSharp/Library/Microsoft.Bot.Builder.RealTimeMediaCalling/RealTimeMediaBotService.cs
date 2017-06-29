@@ -108,6 +108,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// Instantiates the call processor
         /// </summary>
         /// <param name="scope">The autofac lifetime scope</param>
+        /// <param name="settings">Settings for the call service</param>
         public RealTimeMediaBotService(ILifetimeScope scope, IRealTimeMediaCallServiceSettings settings)
         {
             if (null == scope)

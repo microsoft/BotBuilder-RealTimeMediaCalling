@@ -51,16 +51,5 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// Notifications - like roster change/call status change for the call is received.
         /// </summary>
         NotificationEvent,
-
-        /// <summary>
-        /// OutgoingCall - a new outgoing call created by the bot
-        /// </summary>
-        OutgoingCall,
-
-        /// <summary>
-        /// OutgoingJoin - a new outgoing join call to join a meeting
-        /// </summary>
-        OutgoingJoinCall
-
     }
 }
