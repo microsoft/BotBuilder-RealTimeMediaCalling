@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using FrontEnd.CallLogic;
 using FrontEnd.Logging;
+using Microsoft.Bot.Builder.RealTimeMediaCalling;
+using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Bot.Connector;
 
 namespace FrontEnd.Http
@@ -33,6 +35,8 @@ namespace FrontEnd.Http
             MessagesServiceUrl = activity.ServiceUrl;
             BotAccount = activity.Recipient;
             Log.Info(new CallerInfo(), LogContext.FrontEnd, $"Received chat message.. checking if there is an active media call for this thread");
+            var bot = RealTimeMediaCalling.GetBot();
+
             await RealTimeMediaCall.SendUrlForConversationId(activity.Conversation.Id);
             
             return new HttpResponseMessage(System.Net.HttpStatusCode.Accepted);

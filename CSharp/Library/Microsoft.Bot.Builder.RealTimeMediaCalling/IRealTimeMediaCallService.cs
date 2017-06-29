@@ -74,6 +74,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         event Func<AnswerAppHostedMediaOutcomeEvent, Task> OnAnswerFailed;
 
         /// <summary>
+        /// Event raised when the bot receives a request to make a join call
+        /// </summary>
+        event Func<RealTimeMediaWorkflow, Task> OnJoinCallReceived;
+
+        /// <summary>
         /// Event raised when the bot gets the outcome of JoinCallAppHostedMedia action. If the operation was successful the call is established
         /// </summary>
         event Func<JoinCallAppHostedMediaOutcomeEvent, Task> OnJoinCallAppHostedMediaCompleted;
@@ -111,13 +116,6 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         Task Subscribe(VideoSubscription videoSubscription);
 
         /// <summary>
-        /// Join an existing multi-party conversation
-        /// </summary>
-        /// <param name="joinCallAppHostedMedia">details regarding the conversation to be joined</param>
-        /// <returns></returns>
-        Task JoinCall(JoinCallAppHostedMedia joinCallAppHostedMedia);
-
-        /// <summary>
         /// Terminate the call
         /// </summary>
         /// <returns></returns>
@@ -131,6 +129,9 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         Task LocalCleanup();
 
         Task<Workflow> HandleIncomingCall(Conversation conversation);
+
+        //TODO change this when media library is integrated into SDK
+        Task HandleJoinCall(RealTimeMediaWorkflow realTimeMediaWorkflow);
 
         Task<string> ProcessConversationResult(ConversationResult conversationResult);
 

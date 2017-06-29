@@ -100,6 +100,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         event Func<RealTimeMediaCallEvent, Task> OnCallEnded;
 
         /// <summary>
+        /// Method for the bot to join an existing conversation
+        /// </summary>
+        Task JoinCall(JoinCallAppHostedMedia joinCallAppHostedMedia, string callId);
+
+        /// <summary>
         /// Returns the list of all active call ids.
         /// </summary>
         IList<string> CallIds { get; }

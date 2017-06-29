@@ -48,14 +48,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <summary>
         /// The container used to inject various services when registering the bot
         /// </summary>
-        public static readonly IContainer Container;
-
-        static RealTimeMediaCalling()
-        {
-            var builder = new ContainerBuilder();
-            builder.RegisterModule(new RealTimeMediaCallingModule_MakeBot());
-            Container = builder.Build();
-        }
+        public static IContainer Container;
 
         /// <summary>
         /// Register the function to be called to create a bot along with configuration settings.
@@ -63,8 +56,18 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <param name="settings"> Configuration settings for the real time media calling bot.</param>
         /// <param name="makeBot"> The factory method to make the real time media bot.</param>
         /// <param name="makeCall"> The factory method to make the real time media call.</param>
-        public static void RegisterRealTimeMediaCallingBot(IRealTimeMediaCallServiceSettings settings, Func<IRealTimeMediaBotService, IRealTimeMediaBot> makeBot, Func<IRealTimeMediaCallService, IRealTimeMediaCall> makeCall)
+        internal static void RegisterRealTimeMediaCallingBot<TBotService,TCallService>(
+            IRealTimeMediaCallServiceSettings settings, 
+            Func<IRealTimeMediaBotService, IRealTimeMediaBot> makeBot, 
+            Func<IRealTimeMediaCallService, IRealTimeMediaCall> makeCall)
+            where TBotService : IInternalRealTimeMediaBotService
+            where TCallService : IInternalRealTimeMediaCallService
         {
+            var builder = new ContainerBuilder();
+            builder.RegisterModule(new RealTimeMediaCallingModule<TBotService, TCallService>());
+            builder.RegisterModule(new RealTimeMediaCallingModule_MakeBot());
+            Container = builder.Build();
+
             Trace.TraceInformation($"Registering real-time media calling bot");
             if (settings == null)
             {
@@ -85,6 +88,28 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         }
 
         /// <summary>
+        /// Register the function to be called to create a bot along with configuration settings.
+        /// </summary>
+        /// <param name="settings"> Configuration settings for the real time media calling bot.</param>
+        /// <param name="makeBot"> The factory method to make the real time media bot.</param>
+        /// <param name="makeCall"> The factory method to make the real time media call.</param>
+        public static void RegisterRealTimeMediaCallingBot(
+            IRealTimeMediaCallServiceSettings settings,
+            Func<IRealTimeMediaBotService, IRealTimeMediaBot> makeBot,
+            Func<IRealTimeMediaCallService, IRealTimeMediaCall> makeCall)
+        {
+            RegisterRealTimeMediaCallingBot<RealTimeMediaBotService, RealTimeMediaCallService>(
+                settings,
+                makeBot,
+                makeCall);
+        }
+
+        public static IRealTimeMediaBot GetBot()
+        {
+            return Container.Resolve<IRealTimeMediaBot>();
+        }
+
+        /// <summary>
         /// Process an incoming request
         /// </summary>
         /// <param name="toBot"> The calling request sent to the bot.</param>
@@ -92,7 +117,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <returns> The response from the bot.</returns>
         public static async Task<HttpResponseMessage> SendAsync(HttpRequestMessage toBot, RealTimeMediaCallRequestType callRequestType)
         {
-            using (var scope = RealTimeMediaCallingModule.BeginLifetimeScope(Container, toBot))
+            using (var scope = RealTimeMediaCallingScope.BeginLifetimeScope(Container, toBot))
             {                
                 var context = scope.Resolve<RealTimeMediaCallingContext>();
                 var parsedRequest = await context.ProcessRequest(callRequestType).ConfigureAwait(false);

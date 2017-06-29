@@ -96,6 +96,7 @@ namespace FrontEnd.CallLogic
             CallService.OnRosterUpdateNotification += OnRosterUpdateNotification;
             CallService.OnCallCleanup += OnCallCleanup;
             CallService.OnJoinCallAppHostedMediaCompleted += OnJoinCallAppHostedMediaCompleted;
+            CallService.OnJoinCallReceived += OnJoinCallReceived;
         }
 
         private Task OnIncomingCallReceived(RealTimeMediaIncomingCallEvent incomingCallEvent)
@@ -140,16 +141,36 @@ namespace FrontEnd.CallLogic
                 {
                     answerAppHostedMediaOutcomeEvent.RealTimeMediaWorkflow.Actions = new ActionBase[] { new Hangup(), };
                     answerAppHostedMediaOutcomeEvent.RealTimeMediaWorkflow.NotificationSubscriptions = new NotificationType[] { NotificationType.CallStateChange, NotificationType.RosterUpdate };
-                    string meetingUrl = "random";
-                    await JoinCall(meetingUrl).ConfigureAwait(false);
-
                 }
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] threw {ex.ToString()}");
                 throw;
             }
         }
+
+        private Task OnJoinCallReceived(RealTimeMediaWorkflow realTimeMediaWorkflow)
+        {
+            try
+            {
+
+                MediaSession = new MediaSession(CallId, CorrelationId, this);
+                (realTimeMediaWorkflow.Actions.FirstOrDefault() as JoinCallAppHostedMedia).MediaConfiguration =
+                    MediaSession.MediaConfiguration;
+                realTimeMediaWorkflow.NotificationSubscriptions = new NotificationType[]
+                {NotificationType.CallStateChange, NotificationType.RosterUpdate};
+
+            }
+            catch (Exception ex)
+            {
+                Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] threw {ex.ToString()}");
+                throw;
+            }
+            return Task.CompletedTask;
+
+        }
+
         private Task OnJoinCallAppHostedMediaCompleted(JoinCallAppHostedMediaOutcomeEvent outgoingJoinCallOutcomeEvent)
         {
             Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] OnJoinCallAppHostedMediaCompleted");
@@ -226,34 +247,6 @@ namespace FrontEnd.CallLogic
             RealTimeMediaCall temp;
             ActiveMediaCalls.TryRemove(CallId, out temp);
             return Task.CompletedTask;
-        }
-
-        /// <summary>
-        /// Join a multi-party conversation with given url
-        /// </summary>
-        /// <param name="meetingUrl">the url of the multi-party conversation to be joined</param>
-        /// <returns></returns>
-        internal async Task JoinCall(string meetingUrl)
-        {
-            try
-            {
-                MediaSession = new MediaSession(CallId, CorrelationId, this);
-                string displayName = DateTime.UtcNow.ToString();
-                var joinCallAction = new JoinCallAppHostedMedia()
-                {
-                    DisplayName = displayName,
-                    Hidden = false,
-                    JoinToken = meetingUrl,
-                    MediaConfiguration = MediaSession.MediaConfiguration,
-                    OperationId = Guid.NewGuid().ToString()
-                };
-                await CallService.JoinCall(joinCallAction).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] threw {ex.ToString()} in Join call action");
-                throw;
-            }
         }
 
         /// <summary>

@@ -34,7 +34,6 @@
       <Setting name="ServiceDnsName" />
       <Setting name="ServiceCNAME" /> <!-- CNAME pointing to the .cloudapp.net if available-->
       <Setting name="DefaultCertificate" />
-      <Setting name="APPINSIGHTS_INSTRUMENTATIONKEY" />
     </ConfigurationSettings>
     <Endpoints>
       <InputEndpoint name="DefaultEndpoint" protocol="tcp" port="443" localPort="9440" />
@@ -57,7 +56,6 @@
       <Certificate name="Default" storeLocation="LocalMachine" storeName="My" />
     </Certificates>
     <Imports>
-      <Import moduleName="RemoteAccess" />
       <Import moduleName="RemoteForwarder" />
     </Imports>
   </WorkerRole>
