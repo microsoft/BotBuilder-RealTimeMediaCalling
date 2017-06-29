@@ -43,6 +43,7 @@ using System.Threading.Tasks;
 using Autofac;
 using Microsoft.Bot.Builder.Calling.Exceptions;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
+using Microsoft.Bot.Builder.Calling.ObjectModel.Misc;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Misc;
@@ -327,10 +328,23 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }
         }
 
+        private async Task EndCall(string conversationId, Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall> currentCall)
+        {
+            var callEvent = new RealTimeMediaCallEvent(conversationId, currentCall.Item2);
+            await InvokeCallEvent(OnCallEnded, callEvent).ConfigureAwait(false);
+
+            Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall> callToRemove = null;
+            if(!ActiveCalls.TryRemove(conversationId, out callToRemove))
+            {
+                Trace.TraceWarning($"CallId {conversationId} not found");
+            }
+        }
+
         /// <summary>
         /// Method responsible for processing the data sent with POST request to callback URL
         /// </summary>
         /// <param name="content">The content of request</param>
+        /// <param name="skypeChainId">THe ID to associate a call across multiple processes</param>
         /// <returns>Returns the response that should be sent to the sender of POST request</returns>
         public async Task<ResponseResult> ProcessCallbackAsync(string content, string skypeChainId)
         {
@@ -402,6 +416,10 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             {
                 Trace.TraceWarning($"CallId {notification.Id} not found");
                 return new ResponseResult(ResponseType.NotFound);
+            }
+            if (notification.Type == NotificationType.CallStateChange && (notification as CallStateChangeNotification).CurrentState == CallState.Terminated)
+            {
+                await EndCall(notification.Id, currentCall).ConfigureAwait(false);
             }
             await currentCall.Item1.ProcessNotificationResult(notification).ConfigureAwait(false);
             return new ResponseResult(ResponseType.Accepted);
