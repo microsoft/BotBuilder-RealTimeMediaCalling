@@ -18,7 +18,7 @@ using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Bot.Connector;
 using FrontEnd.Http;
 
-namespace FrontEnd.CallLogic
+namespace FrontEnd.Call
 {
     /// <summary>
     /// This class does all the signaling needed to handle a call.
@@ -38,24 +38,25 @@ namespace FrontEnd.CallLogic
         /// <summary>
         /// Id generated locally that is unique to each RealTimeMediaCall
         /// </summary>
-        public string CallId => CallService.CurrentMediaSession.Id;
+        public readonly string CallId;
 
         /// <summary>
         /// CorrelationId that needs to be set in the media platform for correlating logs across services
         /// </summary>
-        public string CorrelationId => CallService.CorrelationId;
-
+        public readonly string CorrelationId;
+        
         public RealTimeMediaCall(IRealTimeMediaCallService callService)
         {
             if (callService == null)
                 throw new ArgumentNullException(nameof(callService));
 
             CallService = callService;
+            CorrelationId = callService.CorrelationId;
+            CallId = CorrelationId + ":" + Guid.NewGuid().ToString();
 
             //Register for the events 
             CallService.OnIncomingCallReceived += OnIncomingCallReceived;
-            CallService.OnAnswerSucceeded += OnAnswerSucceeded;
-            CallService.OnAnswerFailed += OnAnswerFailed;
+            CallService.OnAnswerAppHostedMediaCompleted += OnAnswerAppHostedMediaCompleted;
             CallService.OnCallStateChangeNotification += OnCallStateChangeNotification;
             CallService.OnCallCleanup += OnCallCleanup;
         }
@@ -64,28 +65,45 @@ namespace FrontEnd.CallLogic
         {
             Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] OnIncomingCallReceived");
 
-            var mediaSession = CallService.CreateMediaSession(NotificationType.CallStateChange);
-            MediaSession = new MediaSession(mediaSession);
-            incomingCallEvent.Answer(mediaSession);
+            MediaSession = new MediaSession(CallId, CorrelationId, this);
+            incomingCallEvent.RealTimeMediaWorkflow.Actions = new ActionBase[]
+                {
+                    new AnswerAppHostedMedia
+                    {
+                        MediaConfiguration = MediaSession.MediaConfiguration,
+                        OperationId = Guid.NewGuid().ToString()
+                    }
+                };
+
+            incomingCallEvent.RealTimeMediaWorkflow.NotificationSubscriptions = new NotificationType[] { NotificationType.CallStateChange};
 
             Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] Answering the call");
 
             return Task.CompletedTask;
         }
 
-        private Task OnAnswerSucceeded()
+        private Task OnAnswerAppHostedMediaCompleted(AnswerAppHostedMediaOutcomeEvent answerAppHostedMediaOutcomeEvent)
         {
-            Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] OnAnswerSucceded");
-            return Task.CompletedTask;
-        }
-
-        private Task OnAnswerFailed(AnswerAppHostedMediaOutcomeEvent answerFailedEvent)
-        {
-            var outcome = answerFailedEvent.AnswerAppHostedMediaOutcome;
-            Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] OnAnswerFailed failed with reason: {outcome.FailureReason}");
-            //cleanup internal resources
-            MediaSession.Dispose();
-            return Task.CompletedTask;
+            try
+            {
+                Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] OnAnswerAppHostedMediaCompleted");
+                AnswerAppHostedMediaOutcome answerAppHostedMediaOutcome = answerAppHostedMediaOutcomeEvent.AnswerAppHostedMediaOutcome;
+                if (answerAppHostedMediaOutcome.Outcome == Outcome.Failure)
+                {
+                    Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] AnswerAppHostedMedia failed with reason: {answerAppHostedMediaOutcome.FailureReason}");
+                    //cleanup internal resources
+                    MediaSession.Dispose();
+                }
+                else
+                {
+                    answerAppHostedMediaOutcomeEvent.RealTimeMediaWorkflow.NotificationSubscriptions = new NotificationType[] { NotificationType.CallStateChange};
+                }
+                return Task.CompletedTask;
+            } catch (Exception ex)
+            {
+                Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] threw {ex.ToString()}");
+                throw;
+            }
         }
 
         /// <summary>

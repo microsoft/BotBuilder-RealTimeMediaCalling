@@ -3,12 +3,12 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Threading.Tasks;
+using CorrelationId = FrontEnd.Logging.CorrelationId;
 using FrontEnd.Logging;
 using Microsoft.Skype.Bots.Media;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using CorrelationId = FrontEnd.Logging.CorrelationId;
+using System.Threading.Tasks;
 
 namespace FrontEnd.CallLogic
 {
@@ -85,7 +85,7 @@ namespace FrontEnd.CallLogic
         {
             _correlationId = correlationId;
             this.Id = id;
-            this.RealTimeMediaCall = call;
+            RealTimeMediaCall = call;
 
             Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{this.Id}]: Call created");
 
@@ -98,7 +98,7 @@ namespace FrontEnd.CallLogic
                     CallId = correlationId
                 });
 
-                Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{this.Id}]: Created AudioSocket");
+                Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{this.Id}]:Created AudioSocket");
 
                 // video socket
                 _videoSocket = new VideoSocket(new VideoSocketSettings
@@ -116,7 +116,7 @@ namespace FrontEnd.CallLogic
                 //Video socket events
                 _videoSocket.VideoMediaReceived += OnVideoMediaReceived;
 
-                this.MediaConfiguration = MediaPlatform.CreateMediaConfiguration(_audioSocket, _videoSocket);
+                MediaConfiguration = MediaPlatform.CreateMediaConfiguration(_audioSocket, _videoSocket);
 
                 Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{this.Id}]: MediaConfiguration={MediaConfiguration.ToString(Formatting.Indented)}");
             }

@@ -25,7 +25,6 @@ using Microsoft.Azure;
 using FrontEnd.Logging;
 using Microsoft.IdentityModel.Protocols;
 using System.Configuration;
-using System.Runtime.InteropServices;
 
 namespace WorkerRole
 {
@@ -40,14 +39,13 @@ namespace WorkerRole
         private const string InstanceMediaControlEndpointKey = "InstanceMediaControlEndpoint";
         private const string ServiceDnsNameKey = "ServiceDnsName";
 		private const string ServiceCNAMEKey = "ServiceCNAME";
-        private const string PlaceCallEndpointUrlKey = "PlaceCallEndpointUrl";
         private const string DefaultCertificateKey = "DefaultCertificate";
         private const string SpeechSubscriptionKey = "Skype.Bots.Speech.Subscription";
         private const string MicrosoftAppIdKey = "MicrosoftAppId";
         private const string MicrosoftAppPasswordKey = "MicrosoftAppPassword";
         private const string DefaultMicrosoftAppIdValue = "$MicrosoftAppId$";
         private const string DefaultMicrosoftAppPasswordValue = "$BotSecret$";
-        private const string DefaultPlaceCallEndpointUrl = "https://pma.plat.skype.com:6448/platform/v1/calls";
+
         //Prefix of the InstanceId from the RoleEnvironment 
         private const string InstanceIdToken = "in_";
 
@@ -77,8 +75,6 @@ namespace WorkerRole
 
         public Uri NotificationCallbackUrl { get; private set; }
 
-        public Uri PlaceCallEndpointUrl { get; private set; }
-
         public MediaPlatformSettings MediaPlatformSettings { get; private set; }
 
         public string MicrosoftAppId { get; private set; }
@@ -106,7 +102,6 @@ namespace WorkerRole
 			{
 				ServiceCNAME = ServiceDnsName;
 			}
-            PlaceCallEndpointUrl = new Uri(GetString(PlaceCallEndpointUrlKey, true)??DefaultPlaceCallEndpointUrl);
 
             X509Certificate2 defaultCertificate = GetCertificateFromStore(DefaultCertificateKey);
 
