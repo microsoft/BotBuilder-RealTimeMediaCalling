@@ -3,16 +3,14 @@
   <Role name="WorkerRole">
     <Instances count="1" />
     <ConfigurationSettings>
-      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=oasislync;AccountKey=$(_oasislync.key_)" />
-      <Setting name="ServiceDnsName" value="TixMeetingJoinBot.cloudapp.net" />
-      <!-- xyz.cloudapp.net-->
-      <Setting name="ServiceCNAME" value="TixMeetingJoinBot.cloudapp.net" />
-      <!-- CNAME pointing to the .cloudapp.net if available.-->
-      <Setting name="DefaultCertificate" value="4CBFE8E28CC022E1C8816492D175A13B42ADFF8E" />
+      <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=$storage$;AccountKey=$storageKey$" />
+      <Setting name="ServiceDnsName" value="$ServiceDnsName$" /> <!-- xyz.cloudapp.net-->
+      <Setting name="ServiceCNAME" value="" /> <!-- CNAME pointing to the .cloudapp.net if available.-->
+      <Setting name="DefaultCertificate" value="$CertificateThumbprint$" />
       <Setting name="Microsoft.WindowsAzure.Plugins.RemoteForwarder.Enabled" value="true" />
     </ConfigurationSettings>
     <Certificates>
-      <Certificate name="Default" thumbprint="4CBFE8E28CC022E1C8816492D175A13B42ADFF8E" thumbprintAlgorithm="sha1" />
+      <Certificate name="Default" thumbprint="$CertificateThumbprint$" thumbprintAlgorithm="sha1" />
     </Certificates>
   </Role>
   <NetworkConfiguration>

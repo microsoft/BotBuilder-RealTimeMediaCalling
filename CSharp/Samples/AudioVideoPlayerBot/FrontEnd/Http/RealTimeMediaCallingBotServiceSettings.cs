@@ -26,27 +26,10 @@ namespace FrontEnd.Http
         /// </summary>
         public Uri NotificationUrl { get; private set; }
 
-        /// <summary>
-        /// Url that the bot uses to make an outbound call request, used for both outgoing join or place call
-        /// For example "https://pma-dev-uswe-01.plat-dev.skype.net:6448/platform/v1/calls" 
-        /// </summary>
-        public Uri PlaceCallEndpointUrl { get; }
-
-        /// <summary>
-        /// BotId used to authenticate outgoing call requests to PMA
-        /// </summary>
-        public string BotId { get; }
-
-        /// <summary>
-        /// BotSecret used to authenticate outgoing call requests to PMA
-        /// </summary>
-        public string BotSecret { get; }
-
         public RealTimeMediaCallingBotServiceSettings()
         {
             CallbackUrl = Service.Instance.Configuration.CallControlCallbackUrl;
             NotificationUrl = Service.Instance.Configuration.NotificationCallbackUrl;
-            PlaceCallEndpointUrl = Service.Instance.Configuration.PlaceCallEndpointUrl;
         }
     }
 }

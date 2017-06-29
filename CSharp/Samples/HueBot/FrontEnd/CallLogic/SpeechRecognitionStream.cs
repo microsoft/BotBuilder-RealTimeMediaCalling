@@ -9,7 +9,7 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
 
-namespace FrontEnd.CallLogic
+namespace FrontEnd.Call
 {
     /// <summary>
     /// Stream to allow reading and writing simultaneously from different threads/tasks.

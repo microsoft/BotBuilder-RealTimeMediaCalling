@@ -9,13 +9,14 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using FrontEnd.Http;
 using FrontEnd.Logging;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Misc;
 using Microsoft.Bot.Builder.RealTimeMediaCalling;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
+using Microsoft.Bot.Connector;
+using FrontEnd.Http;
 
 namespace FrontEnd.CallLogic
 {
@@ -54,28 +55,15 @@ namespace FrontEnd.CallLogic
         /// </summary>
         public IRealTimeMediaCallService CallService { get; private set; }
 
-        private readonly string _callGuid = Guid.NewGuid().ToString();
-        private string _callId;
-
         /// <summary>
         /// Id generated locally that is unique to each RealTimeMediaCall
         /// </summary>
-        public string CallId
-        {
-            get
-            {
-                if (null == _callId)
-                {
-                    _callId = $"{CallService.CorrelationId}:{_callGuid}";
-                }
-                return _callId;
-            }
-        }
+        public readonly string CallId;
 
         /// <summary>
         /// CorrelationId that needs to be set in the media platform for correlating logs across services
         /// </summary>
-        public string CorrelationId => CallService.CorrelationId;
+        public readonly string CorrelationId;
 
         static RealTimeMediaCall()
         {
@@ -88,6 +76,8 @@ namespace FrontEnd.CallLogic
                 throw new ArgumentNullException(nameof(callService));
 
             CallService = callService;
+            CorrelationId = callService.CorrelationId;
+            CallId = CorrelationId + ":" + Guid.NewGuid().ToString();
 
             //Register for the events 
             CallService.OnIncomingCallReceived += OnIncomingCallReceived;
