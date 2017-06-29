@@ -84,6 +84,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             RealTimeMediaCallingModule_MakeBot.Register(Container, settings, makeBot, makeCall);
         }
 
+        public static IRealTimeMediaBot GetBot()
+        {
+            return Container.Resolve<IRealTimeMediaBot>();
+        }
+
         /// <summary>
         /// Process an incoming request
         /// </summary>

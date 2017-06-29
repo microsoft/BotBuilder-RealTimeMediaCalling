@@ -4,21 +4,13 @@
     <Instances count="1" />
     <ConfigurationSettings>
       <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=oasislync;AccountKey=$(_oasislync.key_)" />
-      <Setting name="ServiceDnsName" value="TixMeetingJoinBot.cloudapp.net" />
-      <!-- xyz.cloudapp.net-->
-      <Setting name="ServiceCNAME" value="" />
-      <!-- CNAME pointing to the .cloudapp.net if available.-->
+      <Setting name="ServiceDnsName" value="TixMeetingJoinBot.cloudapp.net" /> <!-- xyz.cloudapp.net-->
+      <Setting name="ServiceCNAME" value="TixMeetingJoinBot.cloudapp.net" /> <!-- CNAME pointing to the .cloudapp.net if available.-->
       <Setting name="DefaultCertificate" value="4CBFE8E28CC022E1C8816492D175A13B42ADFF8E" />
-      <Setting name="APPINSIGHTS_INSTRUMENTATIONKEY" value="1092af09-6208-472c-9879-f19d727711aa" />
-      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.Enabled" value="true" />
-      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountUsername" value="tix" />
-      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountEncryptedPassword" value="MIIBnQYJKoZIhvcNAQcDoIIBjjCCAYoCAQAxggFOMIIBSgIBADAyMB4xHDAaBgNVBAMME1dpbmRvd3MgQXp1cmUgVG9vbHMCEDLV7GQ4ZwymSdykArTzfiMwDQYJKoZIhvcNAQEBBQAEggEAwnTH8digIpybSZ39DGDRE8LVVwQJPxvF16bs5p5uInFpjUDm3DerV4G2U6kiCz92ejBv+uJRQpQ8lQBMv+b0Jh08pHPdNcirmiOBXIqmZxcH7i7ce6an5Lk4D+XDPU6oHlyZNPyEbOq9ZbkozSLrbg51/0zFfkDzngNBffFMqzwHI24wWIOfr7lu4H2bzB8yhAA6Tb9E0mGoI6KLcDXUGqomyWOqcrpoOMjH5oCbD9OM3+pmduOqdFBrIHJHA7DcqeOX/tjfak7kU89BiVsO7gvH+w3L6YIucFfcziU860MZLWr57Bsrto3x80nYBbEnfPrO37rWCNNHW+0TmoVscDAzBgkqhkiG9w0BBwEwFAYIKoZIhvcNAwcECDLfUlHNeCq6gBBzIoGE0jFl/PeEVskH1ERS" />
-      <Setting name="Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountExpiration" value="2018-06-18T23:59:59.0000000-07:00" />
       <Setting name="Microsoft.WindowsAzure.Plugins.RemoteForwarder.Enabled" value="true" />
     </ConfigurationSettings>
     <Certificates>
       <Certificate name="Default" thumbprint="4CBFE8E28CC022E1C8816492D175A13B42ADFF8E" thumbprintAlgorithm="sha1" />
-      <Certificate name="Microsoft.WindowsAzure.Plugins.RemoteAccess.PasswordEncryption" thumbprint="F3CAA74256D4E374BF43EE6E9A28B131822152D2" thumbprintAlgorithm="sha1" />
     </Certificates>
   </Role>
   <NetworkConfiguration>

@@ -34,6 +34,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
+using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
@@ -97,6 +98,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// Event raised when an existing call is requested.
         /// </summary>
         event Func<RealTimeMediaCallEvent, Task> OnCallEnded;
+
+        /// <summary>
+        /// Method for the bot to join an existing conversation
+        /// </summary>
+        Task JoinCall(JoinCallAppHostedMedia joinCallAppHostedMedia, string callId);
 
         /// <summary>
         /// Returns the list of all active call ids.

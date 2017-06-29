@@ -35,6 +35,10 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using Autofac;
 using Microsoft.Bot.Builder.Calling.Exceptions;
@@ -42,6 +46,8 @@ using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Misc;
+using Microsoft.Skype.Calling.Common.Logging;
+using Microsoft.Skype.Calling.ServiceAgents.MSA;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
@@ -54,6 +60,13 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// The autofac lifetime scope.
         /// </summary>
         private readonly ILifetimeScope _scope;
+
+        /// <summary>
+        /// The global settings for the RTM SDK.
+        /// </summary>
+        private readonly IRealTimeMediaCallServiceSettings _settings;
+
+        private readonly Uri _defaultPlaceCallEndpointUrl = new Uri("https://pma.plat.skype.com:6448/platform/v1/calls");
 
         /// <summary>
         /// Event raised when a new call is created.
@@ -101,12 +114,16 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// Instantiates the call processor
         /// </summary>
         /// <param name="scope">The autofac lifetime scope</param>
-        public RealTimeMediaBotService(ILifetimeScope scope)
+        public RealTimeMediaBotService(ILifetimeScope scope, IRealTimeMediaCallServiceSettings settings)
         {
             if (null == scope)
                 throw new ArgumentNullException(nameof(scope));
 
+            if (null == settings)
+                throw new ArgumentNullException(nameof(settings));
+
             _scope = scope;
+            _settings = settings;
             ActiveCalls = new ConcurrentDictionary<string, Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall>>();
         }
 
@@ -117,6 +134,92 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 await eventHandler.Invoke(callEvent).ConfigureAwait(false);
             }
         }
+
+        /// <summary>
+        /// method for processing an outgoing join call request
+        /// </summary>
+        /// <param name="joinCallAppHostedMedia">Object contains</param>
+        /// <param name="callId">call id of the call to be joined</param>
+        public async Task JoinCall(JoinCallAppHostedMedia joinCallAppHostedMedia, string callId)
+        {
+            ///TODO remove callId in the parameter after mediaSession has been migrated into SDK
+            if (joinCallAppHostedMedia != null && joinCallAppHostedMedia.JoinToken == null)
+            {
+                throw new InvalidOperationException("No meeting link was present in the joinCallAppHostedMedia");
+            }
+
+            var callLegId = Guid.NewGuid().ToString();
+            var correlationId = callId;
+            var currentCall = CreateCall(callLegId, correlationId);
+
+            var workFlow = new RealTimeMediaWorkflow();
+            workFlow.Actions = new ActionBase[]
+            {
+                joinCallAppHostedMedia
+            };
+            await currentCall.Item1.HandleJoinCall(workFlow).ConfigureAwait(false);
+            await AddCall(correlationId, currentCall).ConfigureAwait(false);
+
+            HttpContent content = new StringContent(RealTimeMediaSerializer.SerializeToJson(workFlow), Encoding.UTF8, "application/json");
+
+            var placeCallEndpointUrl = _settings.PlaceCallEndpointUrl;
+            if (null == placeCallEndpointUrl)
+            {
+                placeCallEndpointUrl = _defaultPlaceCallEndpointUrl;
+            }
+
+            //join call
+            try
+            {
+                Trace.TraceInformation(
+                        "RealTimeMediaBotService :Sending join call request");
+
+                //TODO: add retries & logging
+                using (var request = new HttpRequestMessage(HttpMethod.Post, placeCallEndpointUrl) { Content = content })
+                {
+                    var token = await GetBotToken(_settings.BotId, _settings.BotSecret).ConfigureAwait(false);
+
+                    request.Headers.Add("X-Microsoft-Skype-Chain-ID", correlationId);
+                    request.Headers.Add("X-Microsoft-Skype-Message-ID", Guid.NewGuid().ToString());
+                    //TODO make this an http factory and inject it to the call service and bot service
+                    var client = RealTimeMediaCallService.GetHttpClient();
+
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                    var response = await client.SendAsync(request).ConfigureAwait(false);
+                    response.EnsureSuccessStatusCode();
+                    Trace.TraceInformation($"RealTimeMediaBotService [{correlationId}]: Response to join call: {response}");
+
+                }
+            }
+            catch (Exception exception)
+            {
+                Trace.TraceError($"RealTimeMediaBotService [{correlationId}]: Received error while sending request to subscribe participant. Message: {exception}");
+                throw;
+            }
+
+        }
+        /// <summary>
+        /// Method to obtain bot token from AAD
+        /// </summary>
+        /// <param name="botId"></param>
+        /// <param name="botSecret"></param>
+        /// <returns></returns>
+        internal async Task<string> GetBotToken(string botId, string botSecret)
+        {
+            using (var tokenClient = new MsaAuthTokenService(
+                new Uri(@"https://login.microsoftonline.com/common/oauth2/v2.0/token"),
+                botId,
+                botSecret,
+                @"https://api.botframework.com/.default",
+                null))
+            {
+                await tokenClient.Init().ConfigureAwait(false);
+                var accessToken = tokenClient.Token;
+                return accessToken;
+            }
+        }
+
 
         /// <summary>
         /// Method responsible for processing the data sent with POST request to incoming call URL
@@ -201,8 +304,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 throw new InvalidOperationException("The call was not resolved correctly.");
             }
 
-            var currentCall = new Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall>(callService, call);
-            return currentCall;
+            return new Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall>(callService, call);
         }
 
         private async Task AddCall(string conversationId, Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall> currentCall)
@@ -254,27 +356,8 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 return new ResponseResult(ResponseType.BadRequest);
             }
 
-            Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall> currentCall;
-            //we need to extract the ID here from the ConversationResult and cache it since the ID was not available when we were sending the JoinCall request
-            if (conversationResult.OperationOutcome.Type == RealTimeMediaValidOutcomes.JoinCallAppHostedMediaOutcome)
-            {
-                var callLegId = conversationResult.Id;
-                string correlationId;
-                if (string.IsNullOrEmpty(skypeChainId))
-                {
-                    correlationId = Guid.NewGuid().ToString();
-                    Trace.TraceWarning(
-                        $"RealTimeMediaCallService No SkypeChainId found. Generating {correlationId}");
-                }
-                else
-                {
-                    correlationId = skypeChainId;
-                }
-
-                currentCall = CreateCall(callLegId, correlationId);
-                await AddCall(conversationResult.Id, currentCall).ConfigureAwait(false);
-            }
-            else if (!ActiveCalls.TryGetValue(conversationResult.Id, out currentCall))
+            Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall> currentCall =null;
+            if (!ActiveCalls.TryGetValue(conversationResult.Id, out currentCall))
             {
                 Trace.TraceWarning($"CallId {conversationResult.Id} not found");
                 return new ResponseResult(ResponseType.NotFound);
@@ -320,7 +403,6 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 Trace.TraceWarning($"CallId {notification.Id} not found");
                 return new ResponseResult(ResponseType.NotFound);
             }
-
             await currentCall.Item1.ProcessNotificationResult(notification).ConfigureAwait(false);
             return new ResponseResult(ResponseType.Accepted);
         }
