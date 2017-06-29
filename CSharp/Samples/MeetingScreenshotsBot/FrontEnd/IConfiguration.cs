@@ -47,11 +47,6 @@ namespace FrontEnd
         Uri NotificationCallbackUrl { get; }
 
         /// <summary>
-        /// The remote endpoint that any outgoing call targets
-        /// </summary>
-        Uri PlaceCallEndpointUrl { get; }
-
-        /// <summary>
         /// Base url for this particular azure instance
         /// </summary>
         Uri AzureInstanceBaseUrl { get; }

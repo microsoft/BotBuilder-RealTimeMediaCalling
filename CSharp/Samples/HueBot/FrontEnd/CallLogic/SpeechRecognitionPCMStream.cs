@@ -6,7 +6,7 @@
 
 using System.IO;
 
-namespace FrontEnd.CallLogic
+namespace FrontEnd.Call
 {
     /// <summary>
     /// This class creates stream with wav header included. Mainly used for

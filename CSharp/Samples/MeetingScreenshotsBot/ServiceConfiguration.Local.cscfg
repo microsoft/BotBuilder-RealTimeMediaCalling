@@ -6,11 +6,11 @@
       <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" value="DefaultEndpointsProtocol=https;AccountName=$storage$;AccountKey=$storageKey$" />
       <Setting name="ServiceDnsName" value="$ServiceDnsName$" /> <!-- xyz.cloudapp.net-->
       <Setting name="ServiceCNAME" value="" /> <!-- CNAME pointing to the .cloudapp.net if available.-->
-      <Setting name="DefaultCertificate" value="0000000000000000000000000000000000000000" />
+      <Setting name="DefaultCertificate" value="$CertificateThumbprint$" />
       <Setting name="Microsoft.WindowsAzure.Plugins.RemoteForwarder.Enabled" value="true" />
     </ConfigurationSettings>
     <Certificates>
-      <Certificate name="Default" thumbprint="0000000000000000000000000000000000000000" thumbprintAlgorithm="sha1" />
+      <Certificate name="Default" thumbprint="$CertificateThumbprint$" thumbprintAlgorithm="sha1" />
     </Certificates>
   </Role>
 </ServiceConfiguration>
