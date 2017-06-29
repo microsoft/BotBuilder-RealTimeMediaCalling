@@ -201,7 +201,18 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             result = await service.ProcessCallbackAsync(acceptCallbackJson, null);
             Assert.AreEqual(ResponseType.Accepted, result.ResponseType);
 
-            // TODO: There is no cleanup task, as far as I can tell.
+            var notificationJson = @"
+{
+  ""id"": ""0b022b87-f255-4667-9335-2335f30ee8de"",
+  ""currentState"": ""terminated"",
+  ""stateChangeCode"": ""0"",
+  ""type"": ""callStateChange"",
+}";
+
+            result = await service.ProcessNotificationAsync(notificationJson).ConfigureAwait(false);
+            var call4 = service.GetCallForId("0b022b87-f255-4667-9335-2335f30ee8de");
+            Assert.AreEqual(ResponseType.Accepted, result.ResponseType);
+            Assert.Null(call4);
         }
 
         private class JoinCallRealTimeMediaBotService : RealTimeMediaBotService
@@ -277,8 +288,6 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             Assert.IsTrue(call3.CallId.StartsWith(call3.CorrelationId));
             Assert.AreNotEqual(call1, call3);
             Assert.AreNotEqual(call2, call3);
-
-            // TODO: There is no cleanup task, as far as I can tell.
         }
     }
 }

@@ -102,8 +102,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 settings,
                 makeBot,
                 makeCall);
-        }
+	}
 
+        /// <summary>
+        /// Method to return a registered bot
+        /// </summary>
         public static IRealTimeMediaBot GetBot()
         {
             return Container.Resolve<IRealTimeMediaBot>();
