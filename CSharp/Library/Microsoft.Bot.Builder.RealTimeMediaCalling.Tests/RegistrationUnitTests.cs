@@ -54,11 +54,6 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
                 CallId = $"{service.CorrelationId}:{Guid.NewGuid()}";
             }
 
-            private Task OnAnswerSucceeded()
-            {
-                return Task.CompletedTask;
-            }
-
             private Task OnIncomingCallReceived(RealTimeMediaIncomingCallEvent realTimeMediaIncomingCallEvent)
             {
                 var mediaSession = CallService.CreateMediaSession(NotificationType.CallStateChange);
@@ -74,6 +69,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
                 var audioSocket = mediaSession.SetAudioSocket(new AudioSocketSettings());
                 audioSocket.AudioMediaReceived += AudioSocket_AudioMediaReceived;
                 realTimeMediaJoinCallEvent.Answer(mediaSession);
+                return Task.CompletedTask;
+            }
+
+            private Task OnAnswerSucceeded()
+            {
                 return Task.CompletedTask;
             }
 

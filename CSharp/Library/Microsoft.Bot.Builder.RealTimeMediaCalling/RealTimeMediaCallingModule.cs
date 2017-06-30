@@ -38,13 +38,27 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
     public static class RealTimeMediaCallingScope
     {
-        public static readonly object LifetimeScopeTag = typeof(RealTimeMediaCallingScope);
+        public static object LifetimeScopeTag { get; private set; }
 
-        public static ILifetimeScope BeginLifetimeScope(ILifetimeScope scope, HttpRequestMessage request)
+        static RealTimeMediaCallingScope()
         {
-            var inner = scope.BeginLifetimeScope(LifetimeScopeTag);
-            inner.Resolve<HttpRequestMessage>(TypedParameter.From(request));
+            LifetimeScopeTag = typeof(RealTimeMediaCallingScope);
+        }
+
+        public static ILifetimeScope BeginLifetimeScope(ILifetimeScope scope, object scopeTag, HttpRequestMessage request = null)
+        {
+            LifetimeScopeTag = scopeTag;
+            var inner = scope.BeginLifetimeScope(scopeTag);
+            if (request != null)
+            {
+                inner.Resolve<HttpRequestMessage>(TypedParameter.From(request));
+            }
             return inner;
+        }
+
+        internal static ILifetimeScope BeginLifetimeScope(ILifetimeScope scope, HttpRequestMessage request)
+        {
+            return BeginLifetimeScope(scope, LifetimeScopeTag, request);
         }
     }
 
@@ -55,6 +69,18 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         where TBotService : IInternalRealTimeMediaBotService
         where TCallService : IInternalRealTimeMediaCallService
     {
+        public readonly object LifetimeScopeTag;
+
+        public RealTimeMediaCallingModule(object scopeTag)
+        {
+            LifetimeScopeTag = scopeTag;
+        }
+
+        public RealTimeMediaCallingModule()
+            : this(RealTimeMediaCallingScope.LifetimeScopeTag)
+        {
+        }
+
         protected override void Load(ContainerBuilder builder)
         {
             base.Load(builder);
@@ -62,17 +88,17 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             builder
                .Register((c, p) => p.TypedAs<HttpRequestMessage>())
                .AsSelf()
-               .InstancePerMatchingLifetimeScope(RealTimeMediaCallingScope.LifetimeScopeTag);
+               .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
 
             builder
                .RegisterType<RealTimeMediaCallingContext>()
                .AsSelf()
-                .InstancePerMatchingLifetimeScope(RealTimeMediaCallingScope.LifetimeScopeTag);
+                .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
 
             builder
                 .Register((c, p) => p.TypedAs<RealTimeMediaCallServiceParameters>())
                 .AsSelf()
-                .InstancePerMatchingLifetimeScope(RealTimeMediaCallingScope.LifetimeScopeTag);
+                .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
 
             builder
                 .RegisterType<TBotService>()
@@ -84,13 +110,18 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 .RegisterType<TCallService>()
                 .As<IInternalRealTimeMediaCallService>()
                 .As<IRealTimeMediaCallService>()
-                .InstancePerMatchingLifetimeScope(RealTimeMediaCallingScope.LifetimeScopeTag);
+                .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
         }
     }
 
     public sealed class RealTimeMediaCallingModule : Module
-    { 
-        private static Module _innerModule = new RealTimeMediaCallingModule<RealTimeMediaBotService,RealTimeMediaCallService>();
+    {
+        private readonly Module _innerModule;
+
+        public RealTimeMediaCallingModule(object scopeTag)
+        {
+            _innerModule = new RealTimeMediaCallingModule<RealTimeMediaBotService, RealTimeMediaCallService>(scopeTag);
+        }
 
         protected override void Load(ContainerBuilder builder)
         {
