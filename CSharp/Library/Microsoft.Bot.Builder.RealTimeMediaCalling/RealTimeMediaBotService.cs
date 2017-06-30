@@ -154,16 +154,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             var correlationId = callId;
             var currentCall = CreateCall(callLegId, correlationId);
 
-            var workFlow = new RealTimeMediaWorkflow();
-            workFlow.Actions = new ActionBase[]
-            {
-                joinCallAppHostedMedia
-            };
-            await currentCall.Item1.HandleJoinCall(workFlow).ConfigureAwait(false);
+            var workflow = await currentCall.Item1.HandleJoinCall(joinCallAppHostedMedia).ConfigureAwait(false);
 
             await AddCall(correlationId, currentCall).ConfigureAwait(false);
 
-            HttpContent content = new StringContent(RealTimeMediaSerializer.SerializeToJson(workFlow), Encoding.UTF8, "application/json");
+            HttpContent content = new StringContent(RealTimeMediaSerializer.SerializeToJson(workflow), Encoding.UTF8, "application/json");
 
             await PlaceCall(content, correlationId).ConfigureAwait(false);
         }

@@ -91,12 +91,14 @@ namespace FrontEnd.CallLogic
 
             //Register for the events 
             CallService.OnIncomingCallReceived += OnIncomingCallReceived;
+            CallService.OnJoinCallReceived += OnJoinCallReceived;
+
             CallService.OnAnswerAppHostedMediaCompleted += OnAnswerAppHostedMediaCompleted;
+            CallService.OnJoinCallAppHostedMediaCompleted += OnJoinCallAppHostedMediaCompleted;
+
             CallService.OnCallStateChangeNotification += OnCallStateChangeNotification;
             CallService.OnRosterUpdateNotification += OnRosterUpdateNotification;
             CallService.OnCallCleanup += OnCallCleanup;
-            CallService.OnJoinCallAppHostedMediaCompleted += OnJoinCallAppHostedMediaCompleted;
-            CallService.OnJoinCallReceived += OnJoinCallReceived;
         }
 
         private Task OnIncomingCallReceived(RealTimeMediaIncomingCallEvent incomingCallEvent)
@@ -125,6 +127,27 @@ namespace FrontEnd.CallLogic
             return Task.CompletedTask;
         }
 
+        private Task OnJoinCallReceived(RealTimeMediaWorkflow realTimeMediaWorkflow)
+        {
+            try
+            {
+
+                MediaSession = new MediaSession(CallId, CorrelationId, this);
+                (realTimeMediaWorkflow.Actions.FirstOrDefault() as JoinCallAppHostedMedia).MediaConfiguration =
+                    MediaSession.MediaConfiguration;
+                realTimeMediaWorkflow.NotificationSubscriptions = new NotificationType[]
+                    {NotificationType.CallStateChange, NotificationType.RosterUpdate};
+
+            }
+            catch (Exception ex)
+            {
+                Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] threw {ex.ToString()}");
+                throw;
+            }
+            return Task.CompletedTask;
+
+        }
+
         private async Task OnAnswerAppHostedMediaCompleted(AnswerAppHostedMediaOutcomeEvent answerAppHostedMediaOutcomeEvent)
         {
             try
@@ -148,27 +171,6 @@ namespace FrontEnd.CallLogic
                 Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] threw {ex.ToString()}");
                 throw;
             }
-        }
-
-        private Task OnJoinCallReceived(RealTimeMediaWorkflow realTimeMediaWorkflow)
-        {
-            try
-            {
-
-                MediaSession = new MediaSession(CallId, CorrelationId, this);
-                (realTimeMediaWorkflow.Actions.FirstOrDefault() as JoinCallAppHostedMedia).MediaConfiguration =
-                    MediaSession.MediaConfiguration;
-                realTimeMediaWorkflow.NotificationSubscriptions = new NotificationType[]
-                {NotificationType.CallStateChange, NotificationType.RosterUpdate};
-
-            }
-            catch (Exception ex)
-            {
-                Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{CallId}] threw {ex.ToString()}");
-                throw;
-            }
-            return Task.CompletedTask;
-
         }
 
         private Task OnJoinCallAppHostedMediaCompleted(JoinCallAppHostedMediaOutcomeEvent outgoingJoinCallOutcomeEvent)

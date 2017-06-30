@@ -289,6 +289,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Events\RealTimeMediaCallEvent.cs" />
+    <Compile Include="Events\RealTimeMediaJoinCallEvent.cs" />
     <Compile Include="IRealTimeMediaBot.cs" />
     <Compile Include="IRealTimeMediaCall.cs" />
     <Compile Include="IRealTimeMediaBotService.cs" />

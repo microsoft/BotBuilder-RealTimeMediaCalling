@@ -56,6 +56,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         {
             this.Type = RealTimeMediaValidOutcomes.JoinCallAppHostedMediaOutcome;
         }
+
         /// <summary>
         /// Validation for JoinCallAppHostedMediaOutcome
         /// </summary>

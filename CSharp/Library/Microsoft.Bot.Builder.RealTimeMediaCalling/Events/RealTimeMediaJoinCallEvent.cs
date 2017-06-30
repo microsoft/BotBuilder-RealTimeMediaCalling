@@ -40,26 +40,25 @@ using System.Collections.Generic;
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
 {
     /// <summary>
-    /// EventArg for the OnIncomingCallReceived event raised on <see cref="IRealTimeMediaCallService"/>.
+    /// EventArg for the OnJoinCallReceived event raised on <see cref="IRealTimeMediaCallService"/>.
     /// </summary>
-    public class RealTimeMediaIncomingCallEvent : IncomingCallEvent
+    public class RealTimeMediaJoinCallEvent
     {
         /// <summary>
         /// Workflow associated with the event
         /// </summary>
-        private RealTimeMediaWorkflow RealTimeMediaWorkflow => 
-            ResultingWorkflow as RealTimeMediaWorkflow;
+        public JoinCallAppHostedMedia JoinCall { get; }
 
         internal IReadOnlyMediaSession MediaSession { get; private set; }
 
         /// <summary>
-        /// EventArg for the RealTimeMediaIncomingCallEvent event raised on <see cref="IRealTimeMediaCallService"/>.
+        /// EventArg for the RealTimeMediaJoinCallEvent event raised on <see cref="IRealTimeMediaCallService"/>.
         /// </summary>
         /// <param name="conversation">Conversation for the incoming call</param>
         /// <param name="resultingWorkflow">Workflow to be returned on completion</param>
-        public RealTimeMediaIncomingCallEvent(Conversation conversation, RealTimeMediaWorkflow resultingWorkflow)
-            : base(conversation, resultingWorkflow)
+        public RealTimeMediaJoinCallEvent(JoinCallAppHostedMedia joinCall)
         {
+            JoinCall = joinCall;
         }
 
         public void Answer(IReadOnlyMediaSession mediaSession)
@@ -69,42 +68,41 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
                 throw new ArgumentNullException(nameof(mediaSession));
             }
 
-            IList<IVideoSocket> videoSockets = mediaSession.VideoSockets?.Count > 0 
-                ? new List<IVideoSocket>(mediaSession.VideoSockets) 
-                : null;
-
-            var mediaConfiguration = MediaPlatform.CreateMediaConfiguration(
-                mediaSession.AudioSocket,
-                videoSockets,
-                mediaSession.VbssSocket);
-
-            this.RealTimeMediaWorkflow.Actions = new ActionBase[]
-            {
-                new AnswerAppHostedMedia
-                {
-                    MediaConfiguration = mediaConfiguration,
-                    OperationId = Guid.NewGuid().ToString()
-                }
-            };
-
-            this.MediaSession = mediaSession;
-            this.RealTimeMediaWorkflow.NotificationSubscriptions = mediaSession.Subscriptions;
+            MediaSession = mediaSession;
         }
 
         public void Reject()
         {
-            this.RealTimeMediaWorkflow.Actions = new ActionBase[]
-            {
-                new Reject()
-                {
-                    OperationId = Guid.NewGuid().ToString()
-                }
-            };
         }
 
-        public void Transfer()
+        internal Workflow CreateWorkflow()
         {
-            throw new NotImplementedException();
+            if (null == this.MediaSession)
+            {
+                return null;
+            }
+
+            IList<IVideoSocket> videoSockets = this.MediaSession.VideoSockets?.Count > 0
+                ? new List<IVideoSocket>(this.MediaSession.VideoSockets)
+                : null;
+            var mediaConfiguration = MediaPlatform.CreateMediaConfiguration(
+                this.MediaSession.AudioSocket,
+                videoSockets,
+                this.MediaSession.VbssSocket);
+
+            this.JoinCall.MediaConfiguration = mediaConfiguration;
+            this.JoinCall.OperationId = Guid.NewGuid().ToString();
+
+            var workflow = new RealTimeMediaWorkflow
+            {
+                Actions = new ActionBase[]
+                {
+                    this.JoinCall
+                },
+                NotificationSubscriptions = this.MediaSession.Subscriptions
+            };
+
+            return workflow;
         }
     }
 }

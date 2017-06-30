@@ -49,19 +49,19 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         string CorrelationId { get; }
 
         /// <summary>
-        /// Event raised when bot receives incoming call
-        /// </summary>
-        event Func<RealTimeMediaIncomingCallEvent, Task> OnIncomingCallReceived;
-
-        /// <summary>
         /// Event raised when specified workflow fails to be validated by Bot platform
         /// </summary>
         event Func<RealTimeMediaWorkflowValidationOutcomeEvent, Task> OnWorkflowValidationFailed;
 
         /// <summary>
-        /// Event raised when the bot gets the outcome of AnswerAppHostedMedia action. If the operation was successful the call is established
+        /// Event raised when bot receives incoming call
         /// </summary>
-//        event Func<AnswerAppHostedMediaOutcomeEvent, Task> OnAnswerAppHostedMediaCompleted;
+        event Func<RealTimeMediaIncomingCallEvent, Task> OnIncomingCallReceived;
+
+        /// <summary>
+        /// Event raised when the bot receives a request to make a join call
+        /// </summary>
+        event Func<RealTimeMediaJoinCallEvent, Task> OnJoinCallReceived;
 
         /// <summary>
         /// Event raised when the bot gets the outcome of AnswerAppHostedMedia action and the call is established.
@@ -74,14 +74,9 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         event Func<AnswerAppHostedMediaOutcomeEvent, Task> OnAnswerFailed;
 
         /// <summary>
-        /// Event raised when the bot receives a request to make a join call
+        /// Event raised when the bot gets the outcome of JoinCallAppHostedMedia action but the call failed.
         /// </summary>
-        event Func<RealTimeMediaWorkflow, Task> OnJoinCallReceived;
-
-        /// <summary>
-        /// Event raised when the bot gets the outcome of JoinCallAppHostedMedia action. If the operation was successful the call is established
-        /// </summary>
-        event Func<JoinCallAppHostedMediaOutcomeEvent, Task> OnJoinCallAppHostedMediaCompleted;
+        event Func<JoinCallAppHostedMediaOutcomeEvent, Task> OnJoinCallFailed;
 
         /// <summary>
         /// Event raised when the bot gets call state change notification
@@ -130,8 +125,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
         Task<Workflow> HandleIncomingCall(Conversation conversation);
 
-        //TODO change this when media library is integrated into SDK
-        Task HandleJoinCall(RealTimeMediaWorkflow realTimeMediaWorkflow);
+        Task<Workflow> HandleJoinCall(JoinCallAppHostedMedia call);
 
         Task<string> ProcessConversationResult(ConversationResult conversationResult);
 

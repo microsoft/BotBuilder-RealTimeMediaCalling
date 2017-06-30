@@ -65,24 +65,15 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
                 var audioSocket = mediaSession.SetAudioSocket(new AudioSocketSettings());
                 audioSocket.AudioMediaReceived += AudioSocket_AudioMediaReceived;
                 realTimeMediaIncomingCallEvent.Answer(mediaSession);
-
                 return Task.CompletedTask;
             }
 
-            private Task OnJoinCallReceived(RealTimeMediaWorkflow realTimeMediaWorkflow)
+            private Task OnJoinCallReceived(RealTimeMediaJoinCallEvent realTimeMediaJoinCallEvent)
             {
-                JObject mediaConfiguration;
-                using (var writer = new JTokenWriter())
-                {
-                    writer.WriteRaw("MediaConfiguration");
-                    mediaConfiguration = new JObject { { "Token", writer.Token } };
-                }
-
-                var joinCall = realTimeMediaWorkflow.Actions.FirstOrDefault() as JoinCallAppHostedMedia;
-                joinCall.MediaConfiguration = mediaConfiguration;
-                realTimeMediaWorkflow.NotificationSubscriptions = new NotificationType[]
-                    {NotificationType.CallStateChange, NotificationType.RosterUpdate};
-
+                var mediaSession = CallService.CreateMediaSession(NotificationType.CallStateChange);
+                var audioSocket = mediaSession.SetAudioSocket(new AudioSocketSettings());
+                audioSocket.AudioMediaReceived += AudioSocket_AudioMediaReceived;
+                realTimeMediaJoinCallEvent.Answer(mediaSession);
                 return Task.CompletedTask;
             }
 
