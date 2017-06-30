@@ -65,7 +65,8 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// </summary>
         private readonly IRealTimeMediaCallServiceSettings _settings;
 
-        private readonly Uri _defaultPlaceCallEndpointUrl = new Uri("https://pma.plat.skype.com:6448/platform/v1/calls");
+        private readonly Uri _defaultProdPlaceCallEndpointUrl = new Uri("https://pma.plat.skype.com:6448/platform/v1/calls");
+        private readonly Uri _defaultDevPlaceCallEndpointUrl = new Uri("https://pma-dev-uswe-01.plat-dev.skype.net:6448/platform/v1/calls");
 
         /// <summary>
         /// Event raised when a new call is created.
@@ -146,8 +147,13 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             var callLegId = Guid.NewGuid().ToString();
             var correlationId = callId;
             var currentCall = CreateCall(callLegId, correlationId);
+            joinCallAppHostedMedia.OperationId = Guid.NewGuid().ToString();
 
             var workFlow = new RealTimeMediaWorkflow();
+            workFlow.Links = new CallbackLink() { Callback = _settings.CallbackUrl, Notification = _settings.NotificationUrl };
+            workFlow.AppState = callLegId;
+            workFlow.NotificationSubscriptions = new List<NotificationType>() { NotificationType.CallStateChange };
+
             workFlow.Actions = new ActionBase[]
             {
                 joinCallAppHostedMedia
@@ -166,7 +172,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             var placeCallEndpointUrl = _settings.PlaceCallEndpointUrl;
             if (null == placeCallEndpointUrl)
             {
-                placeCallEndpointUrl = _defaultPlaceCallEndpointUrl;
+                placeCallEndpointUrl = _defaultDevPlaceCallEndpointUrl;
             }
 
             //place the call

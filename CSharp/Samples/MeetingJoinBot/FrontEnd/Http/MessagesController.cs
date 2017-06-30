@@ -36,7 +36,6 @@ namespace FrontEnd.Http
             BotAccount = activity.Recipient;
             Log.Info(new CallerInfo(), LogContext.FrontEnd, $"Received chat message.. checking if there is an active media call for this thread");
             var bot = RealTimeMediaCalling.GetBot();
-
             await RealTimeMediaCall.SendUrlForConversationId(activity.Conversation.Id);
             
             return new HttpResponseMessage(System.Net.HttpStatusCode.Accepted);
