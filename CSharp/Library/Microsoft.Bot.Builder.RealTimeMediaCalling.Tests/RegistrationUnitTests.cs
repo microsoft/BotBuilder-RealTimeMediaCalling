@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Net.Http;
 using System.Threading.Tasks;
-using Autofac;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Skype.Bots.Media;
