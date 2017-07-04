@@ -59,19 +59,24 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         event Func<RealTimeMediaIncomingCallEvent, Task> OnIncomingCallReceived;
 
         /// <summary>
-        /// Event raised when the bot receives a request to make a join call
-        /// </summary>
-        event Func<RealTimeMediaJoinCallEvent, Task> OnJoinCallReceived;
-
-        /// <summary>
         /// Event raised when the bot gets the outcome of AnswerAppHostedMedia action and the call is established.
         /// </summary>
-        event Func<Task> OnAnswerSucceeded;
+        event Func<AnswerAppHostedMediaOutcomeEvent, Task> OnAnswerSucceeded;
 
         /// <summary>
         /// Event raised when the bot gets the outcome of AnswerAppHostedMedia action but the call failed.
         /// </summary>
         event Func<AnswerAppHostedMediaOutcomeEvent, Task> OnAnswerFailed;
+
+        /// <summary>
+        /// Event raised when the bot requests to join a call
+        /// </summary>
+        event Func<RealTimeMediaJoinCallEvent, Task> OnJoinCallRequested;
+
+        /// <summary>
+        /// Event raised when the bot gets the outcome of JoinCallAppHostedMedia action and the call is established.
+        /// </summary>
+        event Func<JoinCallAppHostedMediaOutcomeEvent, Task> OnJoinCallSucceeded;
 
         /// <summary>
         /// Event raised when the bot gets the outcome of JoinCallAppHostedMedia action but the call failed.

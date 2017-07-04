@@ -102,7 +102,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <summary>
         /// Method for the bot to join an existing conversation
         /// </summary>
-        Task JoinCall(JoinCallAppHostedMedia joinCallAppHostedMedia, string callId);
+        Task JoinCall(JoinCall joinCall, string correlationId);
 
         /// <summary>
         /// Returns the list of all active call ids.
@@ -133,17 +133,16 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// Processes incoming call request
         /// </summary>
         /// <param name="content">Content from the request</param>
-        /// <param name="skypeChainId">X-Microsoft-Skype-Chain-Id header value used to associate calls across different services</param>
+        /// <param name="correlationId">X-Microsoft-Skype-Chain-Id header value used to associate calls across different services</param>
         /// <returns></returns>
-        Task<ResponseResult> ProcessIncomingCallAsync(string content, string skypeChainId);
+        Task<ResponseResult> ProcessIncomingCallAsync(string content, string correlationId);
 
         /// <summary>
         /// Processes requests sent to the callback url
         /// </summary>
         /// <param name="content">Content from the request</param>
-        /// <param name="skypeChainId">X-Microsoft-Skype-Chain-Id header value used to associate calls across different services</param>
         /// <returns></returns>
-        Task<ResponseResult> ProcessCallbackAsync(string content , string skypeChainId);
+        Task<ResponseResult> ProcessCallbackAsync(string content);
 
         /// <summary>
         /// Processes requests sent to notification url

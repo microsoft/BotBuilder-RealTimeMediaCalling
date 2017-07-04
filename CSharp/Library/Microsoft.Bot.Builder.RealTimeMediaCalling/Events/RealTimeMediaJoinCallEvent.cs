@@ -30,12 +30,11 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-using Microsoft.Bot.Builder.Calling.Events;
+using System;
+using System.Collections.Generic;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Skype.Bots.Media;
-using System;
-using System.Collections.Generic;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
 {
@@ -82,15 +81,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
                 return null;
             }
 
-            IList<IVideoSocket> videoSockets = this.MediaSession.VideoSockets?.Count > 0
-                ? new List<IVideoSocket>(this.MediaSession.VideoSockets)
-                : null;
-            var mediaConfiguration = MediaPlatform.CreateMediaConfiguration(
-                this.MediaSession.AudioSocket,
-                videoSockets,
-                this.MediaSession.VbssSocket);
-
-            this.JoinCall.MediaConfiguration = mediaConfiguration;
+            this.JoinCall.MediaConfiguration = this.MediaSession.GetMediaConfiguration();
             this.JoinCall.OperationId = Guid.NewGuid().ToString();
 
             var workflow = new RealTimeMediaWorkflow

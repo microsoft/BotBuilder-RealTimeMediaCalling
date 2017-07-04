@@ -159,7 +159,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                     break;
 
                 case RealTimeMediaCallRequestType.CallingEvent:
-                    result = await service.ProcessCallbackAsync(parsedRequest.Content, parsedRequest.SkypeChainId).ConfigureAwait(false);
+                    result = await service.ProcessCallbackAsync(parsedRequest.Content).ConfigureAwait(false);
                     break;
 
                 case RealTimeMediaCallRequestType.NotificationEvent:

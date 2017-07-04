@@ -107,7 +107,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <summary>
         /// Create a media session for an adhoc call.
         /// </summary>
-        public IRealTimeMediaSession CreateMediaSession(string correlationId, params NotificationType[] subscriptions)
+        public virtual IRealTimeMediaSession CreateMediaSession(string correlationId, params NotificationType[] subscriptions)
         {
             return new RealTimeMediaSession(correlationId, subscriptions);
         }
@@ -140,23 +140,21 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <summary>
         /// method for processing an outgoing join call request
         /// </summary>
-        /// <param name="joinCallAppHostedMedia">Object contains</param>
-        /// <param name="callId">call id of the call to be joined</param>
-        public async Task JoinCall(JoinCallAppHostedMedia joinCallAppHostedMedia, string callId)
+        /// <param name="joinCall">The parameters of the call to join.</param>
+        /// <param name="correlationId">The correlation id of the existing call.</param>
+        public async Task JoinCall(JoinCall joinCall, string correlationId)
         {
             ///TODO remove callId in the parameter after mediaSession has been migrated into SDK
-            if (joinCallAppHostedMedia != null && joinCallAppHostedMedia.JoinToken == null)
+            if (joinCall != null && joinCall.JoinToken == null)
             {
                 throw new InvalidOperationException("No meeting link was present in the joinCallAppHostedMedia");
             }
 
-            var callLegId = Guid.NewGuid().ToString();
-            var correlationId = callId;
-            var currentCall = CreateCall(callLegId, correlationId);
+            var callLegId = joinCall.ConversationId;
+            var currentCall = await CreateCall(callLegId, correlationId).ConfigureAwait(false);
 
+            var joinCallAppHostedMedia = new JoinCallAppHostedMedia(joinCall);
             var workflow = await currentCall.Item1.HandleJoinCall(joinCallAppHostedMedia).ConfigureAwait(false);
-
-            await AddCall(correlationId, currentCall).ConfigureAwait(false);
 
             HttpContent content = new StringContent(RealTimeMediaSerializer.SerializeToJson(workflow), Encoding.UTF8, "application/json");
 
@@ -238,9 +236,9 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// Method responsible for processing the data sent with POST request to incoming call URL
         /// </summary>
         /// <param name="content">The content of request</param>
-        /// <param name="skypeChainId">X-Microsoft-Skype-Chain-Id header value used to associate calls across different services</param>
+        /// <param name="correlationId">X-Microsoft-Skype-Chain-Id header value used to associate calls across different services</param>
         /// <returns>Returns the response that should be sent to the sender of POST request</returns>
-        public async Task<ResponseResult> ProcessIncomingCallAsync(string content, string skypeChainId)
+        public async Task<ResponseResult> ProcessIncomingCallAsync(string content, string correlationId)
         {
             if (content == null)
             {
@@ -266,19 +264,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }
 
             var callLegId = conversation.Id;
-            string correlationId;
-            if (string.IsNullOrEmpty(skypeChainId))
-            {
-                correlationId = Guid.NewGuid().ToString();
-                Trace.TraceWarning(
-                    $"RealTimeMediaCallService No SkypeChainId found. Generating {correlationId}");
-            }
-            else
-            {
-                correlationId = skypeChainId;
-            }
-
-            var currentCall = CreateCall(callLegId, correlationId);
+            var currentCall = await CreateCall(callLegId, correlationId).ConfigureAwait(false);
 
             //TODO store jointoken, if present, to ActiveJoinTokens
 
@@ -289,14 +275,19 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }
             workflow.Validate();
 
-            await AddCall(conversation.Id, currentCall).ConfigureAwait(false);
-
             var serializedResponse = RealTimeMediaSerializer.SerializeToJson(workflow);
             return new ResponseResult(ResponseType.Accepted, serializedResponse);
         }
 
-        private Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall> CreateCall(string callLegId, string correlationId)
+        private async Task<Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall>> CreateCall(string callLegId, string correlationId)
         {
+            if (string.IsNullOrEmpty(correlationId))
+            {
+                correlationId = Guid.NewGuid().ToString();
+                Trace.TraceWarning(
+                    $"RealTimeMediaCallService No Correlation ID found. Generating {correlationId}");
+            }
+
             IRealTimeMediaCall call;
             IInternalRealTimeMediaCallService callService;
             using (var scope = _scope.BeginLifetimeScope(RealTimeMediaCallingScope.LifetimeScopeTag))
@@ -317,16 +308,12 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 throw new InvalidOperationException("The call was not resolved correctly.");
             }
 
-            return new Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall>(callService, call);
-        }
-
-        private async Task AddCall(string conversationId, Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall> currentCall)
-        {
-            var callEvent = new RealTimeMediaCallEvent(conversationId, currentCall.Item2);
+            var callEvent = new RealTimeMediaCallEvent(callLegId, call);
             await InvokeCallEvent(OnCallCreated, callEvent).ConfigureAwait(false);
 
+            var currentCall = new Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall>(callService, call);
             Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall> prevCall = null;
-            ActiveCalls.AddOrUpdate(conversationId, currentCall, (key, oldCall) =>
+            ActiveCalls.AddOrUpdate(callLegId, currentCall, (key, oldCall) =>
             {
                 prevCall = oldCall;
                 return currentCall;
@@ -334,10 +321,12 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
             if (prevCall?.Item1 != null)
             {
-                Trace.TraceWarning($"Another call with the same Id {conversationId} exists. ending the old call");
+                Trace.TraceWarning($"Another call with the same Id {callLegId} exists. ending the old call");
                 var prevService = prevCall.Item1;
                 await prevService.LocalCleanup().ConfigureAwait(false);
             }
+
+            return currentCall;
         }
 
         private async Task EndCall(string conversationId, Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall> currentCall)
@@ -356,9 +345,8 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// Method responsible for processing the data sent with POST request to callback URL
         /// </summary>
         /// <param name="content">The content of request</param>
-        /// <param name="skypeChainId">THe ID to associate a call across multiple processes</param>
         /// <returns>Returns the response that should be sent to the sender of POST request</returns>
-        public async Task<ResponseResult> ProcessCallbackAsync(string content, string skypeChainId)
+        public async Task<ResponseResult> ProcessCallbackAsync(string content)
         {
             ConversationResult conversationResult;
             if (content == null)

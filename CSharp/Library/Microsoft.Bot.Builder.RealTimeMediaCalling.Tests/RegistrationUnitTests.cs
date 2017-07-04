@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Autofac;
-using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
-using Microsoft.Bot.Builder.Calling.ObjectModel.Misc;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Skype.Bots.Media;
 using Moq;
-using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using Assert = NUnit.Framework.Assert;
 
@@ -46,8 +42,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             {
                 CallService = service;
                 CallService.OnIncomingCallReceived += OnIncomingCallReceived;
-                CallService.OnAnswerSucceeded += OnAnswerSucceeded;
-                CallService.OnJoinCallReceived += OnJoinCallReceived;
+                CallService.OnJoinCallRequested += OnJoinCallRequested;
                 CallService.OnCallCleanup += OnCallCleanup;
 
                 CorrelationId = service.CorrelationId;
@@ -57,23 +52,23 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             private Task OnIncomingCallReceived(RealTimeMediaIncomingCallEvent realTimeMediaIncomingCallEvent)
             {
                 var mediaSession = CallService.CreateMediaSession(NotificationType.CallStateChange);
-                var audioSocket = mediaSession.SetAudioSocket(new AudioSocketSettings());
+                var socketSettings = new AudioSocketSettings
+                {
+                    StreamDirections = StreamDirection.Sendrecv,
+                    SupportedAudioFormat = AudioFormat.Pcm16K
+                };
+                var audioSocket = mediaSession.SetAudioSocket(socketSettings);
                 audioSocket.AudioMediaReceived += AudioSocket_AudioMediaReceived;
                 realTimeMediaIncomingCallEvent.Answer(mediaSession);
                 return Task.CompletedTask;
             }
 
-            private Task OnJoinCallReceived(RealTimeMediaJoinCallEvent realTimeMediaJoinCallEvent)
+            private Task OnJoinCallRequested(RealTimeMediaJoinCallEvent realTimeMediaJoinCallEvent)
             {
                 var mediaSession = CallService.CreateMediaSession(NotificationType.CallStateChange);
                 var audioSocket = mediaSession.SetAudioSocket(new AudioSocketSettings());
                 audioSocket.AudioMediaReceived += AudioSocket_AudioMediaReceived;
                 realTimeMediaJoinCallEvent.Answer(mediaSession);
-                return Task.CompletedTask;
-            }
-
-            private Task OnAnswerSucceeded()
-            {
                 return Task.CompletedTask;
             }
 
@@ -95,7 +90,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             settings.Setup(a => a.CallbackUrl).Returns(new Uri("https://someuri/callback"));
             settings.Setup(a => a.NotificationUrl).Returns(new Uri("https://someuri/notification"));
 
-            RealTimeMediaCalling.RegisterRealTimeMediaCallingBot(
+            RealTimeMediaCalling.RegisterRealTimeMediaCallingBot<MockRealTimeMediaBotService, MockRealTimeMediaCallService>(
                 settings.Object,
                 a => new RealTimeMediaBot(a),
                 a => new RealTimeMediaCall(a));
@@ -173,23 +168,23 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
 
             var acceptCallbackJson = @"   
 {
-    ""id"": ""0b022b88-f255-4667-9335-2335f30ee8de"",
-    ""operationOutcome"": {
-        ""type"": ""answerAppHostedMediaOutcome"",
-        ""id"": ""1a1a29f1-4102-4b6c-9b85-bf20d61c1756"",
-        ""outcome"": ""success""
-    },
-    ""callState"": ""established"",
-    ""appState"": ""ddc2d769-30e2-4418-8de5-5d846139add8"",
-    ""links"": {
-        ""call"": ""https://b-pma-uswe-01.plat.skype.com:6702/platform/v1/calls/faff9af3-5fef-443b-bc2c-7027d00e7cc9"",
-        ""subscriptions"": ""https://b-pma-uswe-01.plat.skype.com:6702/platform/v1/calls/faff9af3-5fef-443b-bc2c-7027d00e7cc9/subscriptions"",
-        ""mixer"": ""https://b-pma-uswe-01.plat.skype.com:6702/platform/v1/calls/faff9af3-5fef-443b-bc2c-7027d00e7cc9/mixer"",
-        ""participantLegMetadata"": ""https://b-pma-uswe-01.plat.skype.com:6702/platform/v1/calls/faff9af3-5fef-443b-bc2c-7027d00e7cc9/participantlegmetadata""
-    }
+  ""id"": ""0b022b88-f255-4667-9335-2335f30ee8de"",
+  ""operationOutcome"": {
+    ""type"": ""answerAppHostedMediaOutcome"",
+    ""id"": ""1a1a29f1-4102-4b6c-9b85-bf20d61c1756"",
+    ""outcome"": ""success""
+  },
+  ""callState"": ""established"",
+  ""appState"": ""ddc2d769-30e2-4418-8de5-5d846139add8"",
+  ""links"": {
+    ""call"": ""https://b-pma-uswe-01.plat.skype.com:6702/platform/v1/calls/faff9af3-5fef-443b-bc2c-7027d00e7cc9"",
+    ""subscriptions"": ""https://b-pma-uswe-01.plat.skype.com:6702/platform/v1/calls/faff9af3-5fef-443b-bc2c-7027d00e7cc9/subscriptions"",
+    ""mixer"": ""https://b-pma-uswe-01.plat.skype.com:6702/platform/v1/calls/faff9af3-5fef-443b-bc2c-7027d00e7cc9/mixer"",
+    ""participantLegMetadata"": ""https://b-pma-uswe-01.plat.skype.com:6702/platform/v1/calls/faff9af3-5fef-443b-bc2c-7027d00e7cc9/participantlegmetadata""
+  }
 }";
 
-            result = await service.ProcessCallbackAsync(acceptCallbackJson, null);
+            result = await service.ProcessCallbackAsync(acceptCallbackJson);
             Assert.AreEqual(ResponseType.Accepted, result.ResponseType);
 
             var notificationJson = @"
@@ -206,19 +201,6 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             Assert.Null(call4);
         }
 
-        private class JoinCallRealTimeMediaBotService : RealTimeMediaBotService
-        {
-            public JoinCallRealTimeMediaBotService(ILifetimeScope scope, IRealTimeMediaCallServiceSettings settings)
-                : base(scope, settings)
-            {
-            }
-
-            protected override Task PlaceCall(HttpContent content, string correlationId)
-            {
-                return Task.CompletedTask;
-            }
-        }
-
         [Test]
         public async Task CreatingBotWithJoinCall()
         {
@@ -226,7 +208,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             settings.Setup(a => a.CallbackUrl).Returns(new Uri("https://someuri/callback"));
             settings.Setup(a => a.NotificationUrl).Returns(new Uri("https://someuri/notification"));
 
-            RealTimeMediaCalling.RegisterRealTimeMediaCallingBot<JoinCallRealTimeMediaBotService, RealTimeMediaCallService>(
+            RealTimeMediaCalling.RegisterRealTimeMediaCallingBot<MockRealTimeMediaBotService, MockRealTimeMediaCallService>(
                 settings.Object,
                 a => new RealTimeMediaBot(a),
                 a => new RealTimeMediaCall(a));
@@ -237,28 +219,27 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             Assert.AreSame(typeof(RealTimeMediaBot), bot.GetType());
 
             var service = bot.RealTimeMediaBotService as IInternalRealTimeMediaBotService;
-            var joinCall = new JoinCallAppHostedMedia() {JoinToken = "ABC"};
-            var correlationId1 = Guid.NewGuid().ToString();
-            var correlationId2 = Guid.NewGuid().ToString();
+            var joinCall1 = new JoinCall("ABC", "123");
+            var joinCall2 = new JoinCall("ABC", "123");
 
-            await service.JoinCall(joinCall, correlationId1);
+            await service.JoinCall(joinCall1, null);
             Assert.AreEqual(1, service.Calls.Count);
-            Assert.NotNull(service.GetCallForId(correlationId1));
-            Assert.Null(service.GetCallForId(correlationId2));
+            Assert.NotNull(service.GetCallForId(joinCall1.ConversationId));
+            Assert.Null(service.GetCallForId(joinCall2.ConversationId));
 
-            var call1 = service.GetCallForId(correlationId1) as RealTimeMediaCall;
+            var call1 = service.GetCallForId(joinCall1.ConversationId) as RealTimeMediaCall;
             Assert.NotNull(call1);
             Assert.IsNotEmpty(call1.CorrelationId);
             Assert.IsNotEmpty(call1.CallId);
             Assert.AreEqual(call1.CorrelationId, call1.CallService.CorrelationId);
             Assert.IsTrue(call1.CallId.StartsWith(call1.CorrelationId));
 
-            await service.JoinCall(joinCall, correlationId1);
+            await service.JoinCall(joinCall1, null);
             Assert.AreEqual(1, service.Calls.Count);
-            Assert.NotNull(service.GetCallForId(correlationId1));
-            Assert.Null(service.GetCallForId(correlationId2));
+            Assert.NotNull(service.GetCallForId(joinCall1.ConversationId));
+            Assert.Null(service.GetCallForId(joinCall2.ConversationId));
 
-            var call2 = service.GetCallForId(correlationId1) as RealTimeMediaCall;
+            var call2 = service.GetCallForId(joinCall1.ConversationId) as RealTimeMediaCall;
             Assert.NotNull(call2);
             Assert.IsNotEmpty(call2.CorrelationId);
             Assert.IsNotEmpty(call2.CallId);
@@ -266,12 +247,12 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             Assert.IsTrue(call2.CallId.StartsWith(call2.CorrelationId));
             Assert.AreNotEqual(call1, call2);
 
-            await service.JoinCall(joinCall, correlationId2);
+            await service.JoinCall(joinCall2, null);
             Assert.AreEqual(2, service.Calls.Count);
-            Assert.NotNull(service.GetCallForId(correlationId1));
-            Assert.NotNull(service.GetCallForId(correlationId2));
+            Assert.NotNull(service.GetCallForId(joinCall1.ConversationId));
+            Assert.NotNull(service.GetCallForId(joinCall2.ConversationId));
 
-            var call3 = service.GetCallForId(correlationId2) as RealTimeMediaCall;
+            var call3 = service.GetCallForId(joinCall2.ConversationId) as RealTimeMediaCall;
             Assert.NotNull(call3);
             Assert.IsNotEmpty(call3.CorrelationId);
             Assert.IsNotEmpty(call3.CallId);
@@ -279,6 +260,45 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             Assert.IsTrue(call3.CallId.StartsWith(call3.CorrelationId));
             Assert.AreNotEqual(call1, call3);
             Assert.AreNotEqual(call2, call3);
+
+            // Accept doesn't make sense here.
+            // We're just testing to make sure that the callback is going to the right call.
+            // TODO: replace with a different callback.
+            var acceptCallbackJson = @"   
+{
+  ""id"": ""0b022b88-f255-4667-9335-2335f30ee8de"",
+  ""operationOutcome"": {
+    ""type"": ""answerAppHostedMediaOutcome"",
+    ""id"": ""1a1a29f1-4102-4b6c-9b85-bf20d61c1756"",
+    ""outcome"": ""success""
+  },
+  ""callState"": ""established"",
+  ""appState"": ""ddc2d769-30e2-4418-8de5-5d846139add8"",
+  ""links"": {
+    ""call"": ""https://b-pma-uswe-01.plat.skype.com:6702/platform/v1/calls/faff9af3-5fef-443b-bc2c-7027d00e7cc9"",
+    ""subscriptions"": ""https://b-pma-uswe-01.plat.skype.com:6702/platform/v1/calls/faff9af3-5fef-443b-bc2c-7027d00e7cc9/subscriptions"",
+    ""mixer"": ""https://b-pma-uswe-01.plat.skype.com:6702/platform/v1/calls/faff9af3-5fef-443b-bc2c-7027d00e7cc9/mixer"",
+    ""participantLegMetadata"": ""https://b-pma-uswe-01.plat.skype.com:6702/platform/v1/calls/faff9af3-5fef-443b-bc2c-7027d00e7cc9/participantlegmetadata""
+  }
+}";
+
+            acceptCallbackJson = acceptCallbackJson.Replace("0b022b88-f255-4667-9335-2335f30ee8de", joinCall2.ConversationId);
+            var result = await service.ProcessCallbackAsync(acceptCallbackJson);
+            Assert.AreEqual(ResponseType.Accepted, result.ResponseType);
+
+            var notificationJson = @"
+{
+  ""id"": ""0b022b87-f255-4667-9335-2335f30ee8de"",
+  ""currentState"": ""terminated"",
+  ""stateChangeCode"": ""0"",
+  ""type"": ""callStateChange"",
+}";
+
+            notificationJson = notificationJson.Replace("0b022b87-f255-4667-9335-2335f30ee8de", joinCall2.ConversationId);
+            result = await service.ProcessNotificationAsync(notificationJson).ConfigureAwait(false);
+            var call4 = service.GetCallForId(joinCall2.ConversationId);
+            Assert.AreEqual(ResponseType.Accepted, result.ResponseType);
+            Assert.Null(call4);
         }
     }
 }

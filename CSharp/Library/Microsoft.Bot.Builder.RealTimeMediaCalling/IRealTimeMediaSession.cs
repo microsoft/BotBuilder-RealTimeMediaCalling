@@ -34,6 +34,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Skype.Bots.Media;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
@@ -52,6 +53,8 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         IReadOnlyList<IVideoSocket> VideoSockets { get; }
 
         IVideoSocket VbssSocket { get; }
+
+        JObject GetMediaConfiguration();
     }
 
     public interface IRealTimeMediaSession : IReadOnlyMediaSession

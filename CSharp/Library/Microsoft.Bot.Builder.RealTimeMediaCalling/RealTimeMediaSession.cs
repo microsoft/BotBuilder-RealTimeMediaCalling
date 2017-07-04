@@ -35,6 +35,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
@@ -140,6 +141,14 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             VbssSocket = new VideoSocket(settings);
 
             return VbssSocket;
+        }
+
+        public JObject GetMediaConfiguration()
+        {
+            return MediaPlatform.CreateMediaConfiguration(
+                AudioSocket,
+                _videoSockets,
+                VbssSocket);
         }
 
         void IDisposable.Dispose()

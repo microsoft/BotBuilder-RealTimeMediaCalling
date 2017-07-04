@@ -51,7 +51,10 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
         public JoinCallAppHostedMediaOutcomeEvent(ConversationResult conversationResult, RealTimeMediaWorkflow resultingWorkflow, JoinCallAppHostedMediaOutcome outcome) : base(conversationResult, resultingWorkflow)
         {
             if (outcome == null)
+            {
                 throw new ArgumentNullException(nameof(outcome));
+            }
+
             JoinCallAppHostedMediaOutcome = outcome;
         }
 
@@ -59,14 +62,5 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
         /// Outcome of AnswerAppHostedMedia action
         /// </summary>
         public JoinCallAppHostedMediaOutcome JoinCallAppHostedMediaOutcome { get; set; }
-
-        /// <summary>
-        /// Workflow associated with the AnswerAppHostedMediaOutcome event
-        /// </summary>
-        public RealTimeMediaWorkflow RealTimeMediaWorkflow
-        {
-            get { return ResultingWorkflow as RealTimeMediaWorkflow; }
-            set { ResultingWorkflow = value; }
-        }
     }
 }

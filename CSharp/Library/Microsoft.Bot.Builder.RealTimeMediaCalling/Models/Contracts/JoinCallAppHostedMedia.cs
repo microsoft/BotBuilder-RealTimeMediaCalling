@@ -30,6 +30,7 @@
 // OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+using System;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Misc;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
 using Newtonsoft.Json;
@@ -65,6 +66,19 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         public string JoinToken { get; set; }
 
         /// <summary>
+        /// The id of the thread, for multiparty calls.
+        /// </summary>
+        [JsonProperty(Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+        public string ThreadId { get; set; }
+
+        /// <summary>
+        /// The id of the thread message, for multiparty calls.
+        /// </summary>
+        public string ThreadMessageId { get; set; }
+
+        // TODO: Add Organizer ID
+
+        /// <summary>
         /// Joins the conversation as a hidden entity
         /// </summary>
         [JsonProperty(Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
@@ -85,9 +99,18 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         /// <summary>
         /// Constructor
         /// </summary>
-        public JoinCallAppHostedMedia()
+        public JoinCallAppHostedMedia(JoinCall joinCall = null)
             : base(isStandaloneAction: true)
         {
+            if (joinCall != null)
+            {
+                this.DisplayName = joinCall.DisplayName;
+                this.JoinToken = joinCall.JoinToken;
+                this.ThreadId = joinCall.ThreadId;
+                this.ThreadMessageId = joinCall.ThreadMessageId;
+                this.Hidden = joinCall.Hidden;
+            }
+
             this.Action = RealTimeMediaValidActions.JoinCallAppHostedMediaAction;
         }
 

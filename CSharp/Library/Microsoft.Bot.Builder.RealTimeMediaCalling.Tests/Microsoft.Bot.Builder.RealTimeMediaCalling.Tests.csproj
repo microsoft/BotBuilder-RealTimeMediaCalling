@@ -295,6 +295,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MockRealTimeMediaCallService.cs" />
+    <Compile Include="MockRealTimeMediaBotService.cs" />
     <Compile Include="RegistrationUnitTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

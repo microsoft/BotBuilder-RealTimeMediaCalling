@@ -48,10 +48,13 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
         /// <param name="conversationResult">ConversationResult corresponding to the event</param>
         /// <param name="resultingWorkflow">Workflow to be returned on completion</param>
         /// <param name="outcome">outcome of the operation</param>
-        public AnswerAppHostedMediaOutcomeEvent(ConversationResult conversationResult, RealTimeMediaWorkflow resultingWorkflow, AnswerAppHostedMediaOutcome outcome) : base(conversationResult, resultingWorkflow)
+        public AnswerAppHostedMediaOutcomeEvent(ConversationResult conversationResult, RealTimeMediaWorkflow resultingWorkflow, AnswerAppHostedMediaOutcome outcome) 
+            : base(conversationResult, resultingWorkflow)
         {
             if (outcome == null)
+            {
                 throw new ArgumentNullException(nameof(outcome));
+            }
 
             AnswerAppHostedMediaOutcome = outcome;
         }

@@ -7,16 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Bot.Builder.RealT
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Bot.Builder.RealTimeMediaCalling.Tests", "Library\Microsoft.Bot.Builder.RealTimeMediaCalling.Tests\Microsoft.Bot.Builder.RealTimeMediaCalling.Tests.csproj", "{678587EB-03D2-4E26-BEC7-E19650E1A645}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{F3A52B01-1D3B-4637-905B-CBE0F80CFFC4}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MeetingJoinBot", "MeetingJoinBot", "{7D8BF5BC-986F-40A2-994E-738E88F3EA13}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrontEnd", "Samples\MeetingJoinBot\FrontEnd\FrontEnd.csproj", "{20FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkerRole", "Samples\MeetingJoinBot\WorkerRole\WorkerRole.csproj", "{FCB04B51-8726-4762-AE57-FACC1D112C99}"
-EndProject
-Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "MeetingJoinBot", "Samples\MeetingJoinBot\MeetingJoinBot.ccproj", "{DCD83013-9504-4716-ABFB-59881139A531}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,38 +31,8 @@ Global
 		{678587EB-03D2-4E26-BEC7-E19650E1A645}.Release|Any CPU.Build.0 = Release|Any CPU
 		{678587EB-03D2-4E26-BEC7-E19650E1A645}.Release|x64.ActiveCfg = Release|Any CPU
 		{678587EB-03D2-4E26-BEC7-E19650E1A645}.Release|x64.Build.0 = Release|Any CPU
-		{20FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{20FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{20FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{20FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB}.Debug|x64.Build.0 = Debug|Any CPU
-		{20FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{20FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{20FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB}.Release|x64.ActiveCfg = Release|Any CPU
-		{20FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB}.Release|x64.Build.0 = Release|Any CPU
-		{FCB04B51-8726-4762-AE57-FACC1D112C99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FCB04B51-8726-4762-AE57-FACC1D112C99}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FCB04B51-8726-4762-AE57-FACC1D112C99}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{FCB04B51-8726-4762-AE57-FACC1D112C99}.Debug|x64.Build.0 = Debug|Any CPU
-		{FCB04B51-8726-4762-AE57-FACC1D112C99}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FCB04B51-8726-4762-AE57-FACC1D112C99}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FCB04B51-8726-4762-AE57-FACC1D112C99}.Release|x64.ActiveCfg = Release|Any CPU
-		{FCB04B51-8726-4762-AE57-FACC1D112C99}.Release|x64.Build.0 = Release|Any CPU
-		{DCD83013-9504-4716-ABFB-59881139A531}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DCD83013-9504-4716-ABFB-59881139A531}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DCD83013-9504-4716-ABFB-59881139A531}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{DCD83013-9504-4716-ABFB-59881139A531}.Debug|x64.Build.0 = Debug|Any CPU
-		{DCD83013-9504-4716-ABFB-59881139A531}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DCD83013-9504-4716-ABFB-59881139A531}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DCD83013-9504-4716-ABFB-59881139A531}.Release|x64.ActiveCfg = Release|Any CPU
-		{DCD83013-9504-4716-ABFB-59881139A531}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{7D8BF5BC-986F-40A2-994E-738E88F3EA13} = {F3A52B01-1D3B-4637-905B-CBE0F80CFFC4}
-		{20FC03A1-FD3C-43BD-BAA0-1AA418EC6DCB} = {7D8BF5BC-986F-40A2-994E-738E88F3EA13}
-		{FCB04B51-8726-4762-AE57-FACC1D112C99} = {7D8BF5BC-986F-40A2-994E-738E88F3EA13}
-		{DCD83013-9504-4716-ABFB-59881139A531} = {7D8BF5BC-986F-40A2-994E-738E88F3EA13}
 	EndGlobalSection
 EndGlobal
