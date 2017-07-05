@@ -447,7 +447,21 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }
 
             this.CurrentMediaSession = joinCallEvent.MediaSession;
-            return joinCallEvent.CreateWorkflow();
+            joinCall.MediaConfiguration = joinCallEvent.MediaSession.GetMediaConfiguration();
+            joinCall.OperationId = Guid.NewGuid().ToString();
+
+            var workflow = new RealTimeMediaWorkflow
+            {
+                Actions = new ActionBase[]
+                {
+                    joinCall
+                },
+                NotificationSubscriptions = joinCallEvent.MediaSession.Subscriptions
+            };
+            workflow.Links = new CallbackLink() { Callback = _callbackUrl, Notification = _notificationUrl };
+            workflow.AppState = CallLegId;
+
+            return workflow;
         }
 
         private async Task<Workflow> HandleJoinAppHostedMediaOutcome(ConversationResult conversationResult, JoinCallAppHostedMediaOutcome joinCallAppHostedMediaOutcome)

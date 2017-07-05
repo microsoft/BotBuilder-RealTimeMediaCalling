@@ -73,27 +73,5 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
         public void Reject()
         {
         }
-
-        internal Workflow CreateWorkflow()
-        {
-            if (null == this.MediaSession)
-            {
-                return null;
-            }
-
-            this.JoinCall.MediaConfiguration = this.MediaSession.GetMediaConfiguration();
-            this.JoinCall.OperationId = Guid.NewGuid().ToString();
-
-            var workflow = new RealTimeMediaWorkflow
-            {
-                Actions = new ActionBase[]
-                {
-                    this.JoinCall
-                },
-                NotificationSubscriptions = this.MediaSession.Subscriptions
-            };
-
-            return workflow;
-        }
     }
 }

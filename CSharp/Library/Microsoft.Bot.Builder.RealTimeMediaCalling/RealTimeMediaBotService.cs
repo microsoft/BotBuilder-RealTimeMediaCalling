@@ -65,7 +65,8 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// </summary>
         private readonly IRealTimeMediaCallServiceSettings _settings;
 
-        private readonly Uri _defaultPlaceCallEndpointUrl = new Uri("https://pma.plat.skype.com:6448/platform/v1/calls");
+        private readonly Uri _defaultProdPlaceCallEndpointUrl = new Uri("https://pma.plat.skype.com:6448/platform/v1/calls");
+        private readonly Uri _defaultDevPlaceCallEndpointUrl = new Uri("https://pma-dev-uswe-01.plat-dev.skype.net:6448/platform/v1/calls");
 
         /// <summary>
         /// Event raised when a new call is created.
@@ -116,6 +117,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// Instantiates the call processor
         /// </summary>
         /// <param name="scope">The autofac lifetime scope</param>
+        /// <param name="settings">Settings for the call service</param>
         public RealTimeMediaBotService(ILifetimeScope scope, IRealTimeMediaCallServiceSettings settings)
         {
             if (null == scope)
@@ -166,7 +168,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             var placeCallEndpointUrl = _settings.PlaceCallEndpointUrl;
             if (null == placeCallEndpointUrl)
             {
-                placeCallEndpointUrl = _defaultPlaceCallEndpointUrl;
+                placeCallEndpointUrl = _defaultDevPlaceCallEndpointUrl;
             }
 
             //place the call
