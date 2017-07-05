@@ -295,7 +295,7 @@
     <Compile Include="IRealTimeMediaBotService.cs" />
     <Compile Include="IRealTimeMediaSession.cs" />
     <Compile Include="LoggingMessageHandler.cs" />
-    <Compile Include="Models\Contracts\JoinCall.cs" />
+    <Compile Include="Models\Contracts\JoinCallParameters.cs" />
     <Compile Include="RealTimeMediaSession.cs" />
     <Compile Include="Models\Contracts\JoinCallCompletionReason.cs" />
     <Compile Include="Models\Contracts\JoinCallAppHostedMediaOutcome.cs" />

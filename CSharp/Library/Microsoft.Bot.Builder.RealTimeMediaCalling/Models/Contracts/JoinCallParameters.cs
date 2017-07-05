@@ -34,7 +34,7 @@ using System;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
 {
-    public class JoinCall
+    public class JoinCallParameters
     {
         /// <summary>
         /// The ID of the conversation we are joining.
@@ -42,34 +42,34 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         public string ConversationId { get; }
 
         /// <summary>
-        /// Custom display name of the bot
-        /// </summary>
-        public string DisplayName { get; set; }
-
-        /// <summary>
         /// Conversation join token. This value defines the target group conversation
         /// to be joined.
         /// </summary>
-        public string JoinToken { get; set; }
+        public string JoinToken { get; }
 
         /// <summary>
         /// The id of the thread, for multiparty calls.
         /// </summary>
-        public string ThreadId { get; set; }
+        public string ThreadId { get; }
 
         /// <summary>
         /// The id of the thread message, for multiparty calls.
         /// </summary>
-        public string ThreadMessageId { get; set; }
+        public string ThreadMessageId { get; }
 
         // TODO: Add Organizer ID
+
+        /// <summary>
+        /// Custom display name of the bot
+        /// </summary>
+        public string DisplayName { get; set; }
 
         /// <summary>
         /// Joins the conversation as a hidden entity
         /// </summary>
         public bool? Hidden { get; set; }
 
-        public JoinCall(string joinToken, string threadId, string conversationId = null)
+        public JoinCallParameters(string joinToken, string threadId, string threadMessageId, string conversationId = null)
         {
             if (string.IsNullOrWhiteSpace(joinToken))
             {
@@ -81,8 +81,14 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
                 throw new ArgumentNullException(nameof(threadId));
             }
 
+            if (string.IsNullOrWhiteSpace(threadMessageId))
+            {
+                throw new ArgumentNullException(nameof(threadMessageId));
+            }
+
             this.JoinToken = joinToken;
             this.ThreadId = threadId;
+            this.ThreadMessageId = threadMessageId;
 
             this.ConversationId = string.IsNullOrWhiteSpace(conversationId)
                 ? Guid.NewGuid().ToString()

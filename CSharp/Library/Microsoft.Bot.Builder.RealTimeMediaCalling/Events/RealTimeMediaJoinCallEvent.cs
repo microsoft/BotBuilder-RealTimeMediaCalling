@@ -31,10 +31,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
-using Microsoft.Skype.Bots.Media;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
 {
@@ -46,21 +43,24 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
         /// <summary>
         /// Workflow associated with the event
         /// </summary>
-        public JoinCallAppHostedMedia JoinCall { get; }
+        public JoinCallParameters JoinCallParameters { get; }
 
         internal IReadOnlyMediaSession MediaSession { get; private set; }
 
         /// <summary>
         /// EventArg for the RealTimeMediaJoinCallEvent event raised on <see cref="IRealTimeMediaCallService"/>.
         /// </summary>
-        /// <param name="conversation">Conversation for the incoming call</param>
-        /// <param name="resultingWorkflow">Workflow to be returned on completion</param>
-        public RealTimeMediaJoinCallEvent(JoinCallAppHostedMedia joinCall)
+        /// <param name="joinCallParameters">The parameters specifying how to join the call.</param>
+        public RealTimeMediaJoinCallEvent(JoinCallParameters joinCallParameters)
         {
-            JoinCall = joinCall;
+            JoinCallParameters = joinCallParameters;
         }
 
-        public void Answer(IReadOnlyMediaSession mediaSession)
+        /// <summary>
+        /// Specify the media session for the call being joined.
+        /// </summary>
+        /// <param name="mediaSession"></param>
+        public void JoinCall(IReadOnlyMediaSession mediaSession)
         {
             if (null == mediaSession)
             {

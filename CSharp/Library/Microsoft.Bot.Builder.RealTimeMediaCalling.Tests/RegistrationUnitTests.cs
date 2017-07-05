@@ -66,7 +66,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
                 var mediaSession = CallService.CreateMediaSession(NotificationType.CallStateChange);
                 var audioSocket = mediaSession.SetAudioSocket(new AudioSocketSettings());
                 audioSocket.AudioMediaReceived += AudioSocket_AudioMediaReceived;
-                realTimeMediaJoinCallEvent.Answer(mediaSession);
+                realTimeMediaJoinCallEvent.JoinCall(mediaSession);
                 return Task.CompletedTask;
             }
 
@@ -217,8 +217,8 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             Assert.AreSame(typeof(RealTimeMediaBot), bot.GetType());
 
             var service = bot.RealTimeMediaBotService as IInternalRealTimeMediaBotService;
-            var joinCall1 = new JoinCall("ABC", "123");
-            var joinCall2 = new JoinCall("ABC", "123");
+            var joinCall1 = new JoinCallParameters("ABC", "123", "456");
+            var joinCall2 = new JoinCallParameters("ABC", "123", "456");
 
             await service.JoinCall(joinCall1, null);
             Assert.AreEqual(1, service.Calls.Count);

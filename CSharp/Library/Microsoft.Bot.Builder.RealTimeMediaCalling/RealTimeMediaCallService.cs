@@ -355,7 +355,8 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         public async Task<Workflow> HandleIncomingCall(Conversation conversation)
         {
             Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Received incoming call");
-            var incomingCall = new RealTimeMediaIncomingCallEvent(conversation, CreateInitialWorkflow());
+            var workflow = CreateInitialWorkflow();
+            var incomingCall = new RealTimeMediaIncomingCallEvent(conversation, workflow);
 
             try
             {
@@ -415,17 +416,17 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <summary>
         /// Invokes handler for join call
         /// </summary>
-        /// <param name="joinCall">Which call to join and how to join it.</param>
+        /// <param name="joinCallParameters">Which call to join and how to join it.</param>
         /// <returns>WorkFlow to be executed for the call</returns>
-        public async Task<Workflow> HandleJoinCall(JoinCallAppHostedMedia joinCall)
+        public async Task<Workflow> HandleJoinCall(JoinCallParameters joinCallParameters)
         {
-            if (null == joinCall)
+            if (null == joinCallParameters)
             {
-                throw new ArgumentNullException(nameof(joinCall));
+                throw new ArgumentNullException(nameof(joinCallParameters));
             }
 
             Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Received join call request");
-            var joinCallEvent = new RealTimeMediaJoinCallEvent(joinCall);
+            var joinCallEvent = new RealTimeMediaJoinCallEvent(joinCallParameters);
 
             try
             {
@@ -447,19 +448,16 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }
 
             this.CurrentMediaSession = joinCallEvent.MediaSession;
-            joinCall.MediaConfiguration = joinCallEvent.MediaSession.GetMediaConfiguration();
-            joinCall.OperationId = Guid.NewGuid().ToString();
 
-            var workflow = new RealTimeMediaWorkflow
+            var joinCall = new JoinCallAppHostedMedia(joinCallParameters)
             {
-                Actions = new ActionBase[]
-                {
-                    joinCall
-                },
-                NotificationSubscriptions = joinCallEvent.MediaSession.Subscriptions
+                MediaConfiguration = joinCallEvent.MediaSession.GetMediaConfiguration(),
+                OperationId = Guid.NewGuid().ToString()
             };
-            workflow.Links = new CallbackLink() { Callback = _callbackUrl, Notification = _notificationUrl };
-            workflow.AppState = CallLegId;
+
+            var workflow = CreateInitialWorkflow();
+            workflow.Actions = new ActionBase[] { joinCall };
+            workflow.NotificationSubscriptions = joinCallEvent.MediaSession.Subscriptions;
 
             return workflow;
         }
@@ -468,13 +466,13 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         {
             try
             {
-                Trace.TraceInformation($"[{CorrelationId}] OnAnswerAppHostedMediaCompleted");
+                Trace.TraceInformation($"[{CorrelationId}] OnJoinCallAppHostedMediaCompleted");
                 var workflow = CreateInitialWorkflow();
                 var outcomeEvent = new JoinCallAppHostedMediaOutcomeEvent(conversationResult, workflow, joinCallAppHostedMediaOutcome);
                 if (joinCallAppHostedMediaOutcome.Outcome == Outcome.Failure)
                 {
-                    Trace.TraceWarning($"[{CorrelationId}] AnswerAppHostedMedia failed with reason: {joinCallAppHostedMediaOutcome.FailureReason}");
-                    Trace.TraceWarning($"[{CorrelationId}] AnswerAppHostedMedia failed with completion: {joinCallAppHostedMediaOutcome.CompletionReason}");
+                    Trace.TraceWarning($"[{CorrelationId}] JoinCallAppHostedMedia failed with reason: {joinCallAppHostedMediaOutcome.FailureReason}");
+                    Trace.TraceWarning($"[{CorrelationId}] JoinCallAppHostedMedia failed with completion: {joinCallAppHostedMediaOutcome.CompletionReason}");
                     await InvokeHandlerIfSet(OnJoinCallFailed, outcomeEvent).ConfigureAwait(false);
                 }
                 else

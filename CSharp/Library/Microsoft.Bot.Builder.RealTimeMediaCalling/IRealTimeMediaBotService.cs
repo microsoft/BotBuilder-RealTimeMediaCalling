@@ -102,7 +102,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <summary>
         /// Method for the bot to join an existing conversation
         /// </summary>
-        Task JoinCall(JoinCall joinCall, string correlationId);
+        Task JoinCall(JoinCallParameters joinCallParameters, string correlationId);
 
         /// <summary>
         /// Returns the list of all active call ids.

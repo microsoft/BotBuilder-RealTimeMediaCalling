@@ -69,10 +69,6 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
                 throw new ArgumentNullException(nameof(mediaSession));
             }
 
-            IList<IVideoSocket> videoSockets = mediaSession.VideoSockets?.Count > 0 
-                ? new List<IVideoSocket>(mediaSession.VideoSockets) 
-                : null;
-
             this.RealTimeMediaWorkflow.Actions = new ActionBase[]
             {
                 new AnswerAppHostedMedia

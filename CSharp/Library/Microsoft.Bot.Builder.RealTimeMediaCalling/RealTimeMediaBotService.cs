@@ -65,8 +65,8 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// </summary>
         private readonly IRealTimeMediaCallServiceSettings _settings;
 
-        private readonly Uri _defaultProdPlaceCallEndpointUrl = new Uri("https://pma.plat.skype.com:6448/platform/v1/calls");
-        private readonly Uri _defaultDevPlaceCallEndpointUrl = new Uri("https://pma-dev-uswe-01.plat-dev.skype.net:6448/platform/v1/calls");
+        private readonly Uri _defaultPlaceCallEndpointUrl = new Uri("https://pma.plat.skype.com:6448/platform/v1/calls");
+        //private readonly Uri _defaultPlaceCallEndpointUrl = new Uri("https://pma-dev-uswe-01.plat-dev.skype.net:6448/platform/v1/calls");
 
         /// <summary>
         /// Event raised when a new call is created.
@@ -142,21 +142,20 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <summary>
         /// method for processing an outgoing join call request
         /// </summary>
-        /// <param name="joinCall">The parameters of the call to join.</param>
+        /// <param name="joinCallParameters">The parameters of the call to join.</param>
         /// <param name="correlationId">The correlation id of the existing call.</param>
-        public async Task JoinCall(JoinCall joinCall, string correlationId)
+        public async Task JoinCall(JoinCallParameters joinCallParameters, string correlationId)
         {
             ///TODO remove callId in the parameter after mediaSession has been migrated into SDK
-            if (joinCall != null && joinCall.JoinToken == null)
+            if (joinCallParameters != null && joinCallParameters.JoinToken == null)
             {
                 throw new InvalidOperationException("No meeting link was present in the joinCallAppHostedMedia");
             }
 
-            var callLegId = joinCall.ConversationId;
+            var callLegId = joinCallParameters.ConversationId;
             var currentCall = await CreateCall(callLegId, correlationId).ConfigureAwait(false);
 
-            var joinCallAppHostedMedia = new JoinCallAppHostedMedia(joinCall);
-            var workflow = await currentCall.Item1.HandleJoinCall(joinCallAppHostedMedia).ConfigureAwait(false);
+            var workflow = await currentCall.Item1.HandleJoinCall(joinCallParameters).ConfigureAwait(false);
 
             HttpContent content = new StringContent(RealTimeMediaSerializer.SerializeToJson(workflow), Encoding.UTF8, "application/json");
 
@@ -165,11 +164,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
         protected virtual async Task PlaceCall(HttpContent content, string correlationId)
         {
-            var placeCallEndpointUrl = _settings.PlaceCallEndpointUrl;
-            if (null == placeCallEndpointUrl)
-            {
-                placeCallEndpointUrl = _defaultDevPlaceCallEndpointUrl;
-            }
+            var placeCallEndpointUrl = _settings.PlaceCallEndpointUrl ?? _defaultPlaceCallEndpointUrl;
 
             //place the call
             try

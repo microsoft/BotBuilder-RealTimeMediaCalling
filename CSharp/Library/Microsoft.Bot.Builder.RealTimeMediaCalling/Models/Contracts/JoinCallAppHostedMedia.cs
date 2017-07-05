@@ -99,16 +99,16 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         /// <summary>
         /// Constructor
         /// </summary>
-        public JoinCallAppHostedMedia(JoinCall joinCall = null)
+        public JoinCallAppHostedMedia(JoinCallParameters joinCallParameters = null)
             : base(isStandaloneAction: true)
         {
-            if (joinCall != null)
+            if (joinCallParameters != null)
             {
-                this.DisplayName = joinCall.DisplayName;
-                this.JoinToken = joinCall.JoinToken;
-                this.ThreadId = joinCall.ThreadId;
-                this.ThreadMessageId = joinCall.ThreadMessageId;
-                this.Hidden = joinCall.Hidden;
+                this.DisplayName = joinCallParameters.DisplayName;
+                this.JoinToken = joinCallParameters.JoinToken;
+                this.ThreadId = joinCallParameters.ThreadId;
+                this.ThreadMessageId = joinCallParameters.ThreadMessageId;
+                this.Hidden = joinCallParameters.Hidden;
             }
 
             this.Action = RealTimeMediaValidActions.JoinCallAppHostedMediaAction;

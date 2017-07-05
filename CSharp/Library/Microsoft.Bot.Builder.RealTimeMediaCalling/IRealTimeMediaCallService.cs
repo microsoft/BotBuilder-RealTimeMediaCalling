@@ -130,7 +130,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
         Task<Workflow> HandleIncomingCall(Conversation conversation);
 
-        Task<Workflow> HandleJoinCall(JoinCallAppHostedMedia call);
+        Task<Workflow> HandleJoinCall(JoinCallParameters joinCallParameters);
 
         Task<string> ProcessConversationResult(ConversationResult conversationResult);
 
