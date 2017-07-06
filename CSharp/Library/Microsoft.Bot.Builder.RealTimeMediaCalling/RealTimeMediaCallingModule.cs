@@ -36,29 +36,18 @@ using Autofac;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
-    public static class RealTimeMediaCallingScope
+    internal static class RealTimeMediaCallingScope
     {
-        public static object LifetimeScopeTag { get; private set; }
+        public static readonly object LifetimeScopeTag = typeof(RealTimeMediaCallingScope);
 
-        static RealTimeMediaCallingScope()
+        public static ILifetimeScope BeginLifetimeScope(ILifetimeScope scope, HttpRequestMessage request = null)
         {
-            LifetimeScopeTag = typeof(RealTimeMediaCallingScope);
-        }
-
-        public static ILifetimeScope BeginLifetimeScope(ILifetimeScope scope, object scopeTag, HttpRequestMessage request = null)
-        {
-            LifetimeScopeTag = scopeTag;
-            var inner = scope.BeginLifetimeScope(scopeTag);
+            var inner = scope.BeginLifetimeScope(LifetimeScopeTag);
             if (request != null)
             {
                 inner.Resolve<HttpRequestMessage>(TypedParameter.From(request));
             }
             return inner;
-        }
-
-        internal static ILifetimeScope BeginLifetimeScope(ILifetimeScope scope, HttpRequestMessage request)
-        {
-            return BeginLifetimeScope(scope, LifetimeScopeTag, request);
         }
     }
 
@@ -76,11 +65,6 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             LifetimeScopeTag = scopeTag;
         }
 
-        public RealTimeMediaCallingModule()
-            : this(RealTimeMediaCallingScope.LifetimeScopeTag)
-        {
-        }
-
         protected override void Load(ContainerBuilder builder)
         {
             base.Load(builder);
@@ -96,21 +80,21 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
 
             builder
-                .Register((c, p) => p.TypedAs<RealTimeMediaCallServiceParameters>())
-                .AsSelf()
-                .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
-
-            builder
                 .RegisterType<TBotService>()
                 .As<IInternalRealTimeMediaBotService>()
                 .As<IRealTimeMediaBotService>()
                 .SingleInstance();
 
             builder
+                .Register((c, p) => p.TypedAs<RealTimeMediaCallServiceParameters>())
+                .AsSelf()
+                .InstancePerLifetimeScope();
+
+            builder
                 .RegisterType<TCallService>()
                 .As<IInternalRealTimeMediaCallService>()
                 .As<IRealTimeMediaCallService>()
-                .InstancePerMatchingLifetimeScope(LifetimeScopeTag);
+                .InstancePerLifetimeScope();
         }
     }
 

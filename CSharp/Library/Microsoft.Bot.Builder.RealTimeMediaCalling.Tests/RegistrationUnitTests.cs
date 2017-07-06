@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Skype.Bots.Media;
+using Microsoft.Skype.Calling.ServiceAgents.MSA;
 using Moq;
+using Newtonsoft.Json;
 using NUnit.Framework;
 using Assert = NUnit.Framework.Assert;
 
@@ -89,6 +93,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             settings.Setup(a => a.NotificationUrl).Returns(new Uri("https://someuri/notification"));
 
             RealTimeMediaCalling.RegisterRealTimeMediaCallingBot<MockRealTimeMediaBotService, MockRealTimeMediaCallService>(
+                RealTimeMediaCallingScope.LifetimeScopeTag,
                 settings.Object,
                 a => new RealTimeMediaBot(a),
                 a => new RealTimeMediaCall(a));
@@ -207,6 +212,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             settings.Setup(a => a.NotificationUrl).Returns(new Uri("https://someuri/notification"));
 
             RealTimeMediaCalling.RegisterRealTimeMediaCallingBot<MockRealTimeMediaBotService, MockRealTimeMediaCallService>(
+                RealTimeMediaCallingScope.LifetimeScopeTag,
                 settings.Object,
                 a => new RealTimeMediaBot(a),
                 a => new RealTimeMediaCall(a));

@@ -31,11 +31,9 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
-using System.Collections.Generic;
 using Microsoft.Bot.Builder.Calling.Events;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
-using Microsoft.Skype.Bots.Media;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Events
 {

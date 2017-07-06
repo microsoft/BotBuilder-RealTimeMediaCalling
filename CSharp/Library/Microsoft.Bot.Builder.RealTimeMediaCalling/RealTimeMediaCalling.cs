@@ -53,10 +53,12 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <summary>
         /// Register the function to be called to create a bot along with configuration settings.
         /// </summary>
+        /// <param name="scopeTag">The lifetime scope tag to be used in registration.</param>
         /// <param name="settings"> Configuration settings for the real time media calling bot.</param>
         /// <param name="makeBot"> The factory method to make the real time media bot.</param>
         /// <param name="makeCall"> The factory method to make the real time media call.</param>
         internal static void RegisterRealTimeMediaCallingBot<TBotService,TCallService>(
+            object scopeTag,
             IRealTimeMediaCallServiceSettings settings, 
             Func<IRealTimeMediaBotService, IRealTimeMediaBot> makeBot, 
             Func<IRealTimeMediaCallService, IRealTimeMediaCall> makeCall)
@@ -64,7 +66,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             where TCallService : IInternalRealTimeMediaCallService
         {
             var builder = new ContainerBuilder();
-            builder.RegisterModule(new RealTimeMediaCallingModule<TBotService, TCallService>());
+            builder.RegisterModule(new RealTimeMediaCallingModule<TBotService, TCallService>(scopeTag));
             builder.RegisterModule(new RealTimeMediaCallingModule_MakeBot());
             Container = builder.Build();
 
@@ -99,10 +101,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             Func<IRealTimeMediaCallService, IRealTimeMediaCall> makeCall)
         {
             RegisterRealTimeMediaCallingBot<RealTimeMediaBotService, RealTimeMediaCallService>(
+                RealTimeMediaCallingScope.LifetimeScopeTag,
                 settings,
                 makeBot,
                 makeCall);
-	}
+	    }
 
         /// <summary>
         /// Method to return a registered bot

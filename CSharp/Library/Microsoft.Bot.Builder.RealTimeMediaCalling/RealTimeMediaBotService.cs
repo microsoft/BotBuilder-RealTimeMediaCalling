@@ -287,8 +287,9 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
             IRealTimeMediaCall call;
             IInternalRealTimeMediaCallService callService;
-            using (var scope = _scope.BeginLifetimeScope(RealTimeMediaCallingScope.LifetimeScopeTag))
+            using (var scope = _scope.BeginLifetimeScope())
             {
+                // We use the lifetime scope to control the instances created but not when they are disposed
                 var parameters = new RealTimeMediaCallServiceParameters(callLegId, correlationId);
                 scope.Resolve<RealTimeMediaCallServiceParameters>(TypedParameter.From(parameters));
                 callService = scope.Resolve<IInternalRealTimeMediaCallService>();
