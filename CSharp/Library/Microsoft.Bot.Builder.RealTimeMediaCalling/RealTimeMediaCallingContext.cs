@@ -88,7 +88,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             {
                 if (Request.Content == null)
                 {
-                    Trace.TraceError("No content in the request");
+                    Logger.LogError("No content in the request");
                     return CallingContext.GenerateParsedResults(HttpStatusCode.BadRequest);
                 }
 
@@ -97,7 +97,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }
             catch (Exception e)
             {
-                Trace.TraceError($"Failed to process the notification request, exception: {e}");
+                Logger.LogError($"Failed to process the notification request, exception: {e}");
                 return CallingContext.GenerateParsedResults(HttpStatusCode.InternalServerError, e.ToString());
             }
         }

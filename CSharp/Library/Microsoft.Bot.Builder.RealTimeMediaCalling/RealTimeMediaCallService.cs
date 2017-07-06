@@ -212,7 +212,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <param name="state"></param>
         private void CallExpiredTimerCallback(object state)
         {
-            Trace.TraceInformation(
+            Logger.LogInformation(
             $"RealTimeMediaCallService [{CallLegId}]: CallExpiredTimerCallback called.. cleaning up the call");
 
             Task.Run(async () =>
@@ -223,7 +223,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 }
                 catch (Exception ex)
                 {
-                    Trace.TraceError(
+                    Logger.LogError(
                         $"RealTimeMediaCallService [{CallLegId}]: Error in LocalCleanup {ex}");
                 }
             });
@@ -236,7 +236,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <returns></returns>
         public Task ProcessNotificationResult(NotificationBase notification)
         {
-            Trace.TraceInformation(
+            Logger.LogInformation(
                 $"RealTimeMediaCallService [{CallLegId}]: Received the notification for {notification.Type} operation, callId: {notification.Id}");
 
             switch (notification.Type)
@@ -252,7 +252,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
         private async Task HandleCallStateChangeNotification(CallStateChangeNotification notification)
         {
-            Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Received CallStateChangeNotification.. ");
+            Logger.LogInformation($"RealTimeMediaCallService [{CallLegId}]: Received CallStateChangeNotification.. ");
             notification.Validate();
 
             var eventHandler = OnCallStateChangeNotification;
@@ -264,7 +264,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
         private async Task HandleRosterUpdateNotification(RosterUpdateNotification notification)
         {
-            Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Received RosterUpdateNotification");
+            Logger.LogInformation($"RealTimeMediaCallService [{CallLegId}]: Received RosterUpdateNotification");
             notification.Validate();
 
             var eventHandler = OnRosterUpdateNotification;
@@ -295,17 +295,17 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 if (conversationResult.Links.TryGetValue("subscriptions", out link))
                 {
                     _subscriptionLink = link;
-                    Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Caching subscription link {link}");
+                    Logger.LogInformation($"RealTimeMediaCallService [{CallLegId}]: Caching subscription link {link}");
                 }
 
                 if (conversationResult.Links.TryGetValue("call", out link))
                 {
                     _callLink = link;
-                    Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Caching call link {link}");
+                    Logger.LogInformation($"RealTimeMediaCallService [{CallLegId}]: Caching call link {link}");
                 }
                 expectEmptyActions = true;
 
-                Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Disposing call expiry timer");
+                Logger.LogInformation($"RealTimeMediaCallService [{CallLegId}]: Disposing call expiry timer");
                 _timer.Dispose();
             }
             else if (conversationResult.OperationOutcome.Type == RealTimeMediaValidOutcomes.JoinCallAppHostedMediaOutcome && conversationResult.OperationOutcome.Outcome == Outcome.Success)
@@ -315,11 +315,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 if (conversationResult.Links.TryGetValue("call", out link))
                 {
                     _callLink = link;
-                    Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Caching call link {link}");
+                    Logger.LogInformation($"RealTimeMediaCallService [{CallLegId}]: Caching call link {link}");
                 }
                 expectEmptyActions = true;
 
-                Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Disposing call expiry timer");
+                Logger.LogInformation($"RealTimeMediaCallService [{CallLegId}]: Disposing call expiry timer");
                 _timer.Dispose();
             }
 
@@ -329,7 +329,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
         private Task<Workflow> PassActionResultToHandler(ConversationResult receivedConversationResult)
         {
-            Trace.TraceInformation(
+            Logger.LogInformation(
                 $"RealTimeMediaCallService [{CallLegId}]: Received the outcome for {receivedConversationResult.OperationOutcome.Type} operation, callId: {receivedConversationResult.OperationOutcome.Id}");
 
             switch (receivedConversationResult.OperationOutcome.Type)
@@ -354,7 +354,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <returns>WorkFlow to be executed for the call</returns>
         public async Task<Workflow> HandleIncomingCall(Conversation conversation)
         {
-            Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Received incoming call");
+            Logger.LogInformation($"RealTimeMediaCallService [{CallLegId}]: Received incoming call");
             var workflow = CreateInitialWorkflow();
             var incomingCall = new RealTimeMediaIncomingCallEvent(conversation, workflow);
 
@@ -365,14 +365,14 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                     await eventHandler.Invoke(incomingCall).ConfigureAwait(false);
                 else
                 {
-                    Trace.TraceInformation(
+                    Logger.LogInformation(
                         $"RealTimeMediaCallService [{CallLegId}]: No handler specified for incoming call");
                     return null;
                 }
             }
             catch (Exception e)
             {
-                Trace.TraceInformation(
+                Logger.LogInformation(
                     $"RealTimeMediaCallService [{CallLegId}]: Invoking Incoming Call Failed {e}");
 
                 throw;
@@ -386,12 +386,12 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         {
             try
             {
-                Trace.TraceInformation($"[{CorrelationId}] OnAnswerAppHostedMediaCompleted");
+                Logger.LogInformation($"[{CorrelationId}] OnAnswerAppHostedMediaCompleted");
                 var workflow = CreateInitialWorkflow();
                 var outcomeEvent = new AnswerAppHostedMediaOutcomeEvent(conversationResult, workflow, answerAppHostedMediaOutcome);
                 if (answerAppHostedMediaOutcome.Outcome == Outcome.Failure)
                 {
-                    Trace.TraceWarning($"[{CorrelationId}] AnswerAppHostedMedia failed with reason: {answerAppHostedMediaOutcome.FailureReason}");
+                    Logger.LogWarning($"[{CorrelationId}] AnswerAppHostedMedia failed with reason: {answerAppHostedMediaOutcome.FailureReason}");
                     await InvokeHandlerIfSet(OnAnswerFailed, outcomeEvent).ConfigureAwait(false);
                 }
                 else
@@ -408,7 +408,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }
             catch (Exception ex)
             {
-                Trace.TraceError($"[{CorrelationId}] threw {ex}");
+                Logger.LogError($"[{CorrelationId}] threw {ex}");
                 throw;
             }
         }
@@ -425,7 +425,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 throw new ArgumentNullException(nameof(joinCallParameters));
             }
 
-            Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Received join call request");
+            Logger.LogInformation($"RealTimeMediaCallService [{CallLegId}]: Received join call request");
             var joinCallEvent = new RealTimeMediaJoinCallEvent(joinCallParameters);
 
             try
@@ -435,13 +435,13 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                     await eventHandler.Invoke(joinCallEvent).ConfigureAwait(false);
                 else
                 {
-                    Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: No handler specified for join call");
+                    Logger.LogInformation($"RealTimeMediaCallService [{CallLegId}]: No handler specified for join call");
                     return null;
                 }
             }
             catch (Exception e)
             {
-                Trace.TraceInformation(
+                Logger.LogInformation(
                     $"RealTimeMediaCallService [{CallLegId}]: Invoking Join Call Failed {e}");
 
                 throw;
@@ -466,13 +466,13 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         {
             try
             {
-                Trace.TraceInformation($"[{CorrelationId}] OnJoinCallAppHostedMediaCompleted");
+                Logger.LogInformation($"[{CorrelationId}] OnJoinCallAppHostedMediaCompleted");
                 var workflow = CreateInitialWorkflow();
                 var outcomeEvent = new JoinCallAppHostedMediaOutcomeEvent(conversationResult, workflow, joinCallAppHostedMediaOutcome);
                 if (joinCallAppHostedMediaOutcome.Outcome == Outcome.Failure)
                 {
-                    Trace.TraceWarning($"[{CorrelationId}] JoinCallAppHostedMedia failed with reason: {joinCallAppHostedMediaOutcome.FailureReason}");
-                    Trace.TraceWarning($"[{CorrelationId}] JoinCallAppHostedMedia failed with completion: {joinCallAppHostedMediaOutcome.CompletionReason}");
+                    Logger.LogWarning($"[{CorrelationId}] JoinCallAppHostedMedia failed with reason: {joinCallAppHostedMediaOutcome.FailureReason}");
+                    Logger.LogWarning($"[{CorrelationId}] JoinCallAppHostedMedia failed with completion: {joinCallAppHostedMediaOutcome.CompletionReason}");
                     await InvokeHandlerIfSet(OnJoinCallFailed, outcomeEvent).ConfigureAwait(false);
                 }
                 else
@@ -489,7 +489,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }
             catch (Exception ex)
             {
-                Trace.TraceError($"[{CorrelationId}] threw {ex}");
+                Logger.LogError($"[{CorrelationId}] threw {ex}");
                 throw;
             }
         }
@@ -530,7 +530,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             //Subscribe
             try
             {
-                Trace.TraceInformation(
+                Logger.LogInformation(
                         $"RealTimeMediaCallService [{CallLegId}]: Sending subscribe request for " +
                         $"user: {videoSubscription.ParticipantIdentity}" +
                         $"subscriptionLink: {_subscriptionLink}");
@@ -545,12 +545,12 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                     var response = await client.SendAsync(request).ConfigureAwait(false);
                     response.EnsureSuccessStatusCode();
 
-                    Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Response to subscribe: {response}");
+                    Logger.LogInformation($"RealTimeMediaCallService [{CallLegId}]: Response to subscribe: {response}");
                 }
             }
             catch (Exception exception)
             {
-                Trace.TraceError($"RealTimeMediaCallService [{CallLegId}]: Received error while sending request to subscribe participant. Message: {exception}");
+                Logger.LogError($"RealTimeMediaCallService [{CallLegId}]: Received error while sending request to subscribe participant. Message: {exception}");
                 throw;
             }
         }
@@ -585,7 +585,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 var response = await client.SendAsync(request).ConfigureAwait(false);
                 response.EnsureSuccessStatusCode();
 
-                Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Response to Delete: {response}");
+                Logger.LogInformation($"RealTimeMediaCallService [{CallLegId}]: Response to Delete: {response}");
             }
         }
 

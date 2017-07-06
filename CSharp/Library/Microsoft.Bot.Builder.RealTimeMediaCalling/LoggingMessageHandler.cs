@@ -56,7 +56,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             string requestHeadersText = GetHeadersText(request.Headers);
             string requestBodyText = await GetBodyText(request.Content).ConfigureAwait(false);
 
-            Trace.TraceInformation($"Method: {request.Method.ToString()}, Uri {requestUriText}, Headers { requestHeadersText}, Body { requestBodyText}");
+            Logger.LogInformation($"Method: {request.Method.ToString()}, Uri {requestUriText}, Headers { requestHeadersText}, Body { requestBodyText}");
             HttpResponseMessage response = await SendAndLogAsync(request, cancellationToken).ConfigureAwait(false);
             string responseHeadersText = GetHeadersText(response.Headers);
 
@@ -70,7 +70,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }
 
             string responseBodyText = await GetBodyText(response.Content).ConfigureAwait(false);
-            Trace.TraceInformation($"Response: {responseBodyText}, Headers {responseHeadersText}");
+            Logger.LogInformation($"Response: {responseBodyText}, Headers {responseHeadersText}");
             return response;
         }
 
@@ -82,7 +82,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }
             catch (Exception e)
             {
-                Trace.TraceError("Exception occurred when calling SendAsync: {0}", e.ToString());
+                Logger.LogError("Exception occurred when calling SendAsync: {0}", e.ToString());
                 throw;
             }
         }

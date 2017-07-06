@@ -70,7 +70,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             builder.RegisterModule(new RealTimeMediaCallingModule_MakeBot());
             Container = builder.Build();
 
-            Trace.TraceInformation($"Registering real-time media calling bot");
+            Logger.LogInformation($"Registering real-time media calling bot");
             if (settings == null)
             {
                 throw new ArgumentNullException(nameof(settings));
@@ -141,7 +141,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 }
                 catch (Exception e)
                 {
-                    Trace.TraceError($"RealTimeMediaCallingConversation: {e}");
+                    Logger.LogError($"RealTimeMediaCallingConversation: {e}");
                     return GetResponseMessage(HttpStatusCode.InternalServerError, e.ToString());
                 }
             }

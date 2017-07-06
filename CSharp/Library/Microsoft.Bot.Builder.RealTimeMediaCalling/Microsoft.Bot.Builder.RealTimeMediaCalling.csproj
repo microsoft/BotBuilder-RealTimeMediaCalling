@@ -353,9 +353,11 @@
   <ItemGroup>
     <Compile Include="Events\RealTimeMediaCallEvent.cs" />
     <Compile Include="Events\RealTimeMediaJoinCallEvent.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="IRealTimeMediaBot.cs" />
     <Compile Include="IRealTimeMediaCall.cs" />
     <Compile Include="IRealTimeMediaBotService.cs" />
+    <Compile Include="IRealTimeMediaLogger.cs" />
     <Compile Include="IRealTimeMediaSession.cs" />
     <Compile Include="LoggingMessageHandler.cs" />
     <Compile Include="Models\Contracts\JoinCallParameters.cs" />

@@ -78,7 +78,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                     }
                     catch (Exception e)
                     {
-                        Trace.TraceError("Error sending request " + e.ToString());
+                        Logger.LogError("Error sending request " + e.ToString());
                         exceptions.Add(e);
 
                         if (++retryCount > maxRetries)
@@ -87,7 +87,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                         }
                     }
 
-                    Trace.TraceInformation("Retrying request.. RetryCount" + retryCount);
+                    Logger.LogInformation("Retrying request.. RetryCount" + retryCount);
                     if (delay > TimeSpan.Zero)
                     {
                         await Task.Delay(delay, cancelToken);

@@ -169,7 +169,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             //place the call
             try
             {
-                Trace.TraceInformation(
+                Logger.LogInformation(
                     "RealTimeMediaBotService :Sending place call request");
 
                 //TODO: add retries & logging
@@ -186,12 +186,12 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
                     var response = await client.SendAsync(request).ConfigureAwait(false);
                     response.EnsureSuccessStatusCode();
-                    Trace.TraceInformation($"RealTimeMediaBotService [{correlationId}]: Response to join call: {response}");
+                    Logger.LogInformation($"RealTimeMediaBotService [{correlationId}]: Response to join call: {response}");
                 }
             }
             catch (Exception exception)
             {
-                Trace.TraceError(
+                Logger.LogError(
                     $"RealTimeMediaBotService [{correlationId}]: Received error while sending request to subscribe participant. Message: {exception}");
                 throw;
             }
@@ -248,7 +248,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 conversation = RealTimeMediaSerializer.DeserializeFromJson<Conversation>(content);
                 if (conversation == null)
                 {
-                    Trace.TraceWarning($"Could not deserialize the incoming request.. returning badrequest");
+                    Logger.LogWarning($"Could not deserialize the incoming request.. returning badrequest");
                     return new ResponseResult(ResponseType.BadRequest);
                 }
 
@@ -256,7 +256,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning($"Exception in conversation validate {ex}");
+                Logger.LogWarning($"Exception in conversation validate {ex}");
                 return new ResponseResult(ResponseType.BadRequest);
             }
 
@@ -281,7 +281,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             if (string.IsNullOrEmpty(correlationId))
             {
                 correlationId = Guid.NewGuid().ToString();
-                Trace.TraceWarning(
+                Logger.LogWarning(
                     $"RealTimeMediaCallService No Correlation ID found. Generating {correlationId}");
             }
 
@@ -319,7 +319,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
             if (prevCall?.Item1 != null)
             {
-                Trace.TraceWarning($"Another call with the same Id {callLegId} exists. ending the old call");
+                Logger.LogWarning($"Another call with the same Id {callLegId} exists. ending the old call");
                 var prevService = prevCall.Item1;
                 await prevService.LocalCleanup().ConfigureAwait(false);
             }
@@ -335,7 +335,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall> callToRemove = null;
             if(!ActiveCalls.TryRemove(conversationId, out callToRemove))
             {
-                Trace.TraceWarning($"CallId {conversationId} not found");
+                Logger.LogWarning($"CallId {conversationId} not found");
             }
         }
 
@@ -356,7 +356,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 conversationResult = RealTimeMediaSerializer.DeserializeFromJson<ConversationResult>(content);
                 if (conversationResult == null)
                 {
-                    Trace.TraceWarning($"Could not deserialize the callback.. returning badrequest");
+                    Logger.LogWarning($"Could not deserialize the callback.. returning badrequest");
                     return new ResponseResult(ResponseType.BadRequest);
                 }
           
@@ -364,14 +364,14 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning($"Exception in conversationResult validate {ex}");
+                Logger.LogWarning($"Exception in conversationResult validate {ex}");
                 return new ResponseResult(ResponseType.BadRequest);
             }
 
             Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall> currentCall =null;
             if (!ActiveCalls.TryGetValue(conversationResult.Id, out currentCall))
             {
-                Trace.TraceWarning($"CallId {conversationResult.Id} not found");
+                Logger.LogWarning($"CallId {conversationResult.Id} not found");
                 return new ResponseResult(ResponseType.NotFound);
             }
 
@@ -393,11 +393,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }
             try
             {
-                Trace.TraceWarning($"Received notification {content}");
+                Logger.LogWarning($"Received notification {content}");
                 notification = RealTimeMediaSerializer.DeserializeFromJson<NotificationBase>(content);
                 if (notification == null)
                 {
-                    Trace.TraceWarning($"Could not deserialize the notification.. returning badrequest");
+                    Logger.LogWarning($"Could not deserialize the notification.. returning badrequest");
                     return new ResponseResult(ResponseType.BadRequest);
                 }
 
@@ -405,14 +405,14 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }
             catch (Exception ex)
             {
-                Trace.TraceWarning($"Exception in notification validate {ex}");
+                Logger.LogWarning($"Exception in notification validate {ex}");
                 return new ResponseResult(ResponseType.BadRequest);
             }
 
             Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall> currentCall;
             if (!ActiveCalls.TryGetValue(notification.Id, out currentCall))
             {
-                Trace.TraceWarning($"CallId {notification.Id} not found");
+                Logger.LogWarning($"CallId {notification.Id} not found");
                 return new ResponseResult(ResponseType.NotFound);
             }
             if (notification.Type == NotificationType.CallStateChange && (notification as CallStateChangeNotification)?.CurrentState == CallState.Terminated)
