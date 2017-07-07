@@ -353,7 +353,6 @@
   <ItemGroup>
     <Compile Include="Events\RealTimeMediaCallEvent.cs" />
     <Compile Include="Events\RealTimeMediaJoinCallEvent.cs" />
-    <Compile Include="Logger.cs" />
     <Compile Include="IRealTimeMediaBot.cs" />
     <Compile Include="IRealTimeMediaCall.cs" />
     <Compile Include="IRealTimeMediaBotService.cs" />
@@ -361,6 +360,7 @@
     <Compile Include="IRealTimeMediaSession.cs" />
     <Compile Include="LoggingMessageHandler.cs" />
     <Compile Include="Logging\LoggerInjectorModule.cs" />
+    <Compile Include="Logging\TraceLogger.cs" />
     <Compile Include="Models\Contracts\JoinCallParameters.cs" />
     <Compile Include="RealTimeMediaSession.cs" />
     <Compile Include="Models\Contracts\JoinCallCompletionReason.cs" />

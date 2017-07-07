@@ -1,3 +1,6 @@
+#mergetool orig files
+*.orig
+
 #VS localhistory extension
 .localhistory/
 
