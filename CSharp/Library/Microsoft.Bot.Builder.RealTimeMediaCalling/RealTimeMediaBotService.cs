@@ -69,6 +69,14 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         //private readonly Uri _defaultPlaceCallEndpointUrl = new Uri("https://pma-dev-uswe-01.plat-dev.skype.net:6448/platform/v1/calls");
 
         /// <summary>
+        /// Gets or sets the logger.
+        /// </summary>
+        /// <value>
+        /// Automatically injected by Autofac DI
+        /// </value>
+        public IRealTimeMediaLogger Logger { get; set; }
+
+        /// <summary>
         /// Event raised when a new call is created.
         /// </summary>
         public event Func<RealTimeMediaCallEvent, Task> OnCallCreated;

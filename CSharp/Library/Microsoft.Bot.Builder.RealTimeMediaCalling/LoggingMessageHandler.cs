@@ -45,6 +45,14 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
     internal class LoggingMessageHandler : DelegatingHandler
     {
         /// <summary>
+        /// Gets or sets the logger.
+        /// </summary>
+        /// <value>
+        /// Automatically injected by Autofac DI
+        /// </value>
+        public IRealTimeMediaLogger Logger { get; set; }
+
+        /// <summary>
         /// Log the request and response.
         /// </summary>
         /// <param name="request"></param>

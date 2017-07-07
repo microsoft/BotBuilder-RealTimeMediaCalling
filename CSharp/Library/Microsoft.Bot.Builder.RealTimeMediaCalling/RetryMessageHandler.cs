@@ -44,6 +44,14 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         private const int RetryCount = 3;
         private static TimeSpan RetryDelay = TimeSpan.FromMilliseconds(100);
 
+        /// <summary>
+        /// Gets or sets the logger.
+        /// </summary>
+        /// <value>
+        /// Automatically injected by Autofac DI
+        /// </value>
+        public IRealTimeMediaLogger Logger { get; set; }
+
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             return RunWithRetries(
@@ -53,7 +61,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 cancellationToken);
         }
 
-        public static async Task<HttpResponseMessage> RunWithRetries(
+        public async Task<HttpResponseMessage> RunWithRetries(
           int maxRetries,
           TimeSpan delay,
           Func<Task<HttpResponseMessage>> retryableMethod,

@@ -51,6 +51,14 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         public readonly HttpRequestMessage Request;
 
         /// <summary>
+        /// Gets or sets the logger.
+        /// </summary>
+        /// <value>
+        /// Automatically injected by Autofac DI
+        /// </value>
+        public IRealTimeMediaLogger Logger { get; set; }
+
+        /// <summary>
         /// Creates a new instance of calling context. 
         /// </summary>
         /// <param name="request"> The calling request.</param>

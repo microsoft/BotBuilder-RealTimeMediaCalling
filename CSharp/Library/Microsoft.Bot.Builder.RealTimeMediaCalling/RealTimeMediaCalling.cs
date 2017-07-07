@@ -37,6 +37,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Autofac;
 using Microsoft.Bot.Builder.Calling;
+using Microsoft.Bot.Builder.RealTimeMediaCalling.Logging;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
@@ -51,6 +52,15 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         public static IContainer Container;
 
         /// <summary>
+        /// Gets or sets the logger.
+        /// </summary>
+        /// <value>
+        /// Automatically injected by Autofac DI
+        /// </value>
+        internal static IRealTimeMediaLogger Logger { get; set; }
+
+
+        /// <summary>
         /// Register the function to be called to create a bot along with configuration settings.
         /// </summary>
         /// <param name="scopeTag">The lifetime scope tag to be used in registration.</param>
@@ -61,11 +71,17 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             object scopeTag,
             IRealTimeMediaCallServiceSettings settings, 
             Func<IRealTimeMediaBotService, IRealTimeMediaBot> makeBot, 
-            Func<IRealTimeMediaCallService, IRealTimeMediaCall> makeCall)
+            Func<IRealTimeMediaCallService, IRealTimeMediaCall> makeCall,
+            IRealTimeMediaLogger logger = null)
             where TBotService : IInternalRealTimeMediaBotService
             where TCallService : IInternalRealTimeMediaCallService
         {
+            if (logger == null)
+                logger = new TraceLogger();
+            Logger = logger;
+
             var builder = new ContainerBuilder();
+            builder.RegisterModule(new LoggerInjectorModule<IRealTimeMediaLogger>(Logger));
             builder.RegisterModule(new RealTimeMediaCallingModule<TBotService, TCallService>(scopeTag));
             builder.RegisterModule(new RealTimeMediaCallingModule_MakeBot());
             Container = builder.Build();
@@ -92,19 +108,22 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <summary>
         /// Register the function to be called to create a bot along with configuration settings.
         /// </summary>
-        /// <param name="settings"> Configuration settings for the real time media calling bot.</param>
-        /// <param name="makeBot"> The factory method to make the real time media bot.</param>
-        /// <param name="makeCall"> The factory method to make the real time media call.</param>
+        /// <param name="settings">Configuration settings for the real time media calling bot.</param>
+        /// <param name="makeBot">The factory method to make the real time media bot.</param>
+        /// <param name="makeCall">The factory method to make the real time media call.</param>
+        /// <param name="logger">The logger - if null, set to the default TraceLogger</param>
         public static void RegisterRealTimeMediaCallingBot(
             IRealTimeMediaCallServiceSettings settings,
             Func<IRealTimeMediaBotService, IRealTimeMediaBot> makeBot,
-            Func<IRealTimeMediaCallService, IRealTimeMediaCall> makeCall)
+            Func<IRealTimeMediaCallService, IRealTimeMediaCall> makeCall,
+            IRealTimeMediaLogger logger = null)
         {
             RegisterRealTimeMediaCallingBot<RealTimeMediaBotService, RealTimeMediaCallService>(
                 RealTimeMediaCallingScope.LifetimeScopeTag,
                 settings,
                 makeBot,
-                makeCall);
+                makeCall,
+                logger);
 	    }
 
         /// <summary>

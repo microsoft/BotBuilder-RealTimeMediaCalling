@@ -357,9 +357,10 @@
     <Compile Include="IRealTimeMediaBot.cs" />
     <Compile Include="IRealTimeMediaCall.cs" />
     <Compile Include="IRealTimeMediaBotService.cs" />
-    <Compile Include="IRealTimeMediaLogger.cs" />
+    <Compile Include="Logging\IRealTimeMediaLogger.cs" />
     <Compile Include="IRealTimeMediaSession.cs" />
     <Compile Include="LoggingMessageHandler.cs" />
+    <Compile Include="Logging\LoggerInjectorModule.cs" />
     <Compile Include="Models\Contracts\JoinCallParameters.cs" />
     <Compile Include="RealTimeMediaSession.cs" />
     <Compile Include="Models\Contracts\JoinCallCompletionReason.cs" />
@@ -514,6 +515,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

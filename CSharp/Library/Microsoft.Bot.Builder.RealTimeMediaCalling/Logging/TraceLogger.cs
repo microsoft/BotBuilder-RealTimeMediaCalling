@@ -7,41 +7,10 @@ using System.Threading.Tasks;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
-    public static class Logger
-    {
-        public static IRealTimeMediaLogger LoggerInstance = new TraceLogger();
-
-        public static void LogInformation(string message)
-        {
-            LoggerInstance.LogInformation(message);
-        }
-
-        public static void LogWarning(string message)
-        {
-            LoggerInstance.LogWarning(message);
-        }
-
-        public static void LogError(string message)
-        {
-            LoggerInstance.LogError(message);
-        }
-
-        public static void LogInformation(string format, params object[] args)
-        {
-            LoggerInstance.LogInformation(format, args);
-        }
-
-        public static void LogWarning(string format, params object[] args)
-        {
-            LoggerInstance.LogWarning(format, args);
-        }
-
-        public static void LogError(string format, params object[] args)
-        {
-            LoggerInstance.LogError(format, args);
-        }
-    }
-
+    /// <summary>
+    /// Default, simple IRealtimeMediaLogger implementation that uses the .NET Trace class
+    /// </summary>
+    /// <seealso cref="Microsoft.Bot.Builder.RealTimeMediaCalling.IRealTimeMediaLogger" />
     public class TraceLogger : IRealTimeMediaLogger
     {
         void IRealTimeMediaLogger.LogError(string message)

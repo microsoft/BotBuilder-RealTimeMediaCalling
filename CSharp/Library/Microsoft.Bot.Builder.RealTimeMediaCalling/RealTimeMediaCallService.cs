@@ -104,6 +104,15 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         public string CorrelationId { get; }
 
         /// <summary>
+        /// Gets or sets the logger.
+        /// </summary>
+        /// <value>
+        /// Automatically injected by Autofac DI
+        /// </value>
+        public IRealTimeMediaLogger Logger { get; set; }
+
+
+        /// <summary>
         /// Event raised when specified workflow fails to be validated by Bot platform
         /// </summary>
         public event Func<RealTimeMediaWorkflowValidationOutcomeEvent, Task> OnWorkflowValidationFailed;
