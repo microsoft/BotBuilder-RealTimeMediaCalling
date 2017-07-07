@@ -51,13 +51,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// </summary>
         public static IContainer Container;
 
-        /// <summary>
-        /// Gets or sets the logger.
-        /// </summary>
-        /// <value>
-        /// Automatically injected by Autofac DI
-        /// </value>
-        internal static IRealTimeMediaLogger Logger { get; set; }
+        static IRealTimeMediaLogger _logger;
 
 
         /// <summary>
@@ -76,17 +70,14 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             where TBotService : IInternalRealTimeMediaBotService
             where TCallService : IInternalRealTimeMediaCallService
         {
-            if (logger == null)
-                logger = new TraceLogger();
-            Logger = logger;
+            _logger = logger ?? new TraceLogger();
 
             var builder = new ContainerBuilder();
-            builder.RegisterModule(new LoggerInjectorModule<IRealTimeMediaLogger>(Logger));
-            builder.RegisterModule(new RealTimeMediaCallingModule<TBotService, TCallService>(scopeTag));
+            builder.RegisterModule(new RealTimeMediaCallingModule<TBotService, TCallService>(scopeTag, _logger));
             builder.RegisterModule(new RealTimeMediaCallingModule_MakeBot());
             Container = builder.Build();
 
-            Logger.LogInformation($"Registering real-time media calling bot");
+            _logger.LogInformation($"Registering real-time media calling bot");
             if (settings == null)
             {
                 throw new ArgumentNullException(nameof(settings));
@@ -160,7 +151,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 }
                 catch (Exception e)
                 {
-                    Logger.LogError($"RealTimeMediaCallingConversation: {e}");
+                    _logger.LogError($"RealTimeMediaCallingConversation: {e}");
                     return GetResponseMessage(HttpStatusCode.InternalServerError, e.ToString());
                 }
             }

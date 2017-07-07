@@ -33,6 +33,7 @@
 using System;
 using System.Net.Http;
 using Autofac;
+using Microsoft.Bot.Builder.RealTimeMediaCalling.Logging;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
@@ -60,15 +61,20 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
     {
         public readonly object LifetimeScopeTag;
 
-        public RealTimeMediaCallingModule(object scopeTag)
+        IRealTimeMediaLogger _logger;
+
+        public RealTimeMediaCallingModule(object scopeTag, IRealTimeMediaLogger logger)
         {
             LifetimeScopeTag = scopeTag;
+            _logger = logger ?? new TraceLogger();
         }
 
         protected override void Load(ContainerBuilder builder)
         {
             base.Load(builder);
 
+            builder.RegisterModule(new LoggerInjectorModule<IRealTimeMediaLogger>(_logger));
+            
             builder
                .Register((c, p) => p.TypedAs<HttpRequestMessage>())
                .AsSelf()
@@ -102,9 +108,14 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
     {
         private readonly Module _innerModule;
 
-        public RealTimeMediaCallingModule(object scopeTag)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RealTimeMediaCallingModule"/> class.
+        /// </summary>
+        /// <param name="scopeTag">The scope tag.</param>
+        /// <param name="logger">The logger. if null, defaults to TraceLogger</param>
+        public RealTimeMediaCallingModule(object scopeTag, IRealTimeMediaLogger logger)
         {
-            _innerModule = new RealTimeMediaCallingModule<RealTimeMediaBotService, RealTimeMediaCallService>(scopeTag);
+            _innerModule = new RealTimeMediaCallingModule<RealTimeMediaBotService, RealTimeMediaCallService>(scopeTag, logger);
         }
 
         protected override void Load(ContainerBuilder builder)
