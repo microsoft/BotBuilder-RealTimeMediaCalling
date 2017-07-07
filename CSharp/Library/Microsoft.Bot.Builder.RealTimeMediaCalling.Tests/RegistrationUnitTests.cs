@@ -4,8 +4,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.Skype.Bots.Media;
-using Microsoft.Skype.Calling.ServiceAgents.MSA;
 using Moq;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -303,6 +303,22 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.Tests
             var call4 = service.GetCallForId(joinCall2.ConversationId);
             Assert.AreEqual(ResponseType.Accepted, result.ResponseType);
             Assert.Null(call4);
+        }
+
+        [Test]
+        public async Task FetchBotTokenSuccessfully()
+        {
+            var tokenUri = "https://login.microsoftonline.com/common/oauth2/v2.0/token";
+            var clientId = "6c2cf05c-2ac7-4664-8975-4fc990689ace";
+            var clientSecret = "9MYdo17Y0DcetWHit5oed12";
+            var tokenScope = "https://api.botframework.com/";
+
+            var context = new AuthenticationContext(tokenUri);
+            var creds = new ClientCredential(clientId, clientSecret);
+            var result = await context.AcquireTokenAsync(tokenScope, creds);
+
+            Assert.IsNotEmpty(result.AccessToken);
+            Assert.AreEqual("Bearer", result.AccessTokenType);
         }
     }
 }

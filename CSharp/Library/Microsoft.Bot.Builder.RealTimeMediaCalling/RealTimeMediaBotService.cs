@@ -46,7 +46,7 @@ using Microsoft.Bot.Builder.Calling.ObjectModel.Misc;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Misc;
-using Microsoft.Skype.Calling.ServiceAgents.MSA;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
@@ -223,17 +223,10 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 throw new ArgumentNullException(nameof(botSecret));
             }
 
-            using (var tokenClient = new MsaAuthTokenService(
-                new Uri(@"https://login.microsoftonline.com/common/oauth2/v2.0/token"),
-                botId,
-                botSecret,
-                @"https://api.botframework.com/.default",
-                null))
-            {
-                await tokenClient.Init().ConfigureAwait(false);
-                var accessToken = tokenClient.Token;
-                return accessToken;
-            }
+            var context = new AuthenticationContext(@"https://login.microsoftonline.com/common/oauth2/v2.0/token");
+            var creds = new ClientCredential(botId, botSecret);
+            var result = await context.AcquireTokenAsync(@"https://api.botframework.com/", creds);
+            return result.AccessToken;
         }
 
 
