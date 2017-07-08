@@ -63,7 +63,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
         IRealTimeMediaLogger _logger;
 
-        public RealTimeMediaCallingModule(object scopeTag, IRealTimeMediaLogger logger)
+        public RealTimeMediaCallingModule(object scopeTag, IRealTimeMediaLogger logger = null)
         {
             LifetimeScopeTag = scopeTag;
             _logger = logger ?? new TraceLogger();
@@ -113,7 +113,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// </summary>
         /// <param name="scopeTag">The scope tag.</param>
         /// <param name="logger">The logger. if null, defaults to TraceLogger</param>
-        public RealTimeMediaCallingModule(object scopeTag, IRealTimeMediaLogger logger)
+        public RealTimeMediaCallingModule(object scopeTag, IRealTimeMediaLogger logger = null)
         {
             _innerModule = new RealTimeMediaCallingModule<RealTimeMediaBotService, RealTimeMediaCallService>(scopeTag, logger);
         }
