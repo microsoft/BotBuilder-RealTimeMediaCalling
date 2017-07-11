@@ -482,7 +482,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
             var context = new AuthenticationContext(@"https://login.microsoftonline.com/common/oauth2/v2.0/token");
             var creds = new ClientCredential(botId, botSecret);
-            var result = await context.AcquireTokenAsync(@"https://api.botframework.com/", creds);
+            var result = await context.AcquireTokenAsync(@"https://api.botframework.com", creds).ConfigureAwait(false);
             return result.AccessToken;
         }
 
