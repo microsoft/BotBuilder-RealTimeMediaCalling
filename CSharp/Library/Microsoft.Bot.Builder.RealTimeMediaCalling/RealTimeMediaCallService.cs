@@ -46,6 +46,7 @@ using Microsoft.Bot.Builder.Calling.ObjectModel.Misc;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Misc;
+using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
@@ -86,13 +87,15 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         private readonly Uri _notificationUrl;
         private Uri _subscriptionLink;
         private Uri _callLink;
-        
+        private Uri _placeCallUrl;
         private Timer _timer;
         private const int CallExpiredTimerInterval = 1000 * 60 * 10; //10 minutes
 
         private string _botId;
         private string _botSecret;
         private string _botToken;
+
+        private readonly Uri _defaultPlaceCallEndpointUrl = new Uri("https://pma.plat.skype.com:6448/platform/v1/calls");
         /// <summary>
         /// Id for this call
         /// </summary>
@@ -211,7 +214,9 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             CorrelationId = parameters.CorrelationId;
             _callbackUrl = settings.CallbackUrl;
             _notificationUrl = settings.NotificationUrl;
-
+            _placeCallUrl = settings.PlaceCallEndpointUrl;
+            _botId = settings.BotId;
+            _botSecret = settings.BotSecret;
             _timer = new Timer(CallExpiredTimerCallback, null, CallExpiredTimerInterval, Timeout.Infinite);
         }        
 
@@ -420,6 +425,93 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 Logger.LogError($"[{CorrelationId}] threw {ex}");
                 throw;
             }
+        }
+
+        protected virtual async Task PlaceCall(HttpContent content, string correlationId)
+        {
+            var placeCallEndpointUrl =  _placeCallUrl ?? _defaultPlaceCallEndpointUrl;
+
+            //place the call
+            try
+            {
+                Logger.LogInformation(
+                    "RealTimeMediaBotService :Sending place call request");
+
+                //TODO: add retries & logging
+                using (var request = new HttpRequestMessage(HttpMethod.Post, placeCallEndpointUrl) { Content = content })
+                {
+                    var token = await GetBotToken(_botId, _botSecret).ConfigureAwait(false);
+
+                    request.Headers.Add("X-Microsoft-Skype-Chain-ID", correlationId);
+                    request.Headers.Add("X-Microsoft-Skype-Message-ID", Guid.NewGuid().ToString());
+                    //TODO make this an http factory and inject it to the call service and bot service
+                    var client = RealTimeMediaCallService.GetHttpClient();
+
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+                    var response = await client.SendAsync(request).ConfigureAwait(false);
+                    response.EnsureSuccessStatusCode();
+                    Logger.LogInformation($"RealTimeMediaBotService [{correlationId}]: Response to join call: {response}");
+                }
+            }
+            catch (Exception exception)
+            {
+                Logger.LogError(
+                    $"RealTimeMediaBotService [{correlationId}]: Received error while sending request to subscribe participant. Message: {exception}");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Method to obtain bot token from AAD
+        /// </summary>
+        /// <param name="botId"></param>
+        /// <param name="botSecret"></param>
+        /// <returns></returns>
+        internal async Task<string> GetBotToken(string botId, string botSecret)
+        {
+            if (null == botId)
+            {
+                throw new ArgumentNullException(nameof(botId));
+            }
+
+            if (null == botSecret)
+            {
+                throw new ArgumentNullException(nameof(botSecret));
+            }
+
+            var context = new AuthenticationContext(@"https://login.microsoftonline.com/common/oauth2/v2.0/token");
+            var creds = new ClientCredential(botId, botSecret);
+            var result = await context.AcquireTokenAsync(@"https://api.botframework.com/", creds);
+            return result.AccessToken;
+        }
+
+        public async Task JoinCall(JoinCallParameters joinCallParameters, IReadOnlyMediaSession session, string correlationId)
+        {
+            if (null == joinCallParameters)
+            {
+                throw new ArgumentNullException(nameof(joinCallParameters));
+            }
+            if (null == session)
+            {
+                throw new ArgumentNullException(nameof(session));
+            }
+            Logger.LogInformation($"RealTimeMediaCallService [{CallLegId}]: Received join call request");
+            this.CurrentMediaSession = session;
+
+            var joinCall = new JoinCallAppHostedMedia(joinCallParameters)
+            {
+                MediaConfiguration = session.GetMediaConfiguration(),
+                OperationId = Guid.NewGuid().ToString()
+            };
+
+            var workflow = CreateInitialWorkflow();
+            workflow.Actions = new ActionBase[] { joinCall };
+            workflow.NotificationSubscriptions = session.Subscriptions;
+            HttpContent content = new StringContent(RealTimeMediaSerializer.SerializeToJson(workflow), Encoding.UTF8, "application/json");
+
+            await PlaceCall(content, correlationId).ConfigureAwait(false);
+
         }
 
         /// <summary>

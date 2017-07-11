@@ -100,11 +100,6 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         event Func<RealTimeMediaCallEvent, Task> OnCallEnded;
 
         /// <summary>
-        /// Method for the bot to join an existing conversation
-        /// </summary>
-        Task JoinCall(JoinCallParameters joinCallParameters, string correlationId);
-
-        /// <summary>
         /// Returns the list of all active call ids.
         /// </summary>
         IList<string> CallIds { get; }
@@ -120,6 +115,14 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <param name="id">The ID of the call.</param>
         /// <returns>The real time media call, or null.</returns>
         IRealTimeMediaCall GetCallForId(string id);
+
+        /// <summary>
+        /// Creates a call with the given ids.
+        /// </summary>
+        /// <param name="callLegId">The ID of the call leg.</param>
+        /// <param name="correlationId">The ID of the call.</param>
+        /// <returns>The real time media call, or null.</returns>
+        IRealTimeMediaCall CreateNewCall(string callLegId, string correlationId);
 
         /// <summary>
         /// Create a media session for an adhoc call.

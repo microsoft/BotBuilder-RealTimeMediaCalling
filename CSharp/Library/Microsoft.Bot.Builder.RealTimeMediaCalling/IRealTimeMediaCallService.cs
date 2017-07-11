@@ -120,6 +120,13 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// </summary>
         /// <returns></returns>
         Task EndCall();
+
+        /// <summary>
+        /// Join a call
+        /// </summary>
+        /// <returns></returns>
+        Task JoinCall(JoinCallParameters joinCallParameters, IReadOnlyMediaSession session, string correlationId);
+
     }
 
     internal interface IInternalRealTimeMediaCallService : IRealTimeMediaCallService

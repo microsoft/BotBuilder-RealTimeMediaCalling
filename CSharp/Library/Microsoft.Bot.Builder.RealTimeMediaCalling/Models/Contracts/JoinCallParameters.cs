@@ -69,7 +69,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         /// </summary>
         public bool? Hidden { get; set; }
 
-        public JoinCallParameters(string joinToken, string threadId, string threadMessageId, string conversationId = null)
+        public JoinCallParameters(string joinToken, string threadId, string threadMessageId, string conversationId = null, string displayName = null, bool hidden=false)
         {
             if (string.IsNullOrWhiteSpace(joinToken))
             {

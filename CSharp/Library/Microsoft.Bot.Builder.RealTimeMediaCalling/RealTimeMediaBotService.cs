@@ -148,87 +148,15 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         }
 
         /// <summary>
-        /// method for processing an outgoing join call request
+        /// method for creating a call
         /// </summary>
-        /// <param name="joinCallParameters">The parameters of the call to join.</param>
+        /// <param name="callLegId">The parameters of the call to join.</param>
         /// <param name="correlationId">The correlation id of the existing call.</param>
-        public async Task JoinCall(JoinCallParameters joinCallParameters, string correlationId)
+        public IRealTimeMediaCall CreateNewCall(string callLegId = null, string correlationId = null)
         {
-            ///TODO remove callId in the parameter after mediaSession has been migrated into SDK
-            if (joinCallParameters != null && joinCallParameters.JoinToken == null)
-            {
-                throw new InvalidOperationException("No meeting link was present in the joinCallAppHostedMedia");
-            }
-
-            var callLegId = joinCallParameters.ConversationId;
-            var currentCall = await CreateCall(callLegId, correlationId).ConfigureAwait(false);
-
-            var workflow = await currentCall.Item1.HandleJoinCall(joinCallParameters).ConfigureAwait(false);
-
-            HttpContent content = new StringContent(RealTimeMediaSerializer.SerializeToJson(workflow), Encoding.UTF8, "application/json");
-
-            await PlaceCall(content, correlationId).ConfigureAwait(false);
+            var currentCall = Task.Run(async() => await CreateCall(callLegId, correlationId).ConfigureAwait(false));
+            return currentCall.Result.Item2;
         }
-
-        protected virtual async Task PlaceCall(HttpContent content, string correlationId)
-        {
-            var placeCallEndpointUrl = _settings.PlaceCallEndpointUrl ?? _defaultPlaceCallEndpointUrl;
-
-            //place the call
-            try
-            {
-                Logger.LogInformation(
-                    "RealTimeMediaBotService :Sending place call request");
-
-                //TODO: add retries & logging
-                using (var request = new HttpRequestMessage(HttpMethod.Post, placeCallEndpointUrl) {Content = content})
-                {
-                    var token = await GetBotToken(_settings.BotId, _settings.BotSecret).ConfigureAwait(false);
-
-                    request.Headers.Add("X-Microsoft-Skype-Chain-ID", correlationId);
-                    request.Headers.Add("X-Microsoft-Skype-Message-ID", Guid.NewGuid().ToString());
-                    //TODO make this an http factory and inject it to the call service and bot service
-                    var client = RealTimeMediaCallService.GetHttpClient();
-
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-                    var response = await client.SendAsync(request).ConfigureAwait(false);
-                    response.EnsureSuccessStatusCode();
-                    Logger.LogInformation($"RealTimeMediaBotService [{correlationId}]: Response to join call: {response}");
-                }
-            }
-            catch (Exception exception)
-            {
-                Logger.LogError(
-                    $"RealTimeMediaBotService [{correlationId}]: Received error while sending request to subscribe participant. Message: {exception}");
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Method to obtain bot token from AAD
-        /// </summary>
-        /// <param name="botId"></param>
-        /// <param name="botSecret"></param>
-        /// <returns></returns>
-        internal async Task<string> GetBotToken(string botId, string botSecret)
-        {
-            if (null == botId)
-            {
-                throw new ArgumentNullException(nameof(botId));
-            }
-
-            if (null == botSecret)
-            {
-                throw new ArgumentNullException(nameof(botSecret));
-            }
-
-            var context = new AuthenticationContext(@"https://login.microsoftonline.com/common/oauth2/v2.0/token");
-            var creds = new ClientCredential(botId, botSecret);
-            var result = await context.AcquireTokenAsync(@"https://api.botframework.com/", creds);
-            return result.AccessToken;
-        }
-
 
         /// <summary>
         /// Method responsible for processing the data sent with POST request to incoming call URL
@@ -277,7 +205,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             return new ResponseResult(ResponseType.Accepted, serializedResponse);
         }
 
-        private async Task<Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall>> CreateCall(string callLegId, string correlationId)
+        public async Task<Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall>> CreateCall(string callLegId, string correlationId)
         {
             if (string.IsNullOrEmpty(correlationId))
             {
@@ -307,9 +235,6 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 throw new InvalidOperationException("The call was not resolved correctly.");
             }
 
-            var callEvent = new RealTimeMediaCallEvent(callLegId, call);
-            await InvokeCallEvent(OnCallCreated, callEvent).ConfigureAwait(false);
-
             var currentCall = new Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall>(callService, call);
             Tuple<IInternalRealTimeMediaCallService, IRealTimeMediaCall> prevCall = null;
             ActiveCalls.AddOrUpdate(callLegId, currentCall, (key, oldCall) =>
@@ -324,6 +249,10 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 var prevService = prevCall.Item1;
                 await prevService.LocalCleanup().ConfigureAwait(false);
             }
+            //onCallCreated event should be called after call is created
+            var callEvent = new RealTimeMediaCallEvent(callLegId, call);
+            await InvokeCallEvent(OnCallCreated, callEvent).ConfigureAwait(false);
+
 
             return currentCall;
         }
