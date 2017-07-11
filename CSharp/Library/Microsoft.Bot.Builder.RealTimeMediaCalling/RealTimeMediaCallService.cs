@@ -468,7 +468,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <param name="botId"></param>
         /// <param name="botSecret"></param>
         /// <returns></returns>
-        internal async Task<string> GetBotToken(string botId, string botSecret)
+        protected virtual async Task<string> GetBotToken(string botId, string botSecret)
         {
             if (null == botId)
             {
@@ -486,7 +486,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             return result.AccessToken;
         }
 
-        public async Task JoinCall(JoinCallParameters joinCallParameters, IReadOnlyMediaSession session, string correlationId)
+        public virtual async Task JoinCall(JoinCallParameters joinCallParameters, IReadOnlyMediaSession session, string correlationId)
         {
             if (null == joinCallParameters)
             {
