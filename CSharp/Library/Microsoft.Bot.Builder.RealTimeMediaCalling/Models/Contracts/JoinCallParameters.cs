@@ -60,16 +60,26 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         // TODO: Add Organizer ID
 
         /// <summary>
+        /// Joins the conversation as a hidden entity
+        /// </summary>
+        public bool? Hidden { get; set; }
+
+        /// <summary>
         /// Custom display name of the bot
         /// </summary>
         public string DisplayName { get; set; }
 
         /// <summary>
-        /// Joins the conversation as a hidden entity
+        /// Join the bot with this ID.
         /// </summary>
-        public bool? Hidden { get; set; }
+        public string JoinAsId { get; set; }
 
-        public JoinCallParameters(string joinToken, string threadId, string threadMessageId, string conversationId = null, string displayName = null, bool hidden=false)
+        public JoinCallParameters(
+            string joinToken, 
+            string threadId, 
+            string threadMessageId,
+            string conversationId = null,
+            bool hidden = false)
         {
             if (string.IsNullOrWhiteSpace(joinToken))
             {

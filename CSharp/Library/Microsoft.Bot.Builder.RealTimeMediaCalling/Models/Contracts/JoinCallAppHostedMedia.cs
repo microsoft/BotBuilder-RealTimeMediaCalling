@@ -55,8 +55,14 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         /// <summary>
         /// Custom display name of the bot
         /// </summary>
-        [JsonProperty(Required = Required.Default)]
+        [JsonProperty(Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
         public string DisplayName { get; set; }
+
+        /// <summary>
+        /// Custom id of the bot.
+        /// </summary>
+        [JsonProperty(Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+        public string JoinAsId { get; set; }
 
         /// <summary>
         /// Conversation join token. This value defines the target group conversation
@@ -110,7 +116,12 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         {
             if (joinCallParameters != null)
             {
-                this.DisplayName = joinCallParameters.DisplayName;
+                if (joinCallParameters.DisplayName != null)
+                {
+                    this.DisplayName = joinCallParameters.DisplayName;
+                    // If no join as id is given, generate one.
+                    this.JoinAsId = joinCallParameters.JoinAsId ?? "8:origid:" + Guid.NewGuid();
+                }
                 this.JoinToken = joinCallParameters.JoinToken;
                 this.ThreadId = joinCallParameters.ThreadId;
                 this.ThreadMessageId = joinCallParameters.ThreadMessageId;
