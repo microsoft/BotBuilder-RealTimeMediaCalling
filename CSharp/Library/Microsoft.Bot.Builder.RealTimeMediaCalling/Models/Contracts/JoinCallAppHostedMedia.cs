@@ -68,6 +68,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         /// Conversation join token. This value defines the target group conversation
         /// to be joined.
         /// </summary>
+        //TODO remove this once five IDs are supported on pma side
         [JsonProperty(Required = Required.Always)]
         public string JoinToken { get; set; }
 
@@ -80,15 +81,26 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         /// <summary>
         /// The id of the thread message, for multiparty calls.
         /// </summary>
+        /// //TODO needs to be serialized
         public string ThreadMessageId { get; set; }
 
         /// <summary>
         /// The id of the call leg in the conversation
         /// </summary>
-        /// //TODO needs to be serialized 
+        [JsonProperty(Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
         public string CallLegId { get; set; }
 
-        // TODO: Add Organizer ID
+        /// <summary>
+        /// The id of the organizer in the conversation
+        /// </summary>
+        /// //TODO needs to be serialized 
+        public string OrganizerId { get; set; }
+
+        /// <summary>
+        /// The id of the tenant for the conversation to be joined
+        /// </summary>
+        /// //TODO needs to be serialized 
+        public string TenantId { get; set; }
 
         /// <summary>
         /// Joins the conversation as a hidden entity
@@ -122,8 +134,29 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
                     // If no join as id is given, generate one.
                     this.JoinAsId = joinCallParameters.JoinAsId ?? "8:origid:" + Guid.NewGuid();
                 }
+                if (string.IsNullOrWhiteSpace(joinCallParameters.OrganizerId))
+                {
+                    throw new ArgumentNullException(nameof(OrganizerId));
+                }
+                if (string.IsNullOrWhiteSpace(joinCallParameters.TenantId))
+                {
+                    throw new ArgumentNullException(nameof(TenantId));
+                }
+                if (string.IsNullOrWhiteSpace(joinCallParameters.ThreadMessageId))
+                {
+                    throw new ArgumentNullException(nameof(ThreadMessageId));
+                }
+                if (string.IsNullOrWhiteSpace(joinCallParameters.ThreadId))
+                {
+                    throw new ArgumentNullException(nameof(ThreadId));
+                }
+
+                this.JoinAsId = joinCallParameters.JoinAsId;
                 this.JoinToken = joinCallParameters.JoinToken;
+                this.OrganizerId = joinCallParameters.OrganizerId;
+                this.TenantId = joinCallParameters.TenantId;
                 this.ThreadId = joinCallParameters.ThreadId;
+                this.CallLegId = joinCallParameters.CallLegId;
                 this.ThreadMessageId = joinCallParameters.ThreadMessageId;
                 this.Hidden = joinCallParameters.Hidden;
             }

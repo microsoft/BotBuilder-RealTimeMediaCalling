@@ -39,13 +39,19 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         /// <summary>
         /// The ID of the conversation we are joining.
         /// </summary>
-        public string ConversationId { get; }
+        public string CallLegId { get; set; }
 
         /// <summary>
         /// Conversation join token. This value defines the target group conversation
         /// to be joined.
         /// </summary>
         public string JoinToken { get; }
+
+        /// <summary>
+        /// TenantId passed in to identify a specific meeting
+        /// to be joined.
+        /// </summary>
+        public string TenantId { get; }
 
         /// <summary>
         /// The id of the thread, for multiparty calls.
@@ -57,7 +63,10 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         /// </summary>
         public string ThreadMessageId { get; }
 
-        // TODO: Add Organizer ID
+        /// <summary>
+        /// The Id of the organizer of the meeting to be joined
+        /// </summary>
+        public string OrganizerId { get; }
 
         /// <summary>
         /// Joins the conversation as a hidden entity
@@ -70,39 +79,35 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         public string DisplayName { get; set; }
 
         /// <summary>
-        /// Join the bot with this ID.
+        /// Custom ID of the bot
         /// </summary>
         public string JoinAsId { get; set; }
 
+        /// <summary>
+        /// Join the bot with this ID.
+        /// <param name="joinToken">Token for the meeting to be joined</param>
+        /// <param name="threadId">ThreadId for the meeting to be joined</param>
+        /// <param name="threadMessageId">threadMessageId for the meeting to be joined</param>
+        /// <param name="tenantId">tenantId for the meeting to be joined</param>
+        /// <param name="organizerId">organizerId for the meeting to be joined</param>
+        /// <param name="hidden">whether joined as hidden or not</param>
+        /// </summary>
+        //TODO remove joinToken once the other four parameters are supported on PMA side
         public JoinCallParameters(
             string joinToken, 
             string threadId, 
             string threadMessageId,
-            string conversationId = null,
+            string tenantId,
+            string organizerId,
             bool hidden = false)
         {
-            if (string.IsNullOrWhiteSpace(joinToken))
-            {
-                throw new ArgumentNullException(nameof(joinToken));
-            }
-
-            if (string.IsNullOrWhiteSpace(threadId))
-            {
-                throw new ArgumentNullException(nameof(threadId));
-            }
-
-            if (string.IsNullOrWhiteSpace(threadMessageId))
-            {
-                throw new ArgumentNullException(nameof(threadMessageId));
-            }
 
             this.JoinToken = joinToken;
             this.ThreadId = threadId;
             this.ThreadMessageId = threadMessageId;
-
-            this.ConversationId = string.IsNullOrWhiteSpace(conversationId)
-                ? Guid.NewGuid().ToString()
-                : conversationId;
+            this.OrganizerId = organizerId;
+            this.TenantId = tenantId;
+            this.CallLegId = Guid.NewGuid().ToString();
         }
     }
 }

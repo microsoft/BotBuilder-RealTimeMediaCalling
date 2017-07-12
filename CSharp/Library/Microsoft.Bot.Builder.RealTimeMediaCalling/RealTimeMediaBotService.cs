@@ -150,7 +150,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <summary>
         /// method for creating a call
         /// </summary>
-        /// <param name="callLegId">The parameters of the call to join.</param>
+        /// <param name="callLegId">The call leg id of the call.</param>
         /// <param name="correlationId">The correlation id of the existing call.</param>
         public IRealTimeMediaCall CreateNewCall(string callLegId = null, string correlationId = null)
         {
