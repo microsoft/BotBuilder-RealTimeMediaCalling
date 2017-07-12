@@ -76,6 +76,12 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         /// </summary>
         public string ThreadMessageId { get; set; }
 
+        /// <summary>
+        /// The id of the call leg in the conversation
+        /// </summary>
+        /// //TODO needs to be serialized 
+        public string CallLegId { get; set; }
+
         // TODO: Add Organizer ID
 
         /// <summary>
