@@ -65,9 +65,6 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// </summary>
         private readonly IRealTimeMediaCallServiceSettings _settings;
 
-        private readonly Uri _defaultPlaceCallEndpointUrl = new Uri("https://pma.plat.skype.com:6448/platform/v1/calls");
-        //private readonly Uri _defaultPlaceCallEndpointUrl = new Uri("https://pma-dev-uswe-01.plat-dev.skype.net:6448/platform/v1/calls");
-
         /// <summary>
         /// Gets or sets the logger.
         /// </summary>
