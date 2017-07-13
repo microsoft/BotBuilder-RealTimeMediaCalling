@@ -429,7 +429,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
         protected virtual async Task PlaceCall(HttpContent content, string correlationId)
         {
-            var placeCallEndpointUrl =  _placeCallUrl ?? _defaultPlaceCallEndpointUrl;
+            var placeCallEndpointUrl =  _placeCallUrl == null? _defaultPlaceCallEndpointUrl: _placeCallUrl;
 
             //place the call
             try
