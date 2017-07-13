@@ -1,15 +1,15 @@
-﻿// 
+﻿//
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license.
-// 
+//
 // Microsoft Bot Framework: http://botframework.com
-// 
+//
 // Bot Builder SDK GitHub:
 // https://github.com/Microsoft/BotBuilder
-// 
+//
 // Copyright (c) Microsoft Corporation
 // All rights reserved.
-// 
+//
 // MIT License:
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
@@ -18,10 +18,10 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be
 // included in all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND,
 // EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -50,7 +50,8 @@ using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
-    internal class RealTimeMediaCallServiceParameters {
+    internal class RealTimeMediaCallServiceParameters
+    {
         /// <summary>
         /// Id for this call
         /// </summary>
@@ -80,7 +81,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
     /// <summary>
     /// Service that handles per call requests
-    /// </summary>            
+    /// </summary>
     internal class RealTimeMediaCallService : IInternalRealTimeMediaCallService
     {
         private readonly Uri _callbackUrl;
@@ -96,6 +97,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         private string _botToken;
 
         private readonly Uri _defaultPlaceCallEndpointUrl = new Uri("https://pma.plat.skype.com:6448/platform/v1/calls");
+
         /// <summary>
         /// Id for this call
         /// </summary>
@@ -113,7 +115,6 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// Automatically injected by Autofac DI
         /// </value>
         public IRealTimeMediaLogger Logger { get; set; }
-
 
         /// <summary>
         /// Event raised when specified workflow fails to be validated by Bot platform
@@ -218,7 +219,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             _botId = settings.BotId;
             _botSecret = settings.BotSecret;
             _timer = new Timer(CallExpiredTimerCallback, null, CallExpiredTimerInterval, Timeout.Infinite);
-        }        
+        }
 
         /// <summary>
         /// Keeps track of receiving AnswerAppHostedMediaOutcome. If the answer does not come back, bot can start leaking sockets.
@@ -303,7 +304,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }
 
             bool expectEmptyActions = false;
-            if(conversationResult.OperationOutcome.Type == RealTimeMediaValidOutcomes.AnswerAppHostedMediaOutcome && conversationResult.OperationOutcome.Outcome == Outcome.Success)
+            if (conversationResult.OperationOutcome.Type == RealTimeMediaValidOutcomes.AnswerAppHostedMediaOutcome && conversationResult.OperationOutcome.Outcome == Outcome.Success)
             {
                 Uri link;
                 if (conversationResult.Links.TryGetValue("subscriptions", out link))
@@ -325,6 +326,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             else if (conversationResult.OperationOutcome.Type == RealTimeMediaValidOutcomes.JoinCallAppHostedMediaOutcome && conversationResult.OperationOutcome.Outcome == Outcome.Success)
             {
                 Uri link;
+                if (conversationResult.Links.TryGetValue("subscriptions", out link))
+                {
+                    _subscriptionLink = link;
+                    Logger.LogInformation($"RealTimeMediaCallService [{CallLegId}]: Caching subscription link {link}");
+                }
 
                 if (conversationResult.Links.TryGetValue("call", out link))
                 {
@@ -429,7 +435,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 
         protected virtual async Task PlaceCall(HttpContent content, string correlationId)
         {
-            var placeCallEndpointUrl =  _placeCallUrl == null? _defaultPlaceCallEndpointUrl: _placeCallUrl;
+            var placeCallEndpointUrl = _placeCallUrl == null ? _defaultPlaceCallEndpointUrl : _placeCallUrl;
 
             //place the call
             try
@@ -511,7 +517,6 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             HttpContent content = new StringContent(RealTimeMediaSerializer.SerializeToJson(workflow), Encoding.UTF8, "application/json");
 
             await PlaceCall(content, correlationId).ConfigureAwait(false);
-
         }
 
         /// <summary>
@@ -609,7 +614,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// </summary>
         public Task LocalCleanup()
         {
-            var eventHandler = OnCallCleanup;            
+            var eventHandler = OnCallCleanup;
             return InvokeHandlerIfSet(eventHandler, "Cleanup");
         }
 
@@ -624,7 +629,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             {
                 throw new InvalidOperationException($"[{CallLegId}]: No subscription link was present in the AnswerAppHostedMediaOutcome");
             }
-            
+
             videoSubscription.Validate();
             HttpContent content = new StringContent(RealTimeMediaSerializer.SerializeToJson(videoSubscription), Encoding.UTF8, JSONConstants.ContentType);
 
@@ -678,7 +683,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }
 
             using (var request = new HttpRequestMessage(HttpMethod.Delete, _callLink))
-            {                
+            {
                 request.Headers.Add("X-Microsoft-Skype-Chain-ID", CorrelationId);
                 request.Headers.Add("X-Microsoft-Skype-Message-ID", Guid.NewGuid().ToString());
 
@@ -690,7 +695,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }
         }
 
-        private async Task<Workflow> InvokeHandlerIfSet<T>(Func<T, Task> action, T outcomeEventBase) 
+        private async Task<Workflow> InvokeHandlerIfSet<T>(Func<T, Task> action, T outcomeEventBase)
             where T : OutcomeEventBase
         {
             if (action == null)
@@ -703,7 +708,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             return outcomeEventBase.ResultingWorkflow;
         }
 
-        private async Task InvokeHandlerIfSet(Func<Task> action, string type) 
+        private async Task InvokeHandlerIfSet(Func<Task> action, string type)
         {
             if (action == null)
             {
