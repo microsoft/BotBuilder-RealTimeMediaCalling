@@ -132,7 +132,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
                 {
                     this.DisplayName = joinCallParameters.DisplayName;
                     // If no join as id is given, generate one.
-                    this.JoinAsId = joinCallParameters.JoinAsId ?? "8:origid:" + Guid.NewGuid();
+                    this.JoinAsId = joinCallParameters.JoinAsId ?? "8:teamsvisitor:" + Guid.NewGuid();
                 }
                 if (string.IsNullOrWhiteSpace(joinCallParameters.OrganizerId))
                 {
