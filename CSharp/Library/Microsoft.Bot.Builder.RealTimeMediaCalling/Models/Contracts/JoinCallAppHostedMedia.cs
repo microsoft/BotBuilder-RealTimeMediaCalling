@@ -134,6 +134,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
                     // If no join as id is given, generate one.
                     this.JoinAsId = joinCallParameters.JoinAsId ?? "8:teamsvisitor:" + Guid.NewGuid();
                 }
+                else
+                {
+                    this.JoinAsId = joinCallParameters.JoinAsId;
+                }
+
                 if (string.IsNullOrWhiteSpace(joinCallParameters.OrganizerId))
                 {
                     throw new ArgumentNullException(nameof(OrganizerId));
@@ -151,7 +156,6 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
                     throw new ArgumentNullException(nameof(ThreadId));
                 }
 
-                this.JoinAsId = joinCallParameters.JoinAsId;
                 this.JoinToken = joinCallParameters.JoinToken;
                 this.OrganizerId = joinCallParameters.OrganizerId;
                 this.TenantId = joinCallParameters.TenantId;
