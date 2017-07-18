@@ -53,54 +53,29 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         public static readonly int ParticipantLegMetadataLength = 1024;
 
         /// <summary>
-        /// Custom display name of the bot
-        /// </summary>
-        [JsonProperty(Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
-        public string DisplayName { get; set; }
-
-        /// <summary>
-        /// Custom id of the bot.
-        /// </summary>
-        [JsonProperty(Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
-        public string JoinAsId { get; set; }
-
-        /// <summary>
         /// Conversation join token. This value defines the target group conversation
         /// to be joined.
         /// </summary>
-        //TODO remove this once five IDs are supported on pma side
-        [JsonProperty(Required = Required.Always)]
+        [JsonProperty(Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
         public string JoinToken { get; set; }
 
         /// <summary>
-        /// The id of the thread, for multiparty calls.
+        /// Meeting info that should be provided when JoinToken is not available
         /// </summary>
         [JsonProperty(Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
-        public string ThreadId { get; set; }
+        public MeetingInfo MeetingInfo { get; set; }
 
         /// <summary>
-        /// The id of the thread message, for multiparty calls.
+        /// The Participant as which the bot should join.
         /// </summary>
-        /// //TODO needs to be serialized
-        public string ThreadMessageId { get; set; }
+        [JsonProperty(Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
+        public Participant Source { get; set; }
 
         /// <summary>
-        /// The id of the call leg in the conversation
+        /// The id of call leg in conversation.
         /// </summary>
         [JsonProperty(Required = Required.Default, NullValueHandling = NullValueHandling.Ignore)]
         public string CallLegId { get; set; }
-
-        /// <summary>
-        /// The id of the organizer in the conversation
-        /// </summary>
-        /// //TODO needs to be serialized 
-        public string OrganizerId { get; set; }
-
-        /// <summary>
-        /// The id of the tenant for the conversation to be joined
-        /// </summary>
-        /// //TODO needs to be serialized 
-        public string TenantId { get; set; }
 
         /// <summary>
         /// Joins the conversation as a hidden entity
@@ -128,44 +103,76 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         {
             if (joinCallParameters != null)
             {
+                switch (joinCallParameters.JoinCallSwitch)
+                {
+                    case JoinCallParameters.JoinCallMode.JoinToken:
+                        if (string.IsNullOrWhiteSpace(joinCallParameters.JoinToken))
+                        {
+                            throw new ArgumentNullException(nameof(joinCallParameters.JoinToken));
+                        }
+                        JoinToken = joinCallParameters.JoinToken;
+                        break;
+
+                    case JoinCallParameters.JoinCallMode.FiveParameterJoin:
+                        if (string.IsNullOrWhiteSpace(joinCallParameters.ThreadId))
+                        {
+                            throw new ArgumentNullException(nameof(joinCallParameters.ThreadId));
+                        }
+                        if (string.IsNullOrWhiteSpace(joinCallParameters.ThreadMessageId))
+                        {
+                            throw new ArgumentNullException(nameof(joinCallParameters.ThreadMessageId));
+                        }
+                        if (joinCallParameters.OrganizerId == Guid.Empty)
+                        {
+                            throw new ArgumentException("Organizer Id cannot be empty", nameof(joinCallParameters.OrganizerId));
+                        }
+                        if (joinCallParameters.TenantId == Guid.Empty)
+                        {
+                            throw new ArgumentException("Tenant Id cannot be empty", nameof(joinCallParameters.TenantId));
+                        }
+
+                        MeetingInfo = new MeetingInfo()
+                        {
+                            ThreadId = joinCallParameters.ThreadId,
+                            MessageId = joinCallParameters.ThreadMessageId,
+                            OrganizerId = joinCallParameters.OrganizerId,
+                            TenantId = joinCallParameters.TenantId,
+                            ReplyChainMessageId = joinCallParameters.ReplyChainMessageId
+                        };
+                        break;
+                }
+
+                var joinAsId = joinCallParameters.JoinAsId;
+
                 if (joinCallParameters.DisplayName != null)
                 {
-                    this.DisplayName = joinCallParameters.DisplayName;
-                    // If no join as id is given, generate one.
-                    this.JoinAsId = joinCallParameters.JoinAsId ?? "8:teamsvisitor:" + Guid.NewGuid();
-                }
-                else
-                {
-                    this.JoinAsId = joinCallParameters.JoinAsId;
+                    Source = new Participant()
+                    {
+                        DisplayName = joinCallParameters.DisplayName
+                    };
+
+                    if (joinAsId == null)
+                    {
+                        // If no join as id is given, generate one.
+                        joinAsId = "8:teamsvisitor:" + Guid.NewGuid();
+                    }
                 }
 
-                if (string.IsNullOrWhiteSpace(joinCallParameters.OrganizerId))
+                if (joinAsId != null)
                 {
-                    throw new ArgumentNullException(nameof(OrganizerId));
-                }
-                if (string.IsNullOrWhiteSpace(joinCallParameters.TenantId))
-                {
-                    throw new ArgumentNullException(nameof(TenantId));
-                }
-                if (string.IsNullOrWhiteSpace(joinCallParameters.ThreadMessageId))
-                {
-                    throw new ArgumentNullException(nameof(ThreadMessageId));
-                }
-                if (string.IsNullOrWhiteSpace(joinCallParameters.ThreadId))
-                {
-                    throw new ArgumentNullException(nameof(ThreadId));
+                    if (Source == null)
+                    {
+                        Source = new Participant();
+                    }
+
+                    Source.Identity = joinAsId;
                 }
 
-                this.JoinToken = joinCallParameters.JoinToken;
-                this.OrganizerId = joinCallParameters.OrganizerId;
-                this.TenantId = joinCallParameters.TenantId;
-                this.ThreadId = joinCallParameters.ThreadId;
-                this.CallLegId = joinCallParameters.CallLegId;
-                this.ThreadMessageId = joinCallParameters.ThreadMessageId;
-                this.Hidden = joinCallParameters.Hidden;
+                CallLegId = joinCallParameters.CallLegId;
+                Hidden = joinCallParameters.Hidden;
             }
 
-            this.Action = RealTimeMediaValidActions.JoinCallAppHostedMediaAction;
+            Action = RealTimeMediaValidActions.JoinCallAppHostedMediaAction;
         }
 
         /// <summary>
@@ -175,15 +182,18 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         {
             base.Validate();
 
-            Utils.AssertArgument(this.MediaConfiguration != null, "MediaConfiguration must not be null.");
-            Utils.AssertArgument(this.MediaConfiguration.ToString().Length <= MaxValues.MediaConfigurationLength, "MediaConfiguration must serialize to less than or equal to {0} characters.", MaxValues.MediaConfigurationLength);
-            Utils.AssertArgument(this.JoinToken != null, "JoinToken cannot be null");
-
-            if (this.ParticipantLegMetadata != null)
+            Utils.AssertArgument(MediaConfiguration != null, "MediaConfiguration must not be null.");
+            Utils.AssertArgument(MediaConfiguration?.ToString().Length <= MaxValues.MediaConfigurationLength,
+                "MediaConfiguration must serialize to less than or equal to {0} characters.",
+                MaxValues.MediaConfigurationLength);
+            
+            if (ParticipantLegMetadata != null)
             {
                 //TODO: 
                 //ParticipantLegMetadataLength is in the newest calling nuget, will change it to get from the nuget once calling nuget is updated
-                Utils.AssertArgument(this.ParticipantLegMetadata.ToString().Length <= ParticipantLegMetadataLength, "ParticipantLegMetadata must serialize to less than or equal to {0} characters.", ParticipantLegMetadataLength);
+                Utils.AssertArgument(ParticipantLegMetadata.ToString().Length <= ParticipantLegMetadataLength,
+                    "ParticipantLegMetadata must serialize to less than or equal to {0} characters.",
+                    ParticipantLegMetadataLength);
             }
         }
     }

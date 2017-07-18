@@ -34,12 +34,29 @@ using System;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
 {
+    /// <summary>
+    /// Parameters required for joining a call.
+    /// </summary>
     public class JoinCallParameters
     {
         /// <summary>
+        /// Join call switching enum
+        /// </summary>
+        internal enum JoinCallMode
+        {
+            JoinToken,
+            FiveParameterJoin
+        }
+
+        /// <summary>
+        /// The join call mode used by these parameters.
+        /// </summary>
+        internal JoinCallMode JoinCallSwitch { get; }
+
+        /// <summary>
         /// The ID of the conversation we are joining.
         /// </summary>
-        public string CallLegId { get; set; }
+        public string CallLegId { get; } = Guid.NewGuid().ToString();
 
         /// <summary>
         /// Conversation join token. This value defines the target group conversation
@@ -51,7 +68,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         /// TenantId passed in to identify a specific meeting
         /// to be joined.
         /// </summary>
-        public string TenantId { get; }
+        public Guid TenantId { get; }
 
         /// <summary>
         /// The id of the thread, for multiparty calls.
@@ -66,7 +83,12 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         /// <summary>
         /// The Id of the organizer of the meeting to be joined
         /// </summary>
-        public string OrganizerId { get; }
+        public Guid OrganizerId { get; }
+
+        /// <summary>
+        /// Reply chain message id of the meeting to be joined
+        /// </summary>
+        public string ReplyChainMessageId { get; }
 
         /// <summary>
         /// Joins the conversation as a hidden entity
@@ -85,29 +107,38 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
 
         /// <summary>
         /// Join the bot with this ID.
-        /// <param name="joinToken">Token for the meeting to be joined</param>
         /// <param name="threadId">ThreadId for the meeting to be joined</param>
         /// <param name="threadMessageId">threadMessageId for the meeting to be joined</param>
         /// <param name="tenantId">tenantId for the meeting to be joined</param>
         /// <param name="organizerId">organizerId for the meeting to be joined</param>
-        /// <param name="hidden">whether joined as hidden or not</param>
+        /// <param name="replyChainMessageId">reply chaing message id for the meeting to be joined</param>
         /// </summary>
         //TODO remove joinToken once the other four parameters are supported on PMA side
         public JoinCallParameters(
-            string joinToken, 
-            string threadId, 
+            string threadId,
             string threadMessageId,
-            string tenantId,
-            string organizerId,
-            bool hidden = false)
-        {
+            Guid tenantId,
+            Guid organizerId,
+            string replyChainMessageId = null)
+        { 
+            JoinCallSwitch = JoinCallMode.FiveParameterJoin;
 
-            this.JoinToken = joinToken;
-            this.ThreadId = threadId;
-            this.ThreadMessageId = threadMessageId;
-            this.OrganizerId = organizerId;
-            this.TenantId = tenantId;
-            this.CallLegId = Guid.NewGuid().ToString();
+            ThreadId = threadId;
+            ThreadMessageId = threadMessageId;
+            OrganizerId = organizerId;
+            ReplyChainMessageId = replyChainMessageId;
+            TenantId = tenantId;
+        }
+
+        /// <summary>
+        /// Join a call with the provided join token or a conversation
+        /// url passed as join token.
+        /// </summary>
+        /// <param name="joinToken">The join token/conversation url</param>
+        internal JoinCallParameters(string joinToken)
+        {
+            JoinCallSwitch = JoinCallMode.JoinToken;
+            JoinToken = joinToken;
         }
     }
 }

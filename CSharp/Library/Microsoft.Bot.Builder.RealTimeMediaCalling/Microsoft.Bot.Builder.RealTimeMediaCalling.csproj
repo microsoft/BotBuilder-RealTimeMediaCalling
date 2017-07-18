@@ -150,6 +150,8 @@
     <Compile Include="Logging\LoggerInjectorModule.cs" />
     <Compile Include="Logging\TraceLogger.cs" />
     <Compile Include="Models\Contracts\JoinCallParameters.cs" />
+    <Compile Include="Models\Contracts\MeetingInfo.cs" />
+    <Compile Include="Models\Contracts\Participant.cs" />
     <Compile Include="RealTimeMediaSession.cs" />
     <Compile Include="Models\Contracts\JoinCallCompletionReason.cs" />
     <Compile Include="Models\Contracts\JoinCallAppHostedMediaOutcome.cs" />
