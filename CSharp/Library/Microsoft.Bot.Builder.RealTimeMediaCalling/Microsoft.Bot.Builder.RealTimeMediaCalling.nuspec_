@@ -17,8 +17,8 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\release\Microsoft.Bot.Builder.RealTimeMediaCalling.dll" target="lib\net46" />
-    <file src="bin\release\Microsoft.Bot.Builder.RealTimeMediaCalling.xml" target="lib\net46" />
-    <file src="bin\release\Microsoft.Bot.Builder.RealTimeMediaCalling.pdb" target="lib\net46" />
+    <file src="bin\debug\Microsoft.Bot.Builder.RealTimeMediaCalling.dll" target="lib\net46" />
+    <file src="bin\debug\Microsoft.Bot.Builder.RealTimeMediaCalling.xml" target="lib\net46" />
+    <file src="bin\debug\Microsoft.Bot.Builder.RealTimeMediaCalling.pdb" target="lib\net46" />
   </files>
 </package>
