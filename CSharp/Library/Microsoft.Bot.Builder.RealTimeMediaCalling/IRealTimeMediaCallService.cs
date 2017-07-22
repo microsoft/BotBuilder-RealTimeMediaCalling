@@ -31,6 +31,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
@@ -125,7 +126,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// Join a call
         /// </summary>
         /// <returns></returns>
-        Task JoinCall(JoinCallParameters joinCallParameters, IReadOnlyMediaSession session, string correlationId);
+        Task JoinCall(JoinCallParameters joinCallParameters, IReadOnlyMediaSession session, string correlationId, HttpClient httpClient = null);
 
     }
 
