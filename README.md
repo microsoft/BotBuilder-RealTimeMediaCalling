@@ -6,6 +6,8 @@ This is an advanced capability which allows the bot to send and receive voice an
 
 The Real-Time Media Platform for Bots works with the Skype Calling Cloud to take care of call setup and media session establishment, enabling the bot to engage in a voice and (optionally) video conversation with a Skype caller. The platform provides a simple "socket"-like API for the bot to send and receive media, and handles the real-time encoding and decoding of media, using codecs such as SILK for audio and H.264 for video.
 
+**Currently Real-Time Media Platform only supports P2P bots. Conferencing scenarios are not supported**
+
 ## Developer resources 
 
 ### SDKs
@@ -25,3 +27,6 @@ To develop a real-time media bot, you must install these NuGet packages within y
 ## Contributing
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+
+Release notes
+- Due to privacy concerns with bots, conferencing scenarios are currently not supported. We are removing MeetingScreenShots sample till the scenario is enabled again.
