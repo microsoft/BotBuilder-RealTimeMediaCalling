@@ -58,11 +58,6 @@ namespace FrontEnd.Call
         private bool _sendVideo;
 
         /// <summary>
-        /// Indicates that the MediaPlatform is ready for audio to be sent
-        /// </summary>
-        private bool _sendAudio;
-
-        /// <summary>
         /// DefaultHueColor for the video looped back
         /// </summary>
         private Color DefaultHueColor = Color.Blue;
@@ -158,11 +153,6 @@ namespace FrontEnd.Call
 
                 Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{this.Id}]: Created VideoSocket");
 
-
-                //audio socket events
-                _audioSocket.AudioMediaReceived += OnAudioMediaReceived;
-                _audioSocket.AudioSendStatusChanged += OnAudioSendStatusChanged;
-
                 //Video socket events
                 _videoSocket.VideoMediaReceived += OnVideoMediaReceived;
                 _videoSocket.VideoSendStatusChanged += OnVideoSendStatusChanged;
@@ -191,12 +181,9 @@ namespace FrontEnd.Call
                 if (Interlocked.CompareExchange(ref _disposed, 1, 0) == 0)
                 {
                     Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{this.Id}]: Disposing Call");
-                    _sendAudio = false;
 
                     if (_audioSocket != null)
                     {
-                        _audioSocket.AudioMediaReceived -= OnAudioMediaReceived;
-                        _audioSocket.AudioSendStatusChanged -= OnAudioSendStatusChanged;
                         _audioSocket.Dispose();
                     }
                     _sendVideo = false;
@@ -331,84 +318,6 @@ namespace FrontEnd.Call
             }
             return Task.CompletedTask;
         }
-        #endregion
-
-        #region Audio    
-        /// <summary>
-        /// Callback for informational updates from the media plaform about audio status changes.
-        /// Once the status becomes active, audio can be loopbacked
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnAudioSendStatusChanged(object sender, AudioSendStatusChangedEventArgs e)
-        {
-            CorrelationId.SetCurrentId(_correlationId);
-            Log.Info(
-                new CallerInfo(),
-                LogContext.Media,
-                $"[{this.Id}]: AudioSendStatusChangedEventArgs(MediaSendStatus={e.MediaSendStatus})"
-                );
-
-            if (e.MediaSendStatus == MediaSendStatus.Active && _sendAudio == false)
-            {
-                _sendAudio = true;
-            }
-        }
-
-        /// <summary>
-        /// Callback from the media platform when raw audio received.  This method sends the raw
-        /// audio to the transcriber. The audio is also loopbacked to the user.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void OnAudioMediaReceived(object sender, AudioMediaReceivedEventArgs e)
-        {
-            if (!_sendAudio)
-            {
-                e.Buffer.Dispose();
-                return;
-            }
-
-            CorrelationId.SetCurrentId(_correlationId);
-            Log.Verbose(
-                new CallerInfo(),
-                LogContext.Media,
-                "[{0}] [AudioMediaReceivedEventArgs(Data=<{1}>, Length={2}, Timestamp={3}, AudioFormat={4})]",
-                this.Id,
-                e.Buffer.Data.ToString(),
-                e.Buffer.Length,
-                e.Buffer.Timestamp,
-                e.Buffer.AudioFormat);
-
-            try
-            {
-                var audioSendBuffer = new AudioSendBuffer(e.Buffer, AudioFormat.Pcm16K, (UInt64)DateTime.Now.Ticks);
-                _audioSocket.Send(audioSendBuffer);
-
-                byte[] buffer = new byte[e.Buffer.Length];
-                Marshal.Copy(e.Buffer.Data, buffer, 0, (int)e.Buffer.Length);
-
-                //If the recognize had completed with error/timeout, the underlying stream might have been swapped out on us and disposed.
-                //so ignore the objectDisposedException 
-                try
-                {
-                    _recognitionStream.Write(buffer, 0, buffer.Length);
-                }
-                catch (ObjectDisposedException)
-                {
-                    Log.Info(new CallerInfo(), LogContext.Media, $"[{this.Id}]: Write on recognitionStream threw ObjectDisposed");
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error(new CallerInfo(), LogContext.Media, $"[{this.Id}]: Caught exception when attempting to send audio buffer {ex.ToString()}");
-            }
-            finally
-            {
-                e.Buffer.Dispose();
-            }
-        }
-
         #endregion
 
         #region Video
