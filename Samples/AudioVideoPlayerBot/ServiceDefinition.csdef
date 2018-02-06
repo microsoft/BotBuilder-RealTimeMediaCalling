@@ -20,14 +20,6 @@
           </Variable>
         </Environment>
       </Task>
-      <Task commandLine="InstallNETFX.cmd" executionContext="elevated" taskType="simple">
-        <Environment>
-          <Variable name="NetFxVersion" value="NDP461" />
-          <Variable name="PathToNETFXInstall">
-            <RoleInstanceValue xpath="/RoleEnvironment/CurrentInstance/LocalResources/LocalResource[@name='NETFXInstall']/@path" />
-          </Variable>
-        </Environment>
-      </Task>
     </Startup>
     <ConfigurationSettings>
       <Setting name="Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString" />
@@ -50,9 +42,6 @@
         </AllocatePublicPortFrom>
       </InstanceInputEndpoint>
     </Endpoints>
-    <LocalResources>
-      <LocalStorage name="NETFXInstall" sizeInMB="1024" cleanOnRoleRecycle="false" />
-    </LocalResources>
     <Certificates>
       <Certificate name="Default" storeLocation="LocalMachine" storeName="My" />
     </Certificates>
