@@ -186,9 +186,9 @@ namespace FrontEnd.Call
                     Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{this.Id}]: Disposing Call");
 
                     if (_audioSocket != null)
-                    {
-                        _audioSocket.Dispose();
+                    { 
                         _audioSocket.AudioMediaReceived -= OnAudioMediaReceived;
+                        _audioSocket.Dispose();
                     }
 
                     _sendVideo = false;
@@ -268,8 +268,9 @@ namespace FrontEnd.Call
             ).ForgetAndLogException(string.Format("Failed to start the SpeechRecognition Task for Id: {0}", Id));
         }
 
-        #region Audio    
+        #region Event Handling Methods
 
+        #region Audio
         /// <summary>
         /// Callback from the media platform when raw audio received.  This method sends the raw
         /// audio to the transcriber. The audio is also loopbacked to the user.
@@ -314,7 +315,6 @@ namespace FrontEnd.Call
 
         #endregion
 
-        #region Event Handling Methods
         #region Speech
         public Task OnRecognitionResult(RecognitionResult result)
         {
@@ -555,6 +555,7 @@ namespace FrontEnd.Call
                 _sendVideo = true;
             }
         }
+
         #endregion
 
         #endregion
