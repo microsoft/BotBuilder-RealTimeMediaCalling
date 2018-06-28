@@ -127,6 +127,9 @@ namespace FrontEnd.Call
                     CallId = correlationId
                 });
 
+                // subscribe to the audio media received event to receive media buffers
+                _audioSocket.AudioMediaReceived += OnAudioMediaReceived;
+
                 Log.Info(new CallerInfo(), LogContext.FrontEnd, $"[{this.Id}]:Created AudioSocket");
 
                 _videoSocket = new VideoSocket(new VideoSocketSettings
@@ -185,7 +188,9 @@ namespace FrontEnd.Call
                     if (_audioSocket != null)
                     {
                         _audioSocket.Dispose();
+                        _audioSocket.AudioMediaReceived -= OnAudioMediaReceived;
                     }
+
                     _sendVideo = false;
 
                     if (_videoSocket != null)
@@ -262,6 +267,52 @@ namespace FrontEnd.Call
             }
             ).ForgetAndLogException(string.Format("Failed to start the SpeechRecognition Task for Id: {0}", Id));
         }
+
+        #region Audio    
+
+        /// <summary>
+        /// Callback from the media platform when raw audio received.  This method sends the raw
+        /// audio to the transcriber. The audio is also loopbacked to the user.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnAudioMediaReceived(object sender, AudioMediaReceivedEventArgs e)
+        {
+            CorrelationId.SetCurrentId(_correlationId);
+            Log.Verbose(
+                new CallerInfo(),
+                LogContext.Media,
+                "[{0}] [AudioMediaReceivedEventArgs(Data=<{1}>, Length={2}, Timestamp={3}, AudioFormat={4})]",
+                this.Id,
+                e.Buffer.Data.ToString(),
+                e.Buffer.Length,
+                e.Buffer.Timestamp,
+                e.Buffer.AudioFormat);
+
+            byte[] buffer = new byte[e.Buffer.Length];
+            Marshal.Copy(e.Buffer.Data, buffer, 0, (int)e.Buffer.Length);
+
+            //If the recognize had completed with error/timeout, the underlying stream might have been swapped out on us and disposed.
+            //so ignore the objectDisposedException 
+            try
+            {
+                _recognitionStream.Write(buffer, 0, buffer.Length);
+            }
+            catch (ObjectDisposedException)
+            {
+                Log.Info(new CallerInfo(), LogContext.Media, $"[{this.Id}]: Write on recognitionStream threw ObjectDisposed");
+            }
+            catch (Exception ex)
+            {
+                Log.Error(new CallerInfo(), LogContext.Media, $"[{this.Id}]: Caught an exception while processing the audio buffer {ex.ToString()}");
+            }
+            finally
+            {
+                e.Buffer.Dispose();
+            }
+        }
+
+        #endregion
 
         #region Event Handling Methods
         #region Speech
