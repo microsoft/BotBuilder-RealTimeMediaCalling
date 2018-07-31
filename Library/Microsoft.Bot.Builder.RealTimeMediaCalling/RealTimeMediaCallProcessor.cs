@@ -100,7 +100,8 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                     return new ResponseResult(ResponseType.BadRequest);
                 }
 
-                conversation.Validate();
+                // todo put it back when needed
+                // conversation.Validate();
             }
             catch (Exception ex)
             {
@@ -204,6 +205,46 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             }
 
             await service.ProcessNotificationResult(notification).ConfigureAwait(false);
+            return new ResponseResult(ResponseType.Accepted);
+        }
+
+        /// <summary>
+        /// Method responsible for processing the data sent with POST request to command URL
+        /// </summary>
+        /// <param name="content">The content of request</param>
+        /// <returns>Returns the response that should be sent to the sender of POST request</returns>
+        public async Task<ResponseResult> ProcessControlCommandAsync(string content)
+        {
+            NotificationBase notification;
+            if (content == null)
+            {
+                return new ResponseResult(ResponseType.BadRequest);
+            }
+            try
+            {
+                Trace.TraceWarning($"Received command {content}");
+                notification = RealTimeMediaSerializer.DeserializeFromJson<NotificationBase>(content);
+                if (notification == null)
+                {
+                    Trace.TraceWarning($"Could not deserialize the notification.. returning badrequest");
+                    return new ResponseResult(ResponseType.BadRequest);
+                }
+
+                notification.Validate();
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceWarning($"Exception in notification validate {ex}");
+                return new ResponseResult(ResponseType.BadRequest);
+            }
+
+            RealTimeMediaCallService service;
+            if (!_activeCalls.TryGetValue(notification.Id, out service))
+            {
+                return new ResponseResult(ResponseType.NotFound, $"Call {notification.Id} not found");
+            }
+
+            await service.ProcessControlCommandResult(notification).ConfigureAwait(false);
             return new ResponseResult(ResponseType.Accepted);
         }
     }  

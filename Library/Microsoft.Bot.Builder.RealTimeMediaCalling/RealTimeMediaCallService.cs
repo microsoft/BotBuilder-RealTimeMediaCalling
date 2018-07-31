@@ -46,6 +46,8 @@ using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
 using System.Net.Http.Headers;
 using System.Reflection;
+using Newtonsoft.Json.Linq;
+using Microsoft.Bot.Builder.RealTimeMediaCalling.Models.Contracts;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
@@ -104,6 +106,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// Event raised when bot needs to cleanup an existing call
         /// </summary>
         public event Func<Task> OnCallCleanup;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public event Func<NotificationBase, Task> OnControlCommandReceived;
 
         /// <summary>
         /// Instantiates the service with settings to handle a call
@@ -195,6 +202,23 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                     return HandleRosterUpdateNotification(notification as RosterUpdateNotification);
             }
             throw new BotCallingServiceException($"[{CallLegId}]: Unknown notification type {notification.Type}");
+        }
+
+        /// <summary>
+        /// Invokes bot command
+        /// </summary>
+        /// <param name="notification">Notification to be sent</param>
+        /// <returns></returns>
+        internal async Task ProcessControlCommandResult(NotificationBase notification)
+        {
+            Trace.TraceInformation(
+                $"RealTimeMediaCallService [{CallLegId}]: Received a command with metadata {notification.AdditionalData} operation, callId: {notification.Id}");
+
+            var eventHandler = OnControlCommandReceived;
+            if (eventHandler != null)
+                await eventHandler.Invoke(notification).ConfigureAwait(false);
+
+            return;
         }
 
         private async Task HandleCallStateChangeNotification(CallStateChangeNotification notification)
@@ -371,6 +395,29 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
             var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Microsoft-BotFramework-RealTimeMedia", assemblyVersion));
             return client;
+        }
+
+        public async Task SendMetaData(Uri callbackUri, ParticipantLegMetadataConfiguration participantLegMetadataConfiguration)
+        {
+            if (callbackUri != null && participantLegMetadataConfiguration != null)
+            {
+                Trace.TraceInformation(
+                        $"RealTimeMediaCallService [{CallLegId}]: SendMetaData" +
+                        $"callbackUri: {callbackUri}");
+
+                HttpContent content = new StringContent(RealTimeMediaSerializer.SerializeToJson(participantLegMetadataConfiguration), Encoding.UTF8, JSONConstants.ContentType);
+                using (var request = new HttpRequestMessage(HttpMethod.Put, callbackUri) { Content = content})
+                {
+                    request.Headers.Add("X-Microsoft-Skype-Chain-ID", CorrelationId);
+                    request.Headers.Add("X-Microsoft-Skype-Message-ID", Guid.NewGuid().ToString());
+
+                    var client = GetHttpClient();
+                    var response = await client.SendAsync(request).ConfigureAwait(false);
+                    response.EnsureSuccessStatusCode();
+
+                    Trace.TraceInformation($"RealTimeMediaCallService [{CallLegId}]: Response to SendMetaData: {response}");
+                }
+            }
         }
 
         /// <summary>

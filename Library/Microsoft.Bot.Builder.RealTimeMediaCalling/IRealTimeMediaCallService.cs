@@ -33,7 +33,9 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.Events;
+using Microsoft.Bot.Builder.RealTimeMediaCalling.Models.Contracts;
 using Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling
 {
@@ -73,6 +75,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         event Func<RosterUpdateNotification, Task> OnRosterUpdateNotification;
 
         /// <summary>
+        /// 
+        /// </summary>
+        event Func<NotificationBase, Task> OnControlCommandReceived;
+
+        /// <summary>
         /// Event raised when bot needs to cleanup the call
         /// </summary>
         event Func<Task> OnCallCleanup;
@@ -89,5 +96,13 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// </summary>
         /// <returns></returns>
         Task EndCall();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="callbackUri"></param>
+        /// <param name="participantLegMetadataConfiguration"></param>
+        /// <returns></returns>
+        Task SendMetaData(Uri callbackUri, ParticipantLegMetadataConfiguration participantLegMetadataConfiguration);
     }  
 }

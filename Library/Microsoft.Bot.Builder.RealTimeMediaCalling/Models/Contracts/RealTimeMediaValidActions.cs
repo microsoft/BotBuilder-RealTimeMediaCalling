@@ -52,7 +52,12 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         /// VideoSubscription
         /// </summary>
         public const string VideoSubscriptionAction = "videoSubscription";
-        
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public const string ParticipantLegMetadataConfiguration = "participantLegMetadataConfiguration";
+
         /// <summary>
         /// Dictionary of valid actions and their relative order
         /// +ve order reflect operations after and including call acceptance

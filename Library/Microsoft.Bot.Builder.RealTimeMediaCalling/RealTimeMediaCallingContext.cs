@@ -72,6 +72,7 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                 case RealTimeMediaCallRequestType.IncomingCall:
                 case RealTimeMediaCallRequestType.CallingEvent:
                 case RealTimeMediaCallRequestType.NotificationEvent:
+                case RealTimeMediaCallRequestType.CommandReceivedEvent:
                     parsedRequest = await ProcessRequestAsync();
                     break;
                 default:

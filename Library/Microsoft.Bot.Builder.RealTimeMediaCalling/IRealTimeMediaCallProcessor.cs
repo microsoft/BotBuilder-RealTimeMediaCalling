@@ -114,5 +114,12 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <param name="content">Content from the request</param>
         /// <returns></returns>
         Task<ResponseResult> ProcessNotificationAsync(string content);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        Task<ResponseResult> ProcessControlCommandAsync(string content);
     }
 }

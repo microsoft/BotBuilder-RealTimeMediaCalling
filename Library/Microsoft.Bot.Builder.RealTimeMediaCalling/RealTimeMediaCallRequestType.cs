@@ -51,6 +51,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
         /// <summary>
         /// Notifications - like roster change/call status change for the call is received.
         /// </summary>
-        NotificationEvent
+        NotificationEvent,
+
+        /// <summary>
+        /// 
+        /// </summary>
+        CommandReceivedEvent
     }
 }

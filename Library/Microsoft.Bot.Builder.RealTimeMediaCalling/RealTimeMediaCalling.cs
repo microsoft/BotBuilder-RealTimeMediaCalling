@@ -111,6 +111,9 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling
                             case RealTimeMediaCallRequestType.NotificationEvent:
                                 result = await callingBotService.ProcessNotificationAsync(parsedRequest.Content).ConfigureAwait(false);
                                 break;
+                            case RealTimeMediaCallRequestType.CommandReceivedEvent:
+                                result = await callingBotService.ProcessControlCommandAsync(parsedRequest.Content).ConfigureAwait(false);
+                                break;
 
                             default:
                                 result = new ResponseResult(ResponseType.BadRequest, $"Unsupported call request type: {callRequestType}");

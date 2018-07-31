@@ -32,6 +32,8 @@
 
 using Microsoft.Bot.Builder.Calling.ObjectModel.Contracts;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
 {
@@ -47,6 +49,29 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         public AnswerAppHostedMediaOutcome()
         {
             this.Type = RealTimeMediaValidOutcomes.AnswerAppHostedMediaOutcome;
+        }
+        [JsonExtensionData]
+        private IDictionary<string, JToken> _additionalData;
+
+        /// <summary>
+        /// Extension data for the fields that are not part of schema.
+        /// </summary>
+        [JsonIgnore]
+        public IDictionary<string, JToken> AdditionalData
+        {
+            get
+            {
+                if (_additionalData == null)
+                {
+                    _additionalData = new Dictionary<string, JToken>();
+                }
+
+                return _additionalData;
+            }
+            set
+            {
+                _additionalData = value;
+            }
         }
     }
 }
