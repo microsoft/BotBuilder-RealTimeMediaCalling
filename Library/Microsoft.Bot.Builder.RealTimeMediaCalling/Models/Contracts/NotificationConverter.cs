@@ -32,6 +32,7 @@
 
 using System;
 using Microsoft.Bot.Builder.Calling.ObjectModel.Misc;
+using Microsoft.Bot.Builder.RealTimeMediaCalling.Models.Contracts;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
@@ -52,6 +53,10 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
             else if (String.Equals(type, NotificationType.CallStateChange.ToString(), StringComparison.OrdinalIgnoreCase))
             {
                 return new CallStateChangeNotification();
+            }
+            else if (String.Equals(type, NotificationType.CommandReceived.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                return new CommandNotification();
             }
             else
             {

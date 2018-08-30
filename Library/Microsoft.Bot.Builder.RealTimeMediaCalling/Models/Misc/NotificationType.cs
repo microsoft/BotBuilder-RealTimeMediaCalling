@@ -54,6 +54,11 @@ namespace Microsoft.Bot.Builder.RealTimeMediaCalling.ObjectModel.Contracts
         /// <summary>
         /// Call State change notification
         /// </summary>
-        CallStateChange
+        CallStateChange,
+
+        /// <summary>
+        /// 
+        /// </summary>
+        CommandReceived,
     }
 }

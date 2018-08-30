@@ -97,6 +97,7 @@
     <Compile Include="IRealTimeMediaCall.cs" />
     <Compile Include="IRealTimeMediaCallProcessor.cs" />
     <Compile Include="LoggingMessageHandler.cs" />
+    <Compile Include="Models\Contracts\CommandNotification.cs" />
     <Compile Include="Models\Contracts\ParticipantLegMetadataConfiguration.cs" />
     <Compile Include="RetryMessageHandler.cs" />
     <Compile Include="RealTimeMediaCallingContext.cs" />
